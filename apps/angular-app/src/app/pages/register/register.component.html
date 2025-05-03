@@ -1,0 +1,151 @@
+<div class="min-h-screen md:grid md:grid-cols-2 lg:grid-cols-3">
+    <div class="hidden md:block h-48 lg:col-span-2 min-h-screen relative overflow-hidden bg-green-400 shadow-2xl">
+      <img class="absolute inset-0 h-full w-full object-cover" src="https://i.pinimg.com/736x/9d/9f/18/9d9f18a89989da838bbc6f63bec8967b.jpg" />
+      <div class="absolute inline-block p-4 min-w-full text-white text-5xl lg:text-6xl mt-20 ml-20 bg-gray-600 bg-opacity-50">
+        <h1>A Bright Start for Bright Futures.</h1>
+    </div>
+  
+    
+    <div class="flex items-center justify-center p-6 min-h-screen w-full">
+      <div class="w-full">
+        <div class="sm:mx-auto sm:w-full sm:max-w-md">
+          <a href="#" class="flex justify-center font-bold text-4xl"> LOGO </a>
+  
+          <!-- <h2 class="mt-6 text-2xl font-extrabold text-center leading-9">Sign in to your account</h2>
+  
+          <p class="mt-2 text-sm text-center leading-5 max-w">
+            Or
+            <a href="/login" class="font-medium transition ease-in-out duration-150"> create a new account </a>
+          </p>
+          </div>  -->
+   
+        <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+            <form (ngSubmit)="onRegister()">
+                <div>
+              <label for="Username" class="block text-sm font-medium leading-5">Username</label>
+  
+              <div class="mt-1 rounded-md shadow-sm">
+                <input id="Username" type="username" required autofocus class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 transition duration-150 ease-in-out sm:text-sm sm:leading-5" />
+              </div>
+            </div>
+<br>
+            <div>
+                <label for="email" class="block text-sm font-medium leading-5"> Email address </label>
+    
+                <div class="mt-1 rounded-md shadow-sm">
+                    <input
+                    id="email"
+                    name="email"
+                    [(ngModel)]="email"
+                    type="email"
+                    #emailInput="ngModel"
+                    required
+                    class="..."
+                  />
+                  <div *ngIf="emailInput.invalid && emailInput.touched" class="text-red-600 text-sm mt-1">
+                    Please enter a valid email.
+                  </div>
+              </div>
+            </div>
+  
+            <div class="mt-6">
+              <label for="password" class="block text-sm font-medium text-gray-700 leading-5"> Password </label>
+  
+              <div class="mt-1 rounded-md shadow-sm">
+                <input id="password" type="password" required class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 transition duration-150 ease-in-out sm:text-sm sm:leading-5" />
+              </div>
+            </div>
+  
+            <div class="flex items-center justify-between mt-6">
+              <div class="flex items-center">
+                <input id="remember" type="checkbox" class="form-checkbox w-4 h-4 transition duration-150 ease-in-out" />
+                <label for="remember" class="block ml-2 text-sm text-gray-900 leading-5"> Remember </label>
+              </div>
+  
+              <div class="text-sm leading-5">
+                <a href="#" class="font-medium transition ease-in-out duration-150"> Forgot your password? </a>
+              </div>
+            </div>
+  
+            <div class="mt-6">
+              <span class="block w-full rounded-md shadow-sm">
+                <button type="submit" class="flex justify-center w-full px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-500 focus:outline-none transition duration-150 ease-in-out">Register</button>
+              </span>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+    </div>
+
+
+   <form #form="ngForm" (ngSubmit)="onRegister()">
+    <!-- Username -->
+    <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+
+    <label for="username" class="block text-sm font-medium">Username</label>
+    <input
+      id="username"
+      name="username"
+      [(ngModel)]="username"
+      required
+      class="block w-full px-3 py-2 border rounded-md appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 transition duration-150 ease-in-out sm:text-sm sm:leading-5 block w-full px-3 py-2 border rounded-md"
+    />
+    </div>
+  
+    <!-- Email -->
+
+    <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+
+    <label for="email" class="block text-sm font-medium mt-4">Email address</label>
+    <input id="email" name="email" [(ngModel)]="email" type="email" #emailInput="ngModel"required class="block w-full px-3 py-2 border rounded-md appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 transition duration-150 ease-in-out sm:text-sm sm:leading-5" />
+    <div *ngIf="emailInput.invalid && emailInput.touched" class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 transition duration-150 ease-in-out sm:text-sm sm:leading-5 text-red-600 text-sm mt-1 " >
+      Please enter a valid email.
+    </div>
+  </div>
+
+    <!-- Password -->
+    <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+    <label for="password" class="block text-sm font-medium mt-4">Password</label>
+    <input
+      id="password"
+      name="password"
+      [(ngModel)]="password"
+      type="password"
+      required
+      class="block w-full px-3 py-2 border rounded-md appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 transition duration-150 ease-in-out sm:text-sm sm:leading-5"
+    />
+    </div>
+  
+    <!-- Confirm Password -->
+    <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md"> 
+
+    <label for="confirmPassword" class="block text-sm font-medium mt-4">Confirm Password</label>
+    <input
+      id="confirmPassword"
+      name="confirmPassword"
+      [(ngModel)]="confirmPassword"
+      type="password"
+      required
+      class="block w-full px-3 py-2 border rounded-md appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 transition duration-150 ease-in-out sm:text-sm sm:leading-5"
+    />
+    </div>
+  
+    <!-- Error/Success Messages -->
+    <div *ngIf="errorMessage" class="text-red-500 mt-2">{{ errorMessage }}</div>
+    <div *ngIf="successMessage" class="text-green-600 mt-2">{{ successMessage }}</div>
+  
+    <!-- Submit Button -->
+
+    <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+        <!-- <span class=" block w-full px-3 py-2 border rounded-md appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 transition duration-150 ease-in-out sm:text-sm sm:leading-5block w-full rounded-md shadow-sm"> -->
+    <button 
+      type="submit"
+      class=" block w-full px-3 py-2 border rounded-md appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 transition duration-150 ease-in-out sm:text-sm sm:leading-5 mt-6 w-full py-2 bg-red-600 text-white rounded-md hover:bg-red-500"
+    >
+      Register
+    </button>
+    <!-- </span> -->
+    </div>
+  </form>
