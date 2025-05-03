@@ -9,7 +9,7 @@ import { Component } from '@angular/core';
 export class LandingComponent {
 
   redirectToReactApp() {
-    window.location.href = 'http://localhost:5173/';
+    window.location.href = 'https://react-app-two-olive.vercel.app/';
   }
 
 }
