@@ -12,7 +12,7 @@ import { ConfirmedComponent } from './pages/confirmed/confirmed.component';
 
 export const routes: Routes = [
 
-{ path: '', component: LandingComponent},
+{ path: '/', component: LandingComponent},
 { path: 'login', component: LoginComponent},
 { path:'form', component: FormComponent},
 { path: 'register', component: RegisterComponent},
