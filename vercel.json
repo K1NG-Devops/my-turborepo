@@ -1,0 +1,11 @@
+{
+    "projects": {
+      "angular-app": {
+        "rootDirectory": "apps/angular-app"
+      },
+      "react-app": {
+        "rootDirectory": "apps/react-app"
+      }
+    }
+  }
+  
