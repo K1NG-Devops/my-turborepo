@@ -1,4 +1,4 @@
-<!-- AUTO-GENERATED FILE. DO NOT EDIT MANUALLY. EDIT Navbar.jsx INSTEAD. -->
+AUTO-GENERATED FILE. DO NOT EDIT MANUALLY. EDIT Navbar.jsx INSTEAD.
 
 <nav class="navbar top-0 md:sticky left-0 w-full bg-base-100 text-base-content shadow-md md:bg-slate-50">
     <div class="w-full max-w-7xl mx-auto px-4 flex items-center justify-between py-3">
@@ -11,22 +11,22 @@
         <li><a routerLink="/" class="hover:text-white hover:bg-blue-500 transition-colors duration-700 px-2 py-1 rounded-lg">Home</a></li>
         <li><a routerLink="about" class="hover:text-white hover:bg-blue-500 transition-colors duration-700 px-2 py-1 rounded-lg">About</a></li>
         <li><a routerLink="programs" class="hover:text-white hover:bg-blue-500 transition-colors duration-700 px-2 py-1 rounded-lg">Programs</a></li>
-        <li><a routerLink="admission" class="hover:text-white hover:bg-blue-500 transition-colors duration-700 px-2 py-1 rounded-lg">Admission</a></li>
+        <!-- <li><a routerLink="admission" class="hover:text-white hover:bg-blue-500 transition-colors duration-700 px-2 py-1 rounded-lg">Admission</a></li> -->
         <li><a routerLink="contact" class="hover:text-white hover:bg-blue-500 transition-colors duration-700 px-2 py-1 rounded-lg">Contact</a></li>
       </ul>
       <!-- Mobile Menu Button -->
-      <div class="cursor-pointer md:hidden">
+      <div class="cursor-pointer hidden">
         <!-- Toggle button (you'll replace with Angular logic) -->
         <!-- Insert your Angular (click) event here -->
         <i class="h-6 w-6">☰</i>
       </div>
     </div>
     <!-- Mobile Menu -->
-    <ul class="md:hidden flex flex-col gap-y-6 text-center" *ngIf="isMenuOpen">
+    <ul class="hidden flex flex-col gap-y-6 text-center" *ngIf="isMenuOpen">
       <li><a routerLink="/" class="hover:text-white hover:bg-blue-500 transition-colors duration-700 px-2 py-1 rounded-lg block" (click)="toggleMenu()">Home</a></li>
       <li><a routerLink="about" class="hover:text-white hover:bg-blue-500 transition-colors duration-700 px-2 py-1 rounded-lg block" (click)="toggleMenu()">About</a></li>
       <li><a routerLink="programs" class="hover:text-white hover:bg-blue-500 transition-colors duration-700 px-2 py-1 rounded-lg block" (click)="toggleMenu()">Programs</a></li>
-      <li><a routerLink="admission" class="hover:text-white hover:bg-blue-500 transition-colors duration-700 px-2 py-1 rounded-lg block" (click)="toggleMenu()">Admission</a></li>
+      <!-- <li><a routerLink="admission" class="hover:text-white hover:bg-blue-500 transition-colors duration-700 px-2 py-1 rounded-lg block" (click)="toggleMenu()">Admission</a></li> -->
       <li><a routerLink="contact" class="hover:text-white hover:bg-blue-500 transition-colors duration-700 px-2 py-1 rounded-lg block" (click)="toggleMenu()">Contact</a></li>
     </ul>
   </nav>
