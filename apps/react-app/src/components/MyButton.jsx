@@ -5,7 +5,7 @@ function MyButton() {
 
   return (
     <button
-      onClick={() => redirect("http://localhost:4200/login", 2000)}
+      onClick={() => redirect("/login", 2000)}
       className="px-4 py-2 bg-pink-600 text-white rounded-xl w-50 hover:bg-blue-700 transition"
     >
       Start
