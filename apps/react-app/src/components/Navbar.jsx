@@ -35,6 +35,7 @@ function Navbar() {
           >
             Dashboard
           </li>
+          <li><Link to="/popupload" className={`${styles.link} bg-pink-500`}>Upload POP</Link></li>
         </ul>
         <div className="cursor-pointer md:hidden" aria-label="Toggle Menu">
           {IsMenuOpen ? (
