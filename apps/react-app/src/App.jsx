@@ -15,10 +15,10 @@ function App() {
       <Layout>
         <Routes>
           <Route path="/home" element={<Home />} />
-          <Route path="/about" element={<About />} />
+          {/* <Route path="/about" element={<About />} /> */}
           {/* <Route path="/admission" element={<Admission />} /> */}
           <Route path="/programs" element={<Programs />} />
-          <Route path="/contact" element={<Contact />} />
+          {/* <Route path="/contact" element={<Contact />} /> */}
           <Route path="/popupload" element={<PopUploadForm />} />
         </Routes>
       </Layout>

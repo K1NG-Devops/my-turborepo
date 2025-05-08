@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { storage } from "../firebase";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 const PopUploadForm = () => {
     const [formData, setFormData] = useState({
@@ -15,6 +17,7 @@ const PopUploadForm = () => {
 
     const [file, setFile] = useState(null);
     const [message, setMessage] = useState("");
+    const [loading, setLoading] = useState(false);
 
     const handleChange = (e) => {
         setFormData({
@@ -27,48 +30,78 @@ const PopUploadForm = () => {
         setFile(e.target.files[0]);
     };
 
-    const handlesubmit = async (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         if (!file) {
             return setMessage("Please upload a file.");
         }
 
-        const data = new FormData();
-        Object.entries(formData).forEach(([key, value]) => {
-            data.append(key, value);
-        });
-        data.append("file", file); // Must match backend upload.single('file')
-
         try {
-            const response = await axios.post('https://youngeagles.org.za/api/public/pop-submission', data);
-            setMessage(response.data.message || "File uploaded successfully!");
+            setLoading(true);
+
+            const fileRef = ref(storage, `uploads/${Date.now()}-${file.name}`);
+            await uploadBytes(fileRef, file);
+            const fileUrl = await getDownloadURL(fileRef);
+
+            const response = await axios.post(
+                "https://youngeagles-api-server-production-4b2e.up.railway.app/api/public/pop-submission",
+                {
+                    ...formData,
+                    popFilePath: fileUrl,
+                }
+            );
+
+            setMessage(response.data.message || "POP submitted successfully!");
         } catch (error) {
-            setMessage("Error uploading file. Please try again.");
+            console.error(error);
+            setMessage(
+                error.response?.data?.message || "Error uploading POP. Please try again."
+            );
+        } finally {
+            setLoading(false);
         }
     };
 
+    const inputClass = "bg-gray-50 border border-gray-300 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 dark:bg-pink-100 dark:border-pink-600 dark:text-gray dark:focus:ring-blue-500 dark:focus:border-blue-500";
+
     return (
-        <form onSubmit={handlesubmit} encType="multipart/form-data" className="max-w-md mx-auto p-4 bg-white shadow-md rounded">
+        <form onSubmit={handleSubmit} className="max-w-md mx-auto p-4 bg-white shadow-md rounded">
             <h2 className="text-lg font-bold mb-4">Upload Payment Proof</h2>
-            <input className="bg-gray-50 border border-gray-300 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 dark:bg-pink-100 dark:border-pink-600 dark:text-gray dark:focus:ring-blue-500 dark:focus;border-blue-500" type="text" name="fullname" placeholder="Full Name" onChange={handleChange} required />
-            <input className="bg-gray-50 border border-gray-300 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 dark:bg-pink-100 dark:border-pink-600 dark:text-gray dark:focus:ring-blue-500 dark:focus;border-blue-500" type="email" name="email" placeholder="Email" onChange={handleChange} required />
-            <input className="bg-gray-50 border border-gray-300 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 dark:bg-pink-100 dark:border-pink-600 dark:text-gray dark:focus:ring-blue-500 dark:focus;border-blue-500" type="text" name="phone" placeholder="Phone Number" onChange={handleChange} required />
-            <input className="bg-gray-50 border border-gray-300 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 dark:bg-pink-100 dark:border-pink-600 dark:text-gray dark:focus:ring-blue-500 dark:focus;border-blue-500" type="text" name="studentName" placeholder="Student Name (optional)" onChange={handleChange} />
-            <input className="bg-gray-50 border border-gray-300 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 dark:bg-pink-100 dark:border-pink-600 dark:text-gray dark:focus:ring-blue-500 dark:focus;border-blue-500" type="number" name="amount" placeholder="Amount Paid" onChange={handleChange} required />
-            <input className="bg-gray-50 border border-gray-300 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 dark:bg-pink-100 dark:border-pink-600 dark:text-gray dark:focus:ring-blue-500 dark:focus;border-blue-500" type="date" name="paymentDate" onChange={handleChange} required />
-            <select className="bg-gray-50 border border-gray-300 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 dark:bg-pink-100 dark:border-pink-600 dark:text-gray dark:focus:ring-blue-500 dark:focus;border-blue-500" name="paymentMethod" onChange={handleChange} required>
+            <input type="text" name="fullname" placeholder="Full Name" onChange={handleChange} required className={inputClass} />
+            <input type="email" name="email" placeholder="Email" onChange={handleChange} required className={inputClass} />
+            <input type="text" name="phone" placeholder="Phone Number" onChange={handleChange} required className={inputClass} />
+            <input type="text" name="studentName" placeholder="Student Name (optional)" onChange={handleChange} className={inputClass} />
+            <input type="number" name="amount" placeholder="Amount Paid" onChange={handleChange} required className={inputClass} />
+            <input type="date" name="paymentDate" onChange={handleChange} required className={inputClass} />
+            <select name="paymentMethod" onChange={handleChange} required className={inputClass}>
                 <option value="">Select Payment Method</option>
                 <option value="bank_transfer">Bank Transfer</option>
                 <option value="credit_card">Credit Card</option>
                 <option value="cash">Cash</option>
             </select>
-            <input className="bg-gray-50 border border-gray-300 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 dark:bg-pink-100 dark:border-pink-600 dark:text-gray dark:focus:ring-blue-500 dark:focus;border-blue-500" type="text" name="bankName" placeholder="Bank Name (optional)" onChange={handleChange} />
-            <input className="bg-gray-50 border border-gray-300 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 dark:bg-pink-100 dark:border-pink-600 dark:text-gray dark:focus:ring-blue-500 dark:focus;border-blue-500" type="file" name="file" onChange={handleFileChange} required />
-            <button className="bg-pink-600 p-2 rounded-lg w-full cursor-pointer text-white text-lg hover:bg-blue-500" type="submit">Submit POP</button>
-            {message && <p className="text-red-500 text-lg">{message}</p>}
+            <input type="text" name="bankName" placeholder="Bank Name (optional)" onChange={handleChange} className={inputClass} />
+            <input type="file" name="file" onChange={handleFileChange} required className={inputClass} />
+            <button
+                className="bg-pink-600 p-2 rounded-lg w-full cursor-pointer text-white text-lg hover:bg-blue-500 flex items-center justify-center"
+                type="submit"
+                disabled={loading}
+            >
+                {loading ? (
+                    <>
+                        <svg className="animate-spin h-5 w-5 mr-2 text-white" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                        </svg>
+                        Submitting...
+                    </>
+                ) : (
+                    "Submit POP"
+                )}
+            </button>
+            {message && <p className="text-red-500 text-lg mt-2">{message}</p>}
         </form>
     );
-}
+};
 
 export default PopUploadForm;
