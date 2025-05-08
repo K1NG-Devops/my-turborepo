@@ -1,0 +1,57 @@
+<nav class="navbar top-0 md:sticky left-0 w-full bg-blue-100 text-base-content shadow-md md:bg-slate-50">
+    <div class="w-full max-w-7xl mx-auto px-4 flex items-center justify-between py-3">
+      <!-- Logo -->
+      <a routerLink="/home" class="text-2xl font-bold text-pink-700 dark:text-pink-500 flex items-center gap-2">
+        <img class="w-6 h-6 rounded-lg" src="assets/logo.jpg" alt="Young Eagles Logo" />
+        Young Eagles
+      </a>
+  
+      <!-- Desktop Nav -->
+      <ul class="flex gap-x-4 hidden md:flex">
+        <li><a routerLink="/home" class="hover:text-white hover:bg-pink-500 transition-colors duration-700 px-2 py-1 rounded-lg">Home</a></li>
+        <li><a routerLink="/programs" class="hover:text-white hover:bg-pink-500 transition-colors duration-700 px-2 py-1 rounded-lg">Programs</a></li>
+        <li
+          (click)="redirect('/projects', 2000)"
+          class="hover:text-white hover:bg-pink-500 transition-colors duration-700 px-2 py-1 rounded-lg cursor-pointer"
+        >
+          Projects
+        </li>
+        <li
+          (click)="redirect('/parent', 2000)"
+          class="hover:text-white hover:bg-pink-500 transition-colors duration-700 px-2 py-1 rounded-lg cursor-pointer"
+        >
+          Dashboard
+        </li>
+        <li><a routerLink="/popupload" class="hover:text-white hover:bg-pink-500 transition-colors duration-700 px-2 py-1 rounded-lg bg-pink-500">Upload POP</a></li>
+      </ul>
+  
+      <!-- Mobile Toggle -->
+      <div class="cursor-pointer md:hidden" aria-label="Toggle Menu">
+        <span *ngIf="isMenuOpen; else hamburger" (click)="toggleMenu()">✖️</span>
+        <ng-template #hamburger>
+          <span (click)="toggleMenu()">☰</span>
+        </ng-template>
+      </div>
+    </div>
+  
+    <!-- Mobile Nav -->
+    <ul *ngIf="isMenuOpen" class="md:hidden flex flex-col gap-y-6 text-center pb-4">
+      <li><a routerLink="/home" class="hover:text-white hover:bg-pink-500 transition-colors duration-700 px-2 py-1 rounded-lg block" (click)="toggleMenu()">Home</a></li>
+      <li><a routerLink="/projects" class="hover:text-white hover:bg-pink-500 transition-colors duration-700 px-2 py-1 rounded-lg block" (click)="toggleMenu()">Projects</a></li>
+      <li
+        (click)="redirect('/programs', 2000)"
+        class="hover:text-white hover:bg-pink-500 transition-colors duration-700 px-2 py-1 rounded-lg block cursor-pointer"
+      >
+        Programs
+      </li>
+      <li><a routerLink="/admission" class="hover:text-white hover:bg-pink-500 transition-colors duration-700 px-2 py-1 rounded-lg block" (click)="toggleMenu()">Admission</a></li>
+      <li><a routerLink="/contact" class="hover:text-white hover:bg-pink-500 transition-colors duration-700 px-2 py-1 rounded-lg block" (click)="toggleMenu()">Contact</a></li>
+      <li
+        (click)="redirect('/parent', 2000)"
+        class="hover:text-white hover:bg-pink-500 transition-colors duration-700 px-2 py-1 rounded-lg block cursor-pointer"
+      >
+        Dashboard
+      </li>
+      <li><a routerLink="/popupload" class="hover:text-white hover:bg-pink-500 transition-colors duration-700 px-2 py-1 rounded-lg block bg-pink-500" (click)="toggleMenu()">Upload POP</a></li>
+    </ul>
+</nav>
