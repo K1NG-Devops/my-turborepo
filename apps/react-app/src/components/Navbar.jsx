@@ -17,7 +17,7 @@ function Navbar() {
   const handleRedirect = (path) => redirect(path, 2000);
 
   return (
-    <nav className="navbar top-0 md:sticky left-0 w-full bg-blue-100 text-base-content shadow-md md:bg-slate-50">
+    <nav className="navbar top-0 md:sticky left-0 w-full bg-gray-100 text-base-content shadow-md md:bg-slate-50">
       <div className="w-full max-w-7xl mx-auto px-4 flex items-center justify-between py-3">
         <Link to="/home" className="text-2xl font-bold text-pink-700 dark:text-pink-500 flex items-center gap-2">
           <img src={logo} alt="Young Eagles Logo" className="h-12 w-12 rounded-full" />
