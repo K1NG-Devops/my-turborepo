@@ -7,6 +7,8 @@ import Admission from './pages/Admission';
 import Programs from './pages/Programs';
 import Contact from './pages/Contact';
 import PopUploadForm from './components/PopUploadForm';
+import Login from './components/Login';
+import Register from './components/Register';
 import './App.css';
 
 function App() {
@@ -20,6 +22,8 @@ function App() {
           <Route path="/programs" element={<Programs />} />
           {/* <Route path="/contact" element={<Contact />} /> */}
           <Route path="/popupload" element={<PopUploadForm />} />
+          <Route path="/home/login" element={<Login />} /> 
+          <Route path="/home/register" element={<Register />} />
         </Routes>
       </Layout>
     </Router>

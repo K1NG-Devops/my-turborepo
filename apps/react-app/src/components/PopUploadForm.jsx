@@ -13,6 +13,7 @@ const PopUploadForm = () => {
         paymentDate: "",
         paymentMethod: "",
         bankName: "",
+
     });
 
     const [file, setFile] = useState(null);
@@ -45,7 +46,7 @@ const PopUploadForm = () => {
             const fileUrl = await getDownloadURL(fileRef);
 
             const response = await axios.post(
-                "https://youngeagles-api-server-production-4b2e.up.railway.app/api/public/pop-submission",
+                "https://y.e.youngeagles.org.za/api/public/pop-submission",
                 {
                     ...formData,
                     popFilePath: fileUrl,
@@ -54,10 +55,10 @@ const PopUploadForm = () => {
 
             setMessage(response.data.message || "POP submitted successfully!");
         } catch (error) {
-            console.error(error);
-            setMessage(
-                error.response?.data?.message || "Error uploading POP. Please try again."
-            );
+    console.error("Upload error details:", error.response || error.message || error);
+    setMessage(
+        error.response?.data?.message || "Error uploading POP. Please try again."
+    );
         } finally {
             setLoading(false);
         }

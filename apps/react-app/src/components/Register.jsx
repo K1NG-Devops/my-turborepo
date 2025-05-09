@@ -1,84 +1,116 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 
 const Register = () => {
-  const [username, setUsername] = useState('');
-  const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
-  const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    password: '',
+  });
+  const [message, setMessage] = useState('');
+  const [errors, setErrors] = useState('');
 
-  const handleRegister = async (e) => {
-    e.preventDefault();
-    if (password !== confirmPassword) {
-      setErrorMessage('Passwords do not match!');
-      setSuccessMessage('');
-      return;
-    }
-
-    try {
-      const response = await axios.post(`${process.env.REACT_APP_API_URL}/register`, {
-        name: username,
-        email,
-        phone,
-        password,
-      });
-      setSuccessMessage('Registration successful!');
-      setErrorMessage('');
-      navigate('/login');
-    } catch (error) {
-      setErrorMessage(error.response?.data?.message || 'Registration failed.');
-      setSuccessMessage('');
-    }
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setErrors('');
+    setMessage('');
+
+    try {
+      const response = await axios.post('https://y.e.youngeagles.org.za/api/auth/register', formData);
+      setMessage(response.data.message);
+      setFormData({ name: '', email: '', phone: '', password: '' });
+    } catch (err) {
+      setErrors(err.response?.data?.message || 'Registration failed');
+    }
+  };
+  const navigate = useNavigate();
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      navigate('/dashboard');
+    }
+  }
+  , [navigate]);
+
   return (
-    <div>
-      <h1>Register</h1>
-      <form onSubmit={handleRegister}>
-        <input
-          type="text"
-          placeholder="Username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          required
-        />
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <input
-          type="tel"
-          placeholder="Phone"
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-          required
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <input
-          type="password"
-          placeholder="Confirm Password"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          required
-        />
-        <button type="submit">Register</button>
+    <div className="max-w-md mx-auto p-6 mt-10 bg-white shadow-lg rounded-lg">
+      <h2 className="text-2xl font-bold mb-4 text-center">Parent Registration</h2>
+
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="block text-gray-700">Full Name</label>
+          <input
+            type="text"
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+            required
+            className="w-full border px-3 py-2 rounded focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        <div>
+          <label className="block text-gray-700">Email Address</label>
+          <input
+            type="email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            required
+            className="w-full border px-3 py-2 rounded focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        <div>
+          <label className="block text-gray-700">Phone Number</label>
+          <input
+            type="text"
+            name="phone"
+            value={formData.phone}
+            onChange={handleChange}
+            required
+            className="w-full border px-3 py-2 rounded focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        <div>
+          <label className="block text-gray-700">Password</label>
+          <input
+            type="password"
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
+            required
+            className="w-full border px-3 py-2 rounded focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+      <div className="mt-4">
+        <p className="text-center text-gray-600">
+          By registering, you agree to our <a href="/terms" className="text-blue-600">Terms of Service</a> and <a href="/privacy" className="text-blue-600">Privacy Policy</a>.
+        </p>
+    </div>
+
+        <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
+          Register
+        </button>
+        {message && <p className="text-green-600 mb-3">{message}</p>}
+        {errors && <p className="text-red-600 mb-3">{errors}</p>}
+        <p className="text-center">
+          Already have an account? <a href="/home/login" className="text-blue-600">Login here</a>
+        </p>
+        <p className="text-center">
+          <a href="/home" className="text-blue-600">Back to Home</a>
+        </p>
       </form>
-      {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
-      {successMessage && <p style={{ color: 'green' }}>{successMessage}</p>}
     </div>
   );
 };

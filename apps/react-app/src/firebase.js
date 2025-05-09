@@ -2,6 +2,7 @@
 import { initializeApp } from "firebase/app";
 import { getStorage } from "firebase/storage";
 import { getAnalytics } from "firebase/analytics";
+import { getAuth, signInAnonymously } from "firebase/auth";
 
 const firebaseConfig = {
 
@@ -23,6 +24,17 @@ const firebaseConfig = {
 
 
 const app = initializeApp(firebaseConfig);
+
+
+// Sign in anonymously once when the app starts
+const auth = getAuth(app);
+signInAnonymously(auth)
+  .then(() => {
+    console.log("Signed in anonymously");
+  })
+  .catch((error) => {
+    console.error("Anonymous sign-in error:", error);
+  });
 
 const analytics = getAnalytics(app);
 
