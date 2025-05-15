@@ -8,6 +8,8 @@ const Register = () => {
     name: '',
     email: '',
     phone: '',
+    address: '',
+    workAddress: '',
     password: '',
   });
   const [message, setMessage] = useState('');
@@ -40,7 +42,12 @@ const Register = () => {
   , [navigate]);
 
   return (
-    <div className="max-w-md mx-auto p-6 mt-10 bg-white shadow-lg rounded-lg">
+    <div className="flex items-center justify-center min-h-screen bg-pink-50">
+      <div>
+      <img className="h-full w-full object-cover" src="https://i.pinimg.com/736x/9d/9f/18/9d9f18a89989da838bbc6f63bec8967b.jpg" />
+
+      </div>
+      <div className="max-w-md mx-auto p-6 mt-10 bg-white shadow-lg rounded-lg">
       <h2 className="text-2xl font-bold mb-4 text-center">Parent Registration</h2>
 
 
@@ -82,6 +89,30 @@ const Register = () => {
         </div>
 
         <div>
+          <label className="block text-gray-700">Home Address</label>
+          <input
+            type="text"
+            name="address"
+            value={formData.address}
+            onChange={handleChange}
+            required
+            className="w-full border px-3 py-2 rounded focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        <div>
+          <label className="block text-gray-700">Work Address</label>
+          <input
+            type="text"
+            name="workAddress"
+            value={formData.workAddress}
+            onChange={handleChange}
+            required
+            className="w-full border px-3 py-2 rounded focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        <div>
           <label className="block text-gray-700">Password</label>
           <input
             type="password"
@@ -111,6 +142,8 @@ const Register = () => {
           <a href="/home" className="text-blue-600">Back to Home</a>
         </p>
       </form>
+    </div>
+
     </div>
   );
 };

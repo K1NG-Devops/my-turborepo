@@ -42,12 +42,7 @@ function Navbar() {
             Projects
           </li>
 
-          <li
-            onClick={() => redirect("/parent", 2000)}
-            className={`${styles.link} cursor-pointer`}
-          >
-            Dashboard
-          </li>
+          <li><Link to="/dashboard" className={`${styles.link} cursor-pointer`}>Dashboard</Link></li>
           <li><Link to="/popupload" className={`${styles.link} bg-pink-500`}>Upload POP</Link></li>
         </ul>
         <div className="cursor-pointer md:hidden" aria-label="Toggle Menu">
@@ -76,12 +71,7 @@ function Navbar() {
           </li>          
           {/* <li><Link to="/admission" className={`${styles.link} block`} onClick={toggleMenu}>Admission</Link></li> */}
           {/* <li><Link to="/contact" className={`${styles.link} block`} onClick={toggleMenu}>Contact</Link></li> */}
-          <li
-            onClick={() => redirect("/parent", 2000)}
-            className={`styles.link} cursor-pointer`}
-          >
-            Dashboard
-          </li>
+          <li><Link to="/dashboard" className={`${styles.link} block`} onClick={toggleMenu}>Dashboard</Link></li>   
           <li><Link to="/popupload" className={`${styles.link} block bg-pink-500`} onClick={toggleMenu}>Upload POP</Link></li>
         </ul>
       )}

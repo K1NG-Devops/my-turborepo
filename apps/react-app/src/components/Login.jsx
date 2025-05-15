@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 
@@ -50,7 +50,7 @@ const Login = () => {
       {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
       {successMessage && <p style={{ color: 'green' }}>{successMessage}</p>}
       <p className="text-center mt-4">
-        Don't have an account? <a href="/home/register" className="text-blue-500">Register here</a>
+        Don't have an account? <Link to="/register" className="text-blue-500">Register here</Link>
       </p>
       <div className='text-center mb-4'>
         <div className='flex flex-col items-center text-left bg-pink-100 p-4 rounded-lg shadow-md w-full mt-6'>

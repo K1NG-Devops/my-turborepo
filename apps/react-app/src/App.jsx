@@ -9,23 +9,26 @@ import Contact from './pages/Contact';
 import PopUploadForm from './components/PopUploadForm';
 import Login from './components/Login';
 import Register from './components/Register';
+import Dashboard from './pages/Dashboard';
+import PrivateRoute from './components/PrivateRoute';
 import './App.css';
 
 function App() {
   return (
     <Router>
-      <Layout>
         <Routes>
-          <Route path="/home" element={<Home />} />
-          {/* <Route path="/about" element={<About />} /> */}
-          {/* <Route path="/admission" element={<Admission />} /> */}
-          <Route path="/programs" element={<Programs />} />
-          {/* <Route path="/contact" element={<Contact />} /> */}
-          <Route path="/popupload" element={<PopUploadForm />} />
-          <Route path="/home/login" element={<Login />} /> 
-          <Route path="/home/register" element={<Register />} />
+          <Route element={<Layout />}>
+            <Route path="/home" element={<Home />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/admission" element={<Admission />} />
+            <Route path="/programs" element={<Programs />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/popupload" element={<PopUploadForm />} />
+            <Route path="/login" element={<Login />} /> 
+            <Route path="/register" element={<Register />} />
+          </Route>
+          <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
         </Routes>
-      </Layout>
     </Router>
   );
 }

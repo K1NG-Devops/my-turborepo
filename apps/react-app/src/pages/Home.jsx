@@ -30,7 +30,7 @@ const Home = () => (
     </p>
     <div className="mt-8 flex justify-center">
       <Link
-        to="/home/login"
+        to="/login"
         className="px-6 py-3 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-500 transition duration-300"
       >
         Go to Login
