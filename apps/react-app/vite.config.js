@@ -4,12 +4,11 @@ import tailwindcss from '@tailwindcss/vite';
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: '/home',
+  base: '/home/',
+  build: {
+    outDir: 'dist',
+  },
   plugins: [
-    // proxy: {
-    //  '/home': {
-    //  "target": "https://react-app-iota-nine.vercel.app/",
-    //  "changeOrigin": true,}}
     react(),
     tailwindcss(),
   ],
