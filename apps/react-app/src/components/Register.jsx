@@ -1,85 +1,102 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { Link, useNavigate } from 'react-router-dom';
+import AuthFormLayout from './AuthFormLayout';
 
 const Register = () => {
-  const [username, setUsername] = useState('');
-  const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
+  const [formData, setFormData] = useState({
+    name: '', email: '', phone: '', address: '', workAddress: '', password: '', confirmPassword: ''
+  });
+  const [message, setMessage] = useState('');
+  const [errors, setErrors] = useState('');
   const navigate = useNavigate();
 
-  const handleRegister = async (e) => {
+  useEffect(() => {
+    if (localStorage.getItem('token')) navigate('/dashboard');
+  }, [navigate]);
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (password !== confirmPassword) {
-      setErrorMessage('Passwords do not match!');
-      setSuccessMessage('');
-      return;
+    setErrors('');
+    setMessage('');
+
+    if (formData.password !== formData.confirmPassword) {
+      return setErrors('Passwords do not match');
     }
 
     try {
-      const response = await axios.post(`${process.env.REACT_APP_API_URL}/register`, {
-        name: username,
-        email,
-        phone,
-        password,
+      const res = await axios.post('https://youngeagles-api-server-production-4b2e.up.railway.app/api/auth/register', formData);
+
+      // Auto-login on success
+      const loginRes = await axios.post('https://youngeagles-api-server-production-4b2e.up.railway.app/api/auth/login', {
+        email: formData.email,
+        password: formData.password
       });
-      setSuccessMessage('Registration successful!');
-      setErrorMessage('');
-      navigate('/login');
-    } catch (error) {
-      setErrorMessage(error.response?.data?.message || 'Registration failed.');
-      setSuccessMessage('');
+
+      localStorage.setItem('token', loginRes.data.token);
+      setMessage('Registration successful!');
+      navigate('/dashboard');
+    } catch (err) {
+      if (err.response?.data?.errors) {
+        const allErrors = err.response.data.errors.map(e => e.msg).join(', ');
+        setErrors(allErrors);
+      } else {
+        setErrors(err.response?.data?.message || 'Registration failed');
+      }
     }
   };
 
   return (
-    <div>
-      <h1>Register</h1>
-      <form onSubmit={handleRegister}>
-        <input
-          type="text"
-          placeholder="Username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          required
-        />
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <input
-          type="tel"
-          placeholder="Phone"
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-          required
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <input
-          type="password"
-          placeholder="Confirm Password"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          required
-        />
-        <button type="submit">Register</button>
+    <AuthFormLayout imageUrl="https://i.pinimg.com/736x/9d/9f/18/9d9f18a89989da838bbc6f63bec8967b.jpg">
+      <h2 className="text-2xl font-bold mb-4 text-center">Parent Registration</h2>
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {[
+          { name: 'name', label: 'Full Name' },
+          { name: 'email', label: 'Email Address', type: 'email' },
+          { name: 'phone', label: 'Phone Number' },
+          { name: 'address', label: 'Home Address' },
+          { name: 'workAddress', label: 'Work Address' },
+          { name: 'password', label: 'Password', type: 'password' },
+          { name: 'confirmPassword', label: 'Confirm Password', type: 'password' },
+        ].map(({ name, label, type = 'text', required }) => (
+          <div key={name}>
+            <label className="block text-sm mb-1">{label}</label>
+            <input
+              type={type}
+              name={name}
+              value={formData[name]}
+              onChange={handleChange}
+              required
+              className="w-full border px-3 py-2 rounded bg-white text-black dark:bg-gray-100 dark:text-black focus:ring-2 focus:ring-blue-500"
+              placeholder={name === "workAddress" ? "If applicable" : undefined}
+            />
+          </div>
+        ))}
+
+        <p className="text-sm text-center text-gray-600 dark:text-gray-400">
+          By registering, you agree to our <a href="/terms" className="text-blue-600">Terms</a> and <a href="/privacy" className="text-blue-600">Privacy</a>.
+        </p>
+
+        <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
+          Register
+        </button>
+
+        {message && <p className="text-green-600 text-center">{message}</p>}
+        {errors && <p className="text-red-600 text-center">{errors}</p>}
+
+        <p className="text-center">
+          Already have an account? <Link to="/login" className="text-blue-500">Login here</Link>
+        </p>
+        <p className="text-center">
+        <Link to="/home" className='text-white'>Back to Home</Link>
+        </p>
       </form>
-      {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
-      {successMessage && <p style={{ color: 'green' }}>{successMessage}</p>}
-    </div>
+    </AuthFormLayout>
   );
 };
 
