@@ -1,0 +1,26 @@
+{
+    "version": 2,
+    "builds": [
+      {
+        "src": "angular-app/package.json",
+        "use": "@vercel/static-build",
+        "config": { "distDir": "dist/angular-app" }
+      },
+      {
+        "src": "react-app/package.json",
+        "use": "@vercel/static-build",
+        "config": { "distDir": "dist" }
+      }
+    ],
+    "routes": [
+      {
+        "src": "/home(.*)",
+        "dest": "/react-app$1"
+      },
+      {
+        "src": "/(.*)",
+        "dest": "/angular-app/$1"
+      }
+    ]
+  }
+  
