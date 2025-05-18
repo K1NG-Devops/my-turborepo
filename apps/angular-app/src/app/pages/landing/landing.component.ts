@@ -7,8 +7,8 @@ import { Component } from '@angular/core';
 })
 export class LandingComponent {
 
-  redirectToReactApp(path: string): void {
-    window.location.href = path;
+  redirectToReactApp(path: string = 'home'): void {
+    window.location.href = `https://www.youngeagles.org.za/${path}`;
   }
 
 }

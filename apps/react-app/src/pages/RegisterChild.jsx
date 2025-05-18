@@ -37,7 +37,7 @@ const RegisterChild = () => {
             return;
         }
 
-        if (!formData.name || !formData.dob || !formData.gender) {
+        if (!formData.name || !formData.dob || !formData.gender || !formData.age || !formData.grade || !formData.className) {
             setResponseMessage("Please fill out all required fields.");
             setLoading(false);
             return;
@@ -50,13 +50,10 @@ const RegisterChild = () => {
         data.append("gender", formData.gender);
         data.append("grade", formData.grade);
         data.append("className", formData.className);
-        if (formData.birthCert) {
-            data.append("birthCert", formData.birthCert);
-        }
         data.append("parent_id", parentId);
 
         try {
-            const response = await fetch("https://youngeagles-api-server-production-4b2e.up.railway.app/api/auth/register-child", {
+            const response = await fetch("https://youngeagles-api-server.up.railway.app/api/auth/register-child", {
                 method: "POST",
                 body: data,
             });

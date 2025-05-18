@@ -19,18 +19,18 @@ function App() {
         {/* Routes inside Layout */}
         <Route element={<Layout />}>
           <Route path="/home" element={<Home />} />
-          <Route path="/home/programs" element={<Programs />} />
+          <Route path="/programs" element={<Programs />} />
         </Route>
 
         {/* Public routes */}
-        <Route path="/home/login" element={<Login />} />
-        <Route path="/home/register" element={<Register />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
 
         {/* Protected routes wrapped with PrivateRoute */}
         <Route element={<PrivateRoute />}>
-          <Route path="/home/dashboard" element={<Dashboard />} />
-          <Route path="/home/popupload" element={<PopUploadForm />} />
-          <Route path="/home/register-child" element={<RegisterChild />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/popupload" element={<PopUploadForm />} />
+          <Route path="/register-child" element={<RegisterChild />} />
         </Route>
 
         {/* Catch-all 404 */}

@@ -129,16 +129,7 @@ const Dashboard = () => {
                   >
                     Dashboard
                   </Link>
-                </li>
-                <li>
-                  <Link
-                    to="/homework"
-                    className={`block px-4 py-2 rounded hover:bg-gray-200 ${location.pathname === '/homework' ? 'bg-gray-200 font-bold' : ''
-                      }`}
-                  >
-                    Homework
-                  </Link>
-                </li>
+                </li>                
                 <li>
                   <Link
                     to="/attendance"
@@ -173,6 +164,15 @@ const Dashboard = () => {
                       }`}
                   >
                     Lessons
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/homework"
+                    className={`block px-4 py-2 rounded hover:bg-gray-200 ${location.pathname === '/register-child' ? 'bg-gray-200 font-bold' : ''
+                      }`}
+                  >
+                    Register Child
                   </Link>
                 </li>
               </ul>

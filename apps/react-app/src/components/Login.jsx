@@ -19,7 +19,7 @@ const Login = () => {
 
     try {
       const response = await axios.post(
-        "https://youngeagles-api-server-production-4b2e.up.railway.app/api/auth/login",
+        "https://youngeagles-api-server.up.railway.app/api/auth/login",
         { email, password },
         { headers: { 'Content-Type': 'application/json' } }
       );
