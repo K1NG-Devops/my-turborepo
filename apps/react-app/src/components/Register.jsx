@@ -1,19 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
-import { useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import AuthFormLayout from './AuthFormLayout';
 
 const Register = () => {
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    address: '',
-    workAddress: '',
-    password: '',
+    name: '', email: '', phone: '', address: '', workAddress: '', password: '', confirmPassword: ''
   });
   const [message, setMessage] = useState('');
   const [errors, setErrors] = useState('');
+
+  useEffect(() => {
+    if (localStorage.getItem('token')) navigate('/dashboard');
+  }, [navigate]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -24,127 +23,80 @@ const Register = () => {
     setErrors('');
     setMessage('');
 
-    try {
-      const response = await axios.post('https://y.e.youngeagles.org.za/api/auth/register', formData);
-      setMessage(response.data.message);
-      setFormData({ name: '', email: '', phone: '', password: '' });
-    } catch (err) {
-      setErrors(err.response?.data?.message || 'Registration failed');
+    if (formData.password !== formData.confirmPassword) {
+      return setErrors('Passwords do not match');
     }
-  };
-  const navigate = useNavigate();
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
+
+    try {
+      const res = await axios.post('https://youngeagles-api-server-production-4b2e.up.railway.app/api/auth/register', formData);
+
+      // Auto-login on success
+      const loginRes = await axios.post('https://youngeagles-api-server-production-4b2e.up.railway.app/api/auth/login', {
+        email: formData.email,
+        password: formData.password
+      });
+
+      localStorage.setItem('token', loginRes.data.token);
+      setMessage('Registration successful!');
       navigate('/dashboard');
+    } catch (err) {
+      if (err.response?.data?.errors) {
+        const allErrors = err.response.data.errors.map(e => e.msg).join(', ');
+        setErrors(allErrors);
+      } else {
+        setErrors(err.response?.data?.message || 'Registration failed');
+      }
     }
   }
   , [navigate]);
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-pink-50">
-      <div>
-      <img className="h-full w-full object-cover" src="https://i.pinimg.com/736x/9d/9f/18/9d9f18a89989da838bbc6f63bec8967b.jpg" />
-
-      </div>
-      <div className="max-w-md mx-auto p-6 mt-10 bg-white shadow-lg rounded-lg">
+    <AuthFormLayout imageUrl="https://i.pinimg.com/736x/9d/9f/18/9d9f18a89989da838bbc6f63bec8967b.jpg">
       <h2 className="text-2xl font-bold mb-4 text-center">Parent Registration</h2>
 
-
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-gray-700">Full Name</label>
-          <input
-            type="text"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            required
-            className="w-full border px-3 py-2 rounded focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
+        {[
+          { name: 'name', label: 'Full Name' },
+          { name: 'email', label: 'Email Address', type: 'email' },
+          { name: 'phone', label: 'Phone Number' },
+          { name: 'address', label: 'Home Address' },
+          { name: 'workAddress', label: 'Work Address' },
+          { name: 'password', label: 'Password', type: 'password' },
+          { name: 'confirmPassword', label: 'Confirm Password', type: 'password' },
+        ].map(({ name, label, type = 'text', required }) => (
+          <div key={name}>
+            <label className="block text-sm mb-1">{label}</label>
+            <input
+              type={type}
+              name={name}
+              value={formData[name]}
+              onChange={handleChange}
+              required
+              className="w-full border px-3 py-2 rounded bg-white text-black dark:bg-gray-100 dark:text-black focus:ring-2 focus:ring-blue-500"
+              placeholder={name === "workAddress" ? "If applicable" : undefined}
+            />
+          </div>
+        ))}
 
-        <div>
-          <label className="block text-gray-700">Email Address</label>
-          <input
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            required
-            className="w-full border px-3 py-2 rounded focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-
-        <div>
-          <label className="block text-gray-700">Phone Number</label>
-          <input
-            type="text"
-            name="phone"
-            value={formData.phone}
-            onChange={handleChange}
-            required
-            className="w-full border px-3 py-2 rounded focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-
-        <div>
-          <label className="block text-gray-700">Home Address</label>
-          <input
-            type="text"
-            name="address"
-            value={formData.address}
-            onChange={handleChange}
-            required
-            className="w-full border px-3 py-2 rounded focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-
-        <div>
-          <label className="block text-gray-700">Work Address</label>
-          <input
-            type="text"
-            name="workAddress"
-            value={formData.workAddress}
-            onChange={handleChange}
-            required
-            className="w-full border px-3 py-2 rounded focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-
-        <div>
-          <label className="block text-gray-700">Password</label>
-          <input
-            type="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            required
-            className="w-full border px-3 py-2 rounded focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-
-      <div className="mt-4">
-        <p className="text-center text-gray-600">
-          By registering, you agree to our <a href="/terms" className="text-blue-600">Terms of Service</a> and <a href="/privacy" className="text-blue-600">Privacy Policy</a>.
+        <p className="text-sm text-center text-gray-600 dark:text-gray-400">
+          By registering, you agree to our <a href="/terms" className="text-blue-600">Terms</a> and <a href="/privacy" className="text-blue-600">Privacy</a>.
         </p>
-    </div>
 
         <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
           Register
         </button>
-        {message && <p className="text-green-600 mb-3">{message}</p>}
-        {errors && <p className="text-red-600 mb-3">{errors}</p>}
+
+        {message && <p className="text-green-600 text-center">{message}</p>}
+        {errors && <p className="text-red-600 text-center">{errors}</p>}
+
         <p className="text-center">
-          Already have an account? <a href="/home/login" className="text-blue-600">Login here</a>
+          Already have an account? <Link to="/login" className="text-blue-500">Login here</Link>
         </p>
         <p className="text-center">
-          <a href="/home" className="text-blue-600">Back to Home</a>
+        <Link to="/home" className='text-white'>Back to Home</Link>
         </p>
       </form>
-    </div>
-
-    </div>
+    </AuthFormLayout>
   );
 };
 

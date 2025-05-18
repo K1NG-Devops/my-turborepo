@@ -1,91 +1,244 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import DashboardNavbar from '../components/DashboardNavbar';
+// src/pages/Dashboard.jsx
+import React, { useState, useEffect, useRef } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import DashboardTile from '../components/DashboardTile';
+import useAuth from '../hooks/useAuth';
+import { FaBook, FaCalendarCheck, FaClipboardList, FaVideo, FaChalkboardTeacher, FaBell } from 'react-icons/fa';
 
-const Dashboard = ({ user }) => {
+const Dashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
   const navigate = useNavigate();
+  const location = useLocation();
+  const { auth } = useAuth();
+
+  const userName = auth?.user?.name || 'Parent';
+  const defaultAvatar = 'https://www.gravatar.com/avatar/?d=mp';
+  const userProfilePic =
+    auth?.user?.profilePic && auth.user.profilePic !== 'null'
+      ? auth.user.profilePic
+      : defaultAvatar;
 
   const handleLogout = () => {
-    localStorage.removeItem('token'); // Clear token
-    navigate('/home'); // Redirect to homepage
+    localStorage.removeItem('token');
+    navigate('/home');
   };
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+
+  const closeSidebar = () => {
+    setIsSidebarOpen(false);
+  };
+
+  const toggleDropdown = () => {
+    setIsDropdownOpen(!isDropdownOpen);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   return (
     <>
-    <DashboardNavbar />
-    <div className="flex bg-gray-700 min-h-screen">
-      {/* Sidebar toggle button */}
+      {/* Hamburger menu (mobile only) */}
       <button
-        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-        className="inline-flex items-center p-2 mt-2 ms-3 text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200"
+        onClick={toggleSidebar}
+        className="fixed top-4 left-4 z-50 sm:hidden sm:p-0 text-white bg-gray-800 rounded focus:outline-none"
       >
-        <span className="sr-only">Open sidebar</span>
-        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-          <path clipRule="evenodd" fillRule="evenodd" d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10z" />
+        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+          <path
+            fillRule="evenodd"
+            clipRule="evenodd"
+            d="M3 5h14a1 1 0 110 2H3a1 1 0 110-2zm0 4h14a1 1 0 110 2H3a1 1 0 110-2zm0 4h14a1 1 0 110 2H3a1 1 0 110-2z"
+          />
         </svg>
       </button>
 
+      {/* Sidebar Backdrop */}
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-30 sm:hidden"
+          onClick={closeSidebar}
+        ></div>
+      )}
+
       {/* Sidebar */}
-      <aside className={`fixed top-0 left-0 z-40 w-64 h-screen transition-transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} sm:translate-x-0`} aria-label="Sidebar">
-        <div className="h-full px-3 py-4 overflow-y-auto bg-gray-50">
-          <ul className="space-y-2 font-medium">
-            <li>
-              <Link to="/dashboard" className="flex items-center p-2 text-blue-600 rounded-lg hover:bg-gray-100 group">
-                <span className="ms-3">Dashboard</span>
-              </Link>
-            </li>
-            <li>
-              <Link to="#" className="flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 group">
-                <span className="flex-1 ms-3 whitespace-nowrap">Inbox</span>
-              </Link>
-            </li>
-            <li>
-              <Link to="#" className="flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 group">
-                <span className="flex-1 ms-3 whitespace-nowrap">Report</span>
-              </Link>
-            </li>
-            <li>
-              <Link to="#" className="flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 group">
-                <span className="flex-1 ms-3 whitespace-nowrap">Payment</span>
-              </Link>
-            </li>
-            <li>
-              <Link to="/home" className="flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 group">
-                <span className="flex-1 ms-3 whitespace-nowrap">Back to Home</span>
-              </Link>
-            </li>
-            <li>
-              <button onClick={handleLogout} className="w-full text-left flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 group">
-                <span className="flex-1 ms-3 whitespace-nowrap">Logout</span>
-              </button>
-            </li>
-          </ul>
+      <aside
+        className={`fixed top-0 left-0 z-40 w-64 h-full bg-white shadow transform transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+          } sm:translate-x-0`}
+      >
+        <div className="h-full p-4 flex flex-col justify-between">
+          <div>
+            {/* Profile Section */}
+            <div className="flex flex-col items-center mb-6">
+              <img
+                src={userProfilePic}
+                alt="User Avatar"
+                className="w-20 h-20 rounded-full border"
+              />
+              <p className="mt-2 font-semibold">{userName}</p>
+              <div className="relative mt-2" ref={dropdownRef}>
+                <button
+                  onClick={toggleDropdown}
+                  className="text-sm text-gray-600 hover:underline "
+                >
+                  ▼ Options
+                </button>
+                {isDropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-40 bg-white border rounded shadow-md z-50">
+                    <button
+                      onClick={() => navigate('/profile')}
+                      className="w-full text-left px-4 py-2 hover:bg-gray-100"
+                    >
+                      Profile
+                    </button>
+                    <button
+                      onClick={() => navigate('/settings')}
+                      className="w-full text-left px-4 py-2 hover:bg-gray-100"
+                    >
+                      Settings
+                    </button>
+                    <button
+                      onClick={handleLogout}
+                      className="w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Sidebar Links */}
+            <nav>
+              <ul className="space-y-2">
+                <li>
+                  <Link
+                    to="/dashboard"
+                    className={`block px-4 py-2 rounded hover:bg-gray-200 ${location.pathname === '/dashboard' ? 'bg-gray-200 font-bold' : ''
+                      }`}
+                  >
+                    Dashboard
+                  </Link>
+                </li>                
+                <li>
+                  <Link
+                    to="/attendance"
+                    className={`block px-4 py-2 rounded hover:bg-gray-200 ${location.pathname === '/attendance' ? 'bg-gray-200 font-bold' : ''
+                      }`}
+                  >
+                    Attendance
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/resources"
+                    className={`block px-4 py-2 rounded hover:bg-gray-200 ${location.pathname === '/resources' ? 'bg-gray-200 font-bold' : ''
+                      }`}
+                  >
+                    Resources
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/videos"
+                    className={`block px-4 py-2 rounded hover:bg-gray-200 ${location.pathname === '/videos' ? 'bg-gray-200 font-bold' : ''
+                      }`}
+                  >
+                    Videos
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/lessons"
+                    className={`block px-4 py-2 rounded hover:bg-gray-200 ${location.pathname === '/lessons' ? 'bg-gray-200 font-bold' : ''
+                      }`}
+                  >
+                    Lessons
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/homework"
+                    className={`block px-4 py-2 rounded hover:bg-gray-200 ${location.pathname === '/register-child' ? 'bg-gray-200 font-bold' : ''
+                      }`}
+                  >
+                    Register Child
+                  </Link>
+                </li>
+              </ul>
+            </nav>
+          </div>
         </div>
       </aside>
 
-      {/* Main content */}
-      <div className="w-full p-4 sm:ml-64">
-        <div className="p-4 border-2 border-gray-200 border-dashed rounded-lg">
-          <div className="text-xl text-white font-semibold mb-4">Welcome, {user?.name || 'Parent'}!</div>
-
-          <div className="grid grid-cols-3 gap-4 mb-4">
-            <div className="flex items-center justify-center h-24 rounded bg-gray-50 text-2xl text-gray-400">+</div>
-            <div className="flex items-center justify-center h-24 rounded bg-gray-50 text-2xl text-gray-400">+</div>
-            <div className="flex items-center justify-center h-24 rounded bg-gray-50 text-2xl text-gray-400">+</div>
-          </div>
-          <div className="grid grid-cols-2 gap-4 mb-4">
-            <div className="flex items-center justify-center rounded bg-gray-50 h-28 text-2xl text-gray-400">+</div>
-            <div className="flex items-center justify-center rounded bg-gray-50 h-28 text-2xl text-gray-400">+</div>
-          </div>
-          <div className="flex items-center justify-center h-48 mb-4 rounded bg-gray-50 text-2xl text-gray-400">+</div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex items-center justify-center rounded bg-gray-50 h-28 text-2xl text-gray-400">+</div>
-            <div className="flex items-center justify-center rounded bg-gray-50 h-28 text-2xl text-gray-400">+</div>
-          </div>
+      {/* Page Content */}
+      <main className="sm:ml-64 p-4 min-h-screen bg-gray-300 transition-all duration-300 ease-in-out flex-col flex">
+        <div className="flex justify-end mb-4">
+          <h1 className="md:text-xl text-base font-bold">Welcome, {userName} 👋</h1>
         </div>
-      </div>
-    </div>
+        {/* Dashboard tiles */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <DashboardTile
+            label="Homework"
+            icon={<FaBook />}
+            color="bg-yellow-200"
+            to="/homework"
+          />
+          <DashboardTile
+            label="Attendance"
+            icon={<FaCalendarCheck />}
+            color="bg-green-200"
+            to="/attendance"
+          />
+          <DashboardTile
+            label="Resources"
+            icon={<FaClipboardList />}
+            color="bg-blue-300"
+            to="/resources"
+          />
+          <DashboardTile
+            label="Videos"
+            icon={<FaVideo />}
+            color="bg-purple-300"
+            to="/videos"
+          />
+          <DashboardTile
+            label="Lessons"
+            icon={<FaChalkboardTeacher />}
+            color="bg-pink-300"
+            to="/lessons"
+          />
+          <DashboardTile
+            label="Notices"
+            icon={<FaBell />}
+            color="bg-red-200"
+            to="/notices"
+          />
+        </div>
+
+        <div className="mt-6">
+          <h2 className="text-md font-semibold cursor-pointer mb-4"><Link to='activities'>Recent Activities</Link></h2>
+          {/* Add your recent activities component here */}
+        </div>
+        <div className="mt-6">
+          <h2 className="text-md font-semibold cursor-pointer mb-4"><Link to='notifications'>Notifications</Link></h2>
+          {/* Add your notifications component here */}
+        </div>
+        <div className="mt-6">
+          <h2 className="text-md font-semibold cursor-pointer mb-4"><Link to='messages'>Messages</Link></h2>
+          {/* Add your messages component here */}
+        </div>
+      </main>
     </>
   );
 };

@@ -8,6 +8,7 @@ const Layout = ({ children }) => (
     <Navbar />
     <main className="flex-grow ">
       <Outlet />
+      {/* {children} */}
     </main>
     <Footer />
   </div>
