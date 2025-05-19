@@ -8,7 +8,7 @@ import PopUploadForm from './components/PopUploadForm';
 import PrivateRoute from './components/PrivateRoute';
 import Login from './components/Login';
 import Register from './components/Register';
-import RegisterChild from './pages/RegisterChild';
+import RegisterChild from './components/RegisterChild';
 import './App.css';
 
 function App() {

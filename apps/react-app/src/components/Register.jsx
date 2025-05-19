@@ -9,9 +9,13 @@ const Register = () => {
   });
   const [message, setMessage] = useState('');
   const [errors, setErrors] = useState('');
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    if (localStorage.getItem('token')) navigate('/dashboard');
+    if (localStorage.getItem('token')) {
+      navigate('/dashboard');
+    }
   }, [navigate]);
 
   const handleChange = (e) => {
@@ -27,28 +31,38 @@ const Register = () => {
       return setErrors('Passwords do not match');
     }
 
-    try {
-      const res = await axios.post('https://youngeagles-api-server-production-4b2e.up.railway.app/api/auth/register', formData);
+    setLoading(true);
 
-      // Auto-login on success
-      const loginRes = await axios.post('https://youngeagles-api-server-production-4b2e.up.railway.app/api/auth/login', {
+    try {
+      const res = await axios.post('https://youngeagles-api-server.up.railway.app/api/auth/register', formData);
+
+      localStorage.removeItem('token');
+      // login using the same credentials
+      const loginRes = await axios.post('https://youngeagles-api-server.up.railway.app/api/auth/login', {
         email: formData.email,
         password: formData.password
       });
 
       localStorage.setItem('token', loginRes.data.token);
       setMessage('Registration successful!');
+      setFormData({
+        name: '', email: '', phone: '', address: '', workAddress: '', password: '', confirmPassword: ''
+      });
+      setErrors('');
       navigate('/dashboard');
     } catch (err) {
+      console.error(err); // Helpful for debugging
       if (err.response?.data?.errors) {
         const allErrors = err.response.data.errors.map(e => e.msg).join(', ');
         setErrors(allErrors);
       } else {
         setErrors(err.response?.data?.message || 'Registration failed');
       }
+      setMessage('');
+    } finally {
+      setLoading(false);
     }
-  }
-  , [navigate]);
+  };
 
   return (
     <AuthFormLayout imageUrl="https://i.pinimg.com/736x/9d/9f/18/9d9f18a89989da838bbc6f63bec8967b.jpg">
@@ -63,7 +77,7 @@ const Register = () => {
           { name: 'workAddress', label: 'Work Address' },
           { name: 'password', label: 'Password', type: 'password' },
           { name: 'confirmPassword', label: 'Confirm Password', type: 'password' },
-        ].map(({ name, label, type = 'text', required }) => (
+        ].map(({ name, label, type = 'text' }) => (
           <div key={name}>
             <label className="block text-sm mb-1">{label}</label>
             <input
@@ -82,8 +96,12 @@ const Register = () => {
           By registering, you agree to our <a href="/terms" className="text-blue-600">Terms</a> and <a href="/privacy" className="text-blue-600">Privacy</a>.
         </p>
 
-        <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
-          Register
+        <button
+          type="submit"
+          disabled={loading}
+          className={`w-full ${loading ? 'bg-gray-400' : 'bg-blue-600'} text-white py-2 rounded hover:bg-blue-700`}
+        >
+          {loading ? 'Registering...' : 'Register'}
         </button>
 
         {message && <p className="text-green-600 text-center">{message}</p>}
@@ -93,7 +111,7 @@ const Register = () => {
           Already have an account? <Link to="/login" className="text-blue-500">Login here</Link>
         </p>
         <p className="text-center">
-        <Link to="/home" className='text-white'>Back to Home</Link>
+          <Link to="/home" className='text-white'>Back to Home</Link>
         </p>
       </form>
     </AuthFormLayout>

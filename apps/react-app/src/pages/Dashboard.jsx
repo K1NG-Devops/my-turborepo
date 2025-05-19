@@ -22,7 +22,8 @@ const Dashboard = () => {
 
   const handleLogout = () => {
     localStorage.removeItem('token');
-    navigate('/home');
+    navigate('/login');
+    window.location.reload();
   };
 
   const toggleSidebar = () => {
@@ -136,7 +137,7 @@ const Dashboard = () => {
                     className={`block px-4 py-2 rounded hover:bg-gray-200 ${location.pathname === '/attendance' ? 'bg-gray-200 font-bold' : ''
                       }`}
                   >
-                    Attendance
+                    📅 Attendance
                   </Link>
                 </li>
                 <li>
@@ -145,7 +146,7 @@ const Dashboard = () => {
                     className={`block px-4 py-2 rounded hover:bg-gray-200 ${location.pathname === '/resources' ? 'bg-gray-200 font-bold' : ''
                       }`}
                   >
-                    Resources
+                    📂 Resources
                   </Link>
                 </li>
                 <li>
@@ -154,7 +155,7 @@ const Dashboard = () => {
                     className={`block px-4 py-2 rounded hover:bg-gray-200 ${location.pathname === '/videos' ? 'bg-gray-200 font-bold' : ''
                       }`}
                   >
-                    Videos
+                    🎥 Videos
                   </Link>
                 </li>
                 <li>
@@ -163,16 +164,16 @@ const Dashboard = () => {
                     className={`block px-4 py-2 rounded hover:bg-gray-200 ${location.pathname === '/lessons' ? 'bg-gray-200 font-bold' : ''
                       }`}
                   >
-                    Lessons
+                    📚 Lessons
                   </Link>
                 </li>
                 <li>
                   <Link
-                    to="/homework"
+                    to="/register-child"
                     className={`block px-4 py-2 rounded hover:bg-gray-200 ${location.pathname === '/register-child' ? 'bg-gray-200 font-bold' : ''
                       }`}
                   >
-                    Register Child
+                   👶 Register Child
                   </Link>
                 </li>
               </ul>
@@ -193,36 +194,42 @@ const Dashboard = () => {
             icon={<FaBook />}
             color="bg-yellow-200"
             to="/homework"
+            isActive={true}
           />
           <DashboardTile
             label="Attendance"
             icon={<FaCalendarCheck />}
             color="bg-green-200"
             to="/attendance"
+            isActive={false}
           />
           <DashboardTile
             label="Resources"
             icon={<FaClipboardList />}
             color="bg-blue-300"
             to="/resources"
+            isActive={false}
           />
           <DashboardTile
             label="Videos"
             icon={<FaVideo />}
             color="bg-purple-300"
             to="/videos"
+            isActive={false}
           />
           <DashboardTile
             label="Lessons"
             icon={<FaChalkboardTeacher />}
             color="bg-pink-300"
             to="/lessons"
+            isActive={true}
           />
           <DashboardTile
             label="Notices"
             icon={<FaBell />}
             color="bg-red-200"
             to="/notices"
+            isActive={false}
           />
         </div>
 

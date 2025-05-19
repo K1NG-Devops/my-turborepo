@@ -26,6 +26,7 @@ const Login = () => {
 
       const data = response.data;
       login(data); // save to auth context
+      localStorage.setItem('parent_id', data.user.id); // optional, if needed for later requests
       localStorage.setItem('token', data.token); // optional, if needed for later requests
       setSuccessMessage('Login successful!');
       setErrorMessage('');
