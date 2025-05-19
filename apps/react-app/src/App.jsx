@@ -16,6 +16,8 @@ import Lessons from './pages/Lessons';
 import Notifications from './pages/Notifications';
 import Resources from './pages/Resources';
 import Videos from './pages/Videos';
+import TeacherDashboard from './pages/TeacherDashboard';
+import AdminDashboard from './pages/AdminDashboard';
 import './App.css';
 
 function App() {
@@ -45,7 +47,8 @@ function App() {
           <Route path="/resources" element={<Resources />} />
           <Route path="/videos" element={<Videos />} />
           <Route path="/attendance" element={<div>Attendance</div>} />
-          {/* Add more protected routes here */}
+          <Route path="/teacher-dashboard" element={<TeacherDashboard />} />
+          <Route path="/admin-dashboard" element={<div>Admin Dashboard</div>} />
           <Route path="/register-child" element={<RegisterChild />} />
         </Route>
 
