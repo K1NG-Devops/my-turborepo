@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 // import { useAuth } from "../hooks/useAuth";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { toast } from "react-toastify";
@@ -32,10 +32,13 @@ const TeacherLogin = () => {
             );
 
             const data = response.data;
-            login(data);
+
+            // Save token and user info to localStorage
             localStorage.setItem("token", data.token);
-            setIsLoggedIn(true);
-            setIsTeacher(true);
+            localStorage.setItem("user", JSON.stringify(data.user));
+            localStorage.setItem("isLoggedIn", true);
+            localStorage.setItem("isTeacher", true);
+
             toast.success("Login successful!");
             navigate("/teacher-dashboard");
         } catch (error) {
@@ -43,8 +46,9 @@ const TeacherLogin = () => {
             toast.error(error.response?.data?.message || "Invalid email or password.");
         } finally {
             setIsLoading(false);
-        }   
+        }
     };
+
     const handleShowPassword = () => {
         setShowPassword(!showPassword);
     };
@@ -110,17 +114,21 @@ const TeacherLogin = () => {
                     <button
                         type="submit"
                         disabled={isLoading}
-                        className={`w-full bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 focus:outline-none ${
-                            isLoading ? "opacity-50 cursor-not-allowed" : ""
-                        }`}
+                        className={`w-full bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 focus:outline-none cursor-pointer ${isLoading ? "opacity-50 cursor-not-allowed" : ""
+                            }`}
                     >
                         {isLoading ? "Logging in..." : "Login"}
+                    </button>
+                    <button onClick={() => navigate("/login")}
+                        className='mt-6 w-full bg-gray-600 text-white font-semibold py-2 rounded-md hover:bg-gray-700 transition cursor-pointer'
+                    >
+                        Back to Parent Login
                     </button>
                 </form>
                 <p className="text-center text-sm mt-4 text-gray-700 dark:text-gray-300">
                     If you don't have an account, please contact the admin to create one.
                 </p>
-                </div>
+            </div>
         </div>
     );
 }

@@ -19,6 +19,7 @@ import Videos from './pages/Videos';
 import TeacherDashboard from './pages/TeacherDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import './App.css';
+import TeacherDashboardPage from './pages/TeacherDashboardPage';
 
 function App() {
 
@@ -47,8 +48,8 @@ function App() {
           <Route path="/resources" element={<Resources />} />
           <Route path="/videos" element={<Videos />} />
           <Route path="/attendance" element={<div>Attendance</div>} />
-          <Route path="/teacher-dashboard" element={<TeacherDashboard />} />
           <Route path="/admin-dashboard" element={<div>Admin Dashboard</div>} />
+          <Route path="/teacher-dashboard" element={<TeacherDashboardPage />} />
           <Route path="/register-child" element={<RegisterChild />} />
         </Route>
 

@@ -91,10 +91,9 @@ const Login = () => {
         <div className="mt-6 text-sm text-gray-700 dark:text-gray-300 bg-white/80 dark:bg-gray-700/80 p-4 rounded">
           <p className="text-center mb-2">Are you logging in as:</p>
           <ul className="space-y-1">
-            <li className="text-center"><a href="/student/login" className="text-blue-500">Student</a></li>
+            <li className="text-center"><a href="/principal/login" className="text-blue-500">Principal</a></li>
             <li className="text-center"><a href="/teacher/login" className="text-blue-500">Teacher</a></li>
             <li className="text-center"><a href="/admin/login" className="text-blue-500">School Admin</a></li>
-            <li className="text-center"><a href="/principal/login" className="text-blue-500">Principal</a></li>
           </ul>
           <p className="text-center">
             <a href="/home" className="text-white-600">Back to Home</a>
