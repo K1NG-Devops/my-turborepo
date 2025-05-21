@@ -122,6 +122,7 @@ const Home = () => {
             modules={[Autoplay]}
             spaceBetween={20}
             slidesPerView={1.5}
+            centeredSlides={true}
             loop={true}
             autoplay={{ delay: 2000, reverseDirection: true }}
             dir="rtl"

@@ -7,7 +7,7 @@ import { RouterModule } from '@angular/router';
   standalone: true,
   templateUrl: './navbar.component.html',
   styleUrls: ['./navbar.component.css'],
-  imports: [CommonModule, RouterModule] // Import RouterModule for routerLink to work
+  imports: [CommonModule, RouterModule]
 })
 export class NavbarComponent {
   isMenuOpen = false;
@@ -16,10 +16,8 @@ export class NavbarComponent {
     this.isMenuOpen = !this.isMenuOpen;
   }
 
-  redirect(path: string, delay: number): void {
+  goToExternal(path: string): void {
     this.toggleMenu();
-    setTimeout(() => {
-      window.location.href = path;
-    }, delay);
+    window.location.href = path; // Navigate to React route
   }
 }
