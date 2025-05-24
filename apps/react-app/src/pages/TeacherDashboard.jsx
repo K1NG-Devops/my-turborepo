@@ -1,171 +1,143 @@
 import React, { useState } from "react";
+import Sidebar from "../components/Teacher/Sidebar";
+import { useNavigate } from "react-router-dom";
+import DashboardCard from "../components/Teacher/DashboardCard";
 import {
   FaChalkboardTeacher,
   FaCalendarAlt,
   FaEnvelope,
   FaFileUpload,
   FaCamera,
+  FaBars,
+  FaUserCircle,
   FaSignOutAlt,
   FaUpload,
 } from "react-icons/fa";
+import TeacherChildrenList from "../components/Teacher/TeacherChildrenList";
 
 const TeacherDashboard = ({ user }) => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
-  const closeSidebar = () => setSidebarOpen(false);
+  const [darkMode, setDarkMode] = useState(false);
+  const [childrenList, setChildrenList] = useState([]);
+  const [showChildren, setShowChildren] = useState(false);
+  const navigate = useNavigate();
+  const [showSidebar, setShowSidebar] = useState(false);
+  const [showUpload, setShowUpload] = useState(false);
+  const [showMessages, setShowMessages] = useState(false);
+  const [showCalendar, setShowCalendar] = useState(false);
+  const [showAttendance, setShowAttendance] = useState(false);
+  const [showPhotos, setShowPhotos] = useState(false);
+  const [showReports, setShowReports] = useState(false);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-    window.location.href = "/login";
+    navigate("/login");
   };
 
   const handleProfileUpload = () => {
-    alert("Profile picture upload functionality coming soon!");
+    alert("Profile picture upload coming soon!");
   };
 
-  const defaultAvatar = "https://www.gravatar.com/avatar/?d=mp";
-  const userProfilePic =
-    user?.profilePic && user.profilePic !== "null"
-      ? user.profilePic
-      : defaultAvatar;
+  const toggleDarkMode = () => setDarkMode(!darkMode);
+
+  const fetchChildren = () => {
+    // Simulate fetching children data
+    const children = [
+      { id: 1, name: "John Doe" },
+      { id: 2, name: "Jane Smith" },
+      { id: 3, name: "Alice Johnson" },
+    ];
+    setChildrenList(children);
+    setShowChildren(true);
+  };
+
+  const cards = [
+    {
+      title: "Attendance",
+      icon: <FaChalkboardTeacher size={48} className="text-blue-700" />,
+      description: "View and manage student attendance",
+      bgColor: "bg-blue-200",
+    },
+    {
+      title: "Calendar",
+      icon: <FaCalendarAlt size={48} className="text-purple-700" />,
+      description: "Check upcoming events and holidays",
+      bgColor: "bg-purple-200",
+    },
+    {
+      title: "Messages",
+      icon: <FaEnvelope size={48} className="text-pink-600" />,
+      description: "View messages from parents and staff",
+      bgColor: "bg-pink-200",
+    },
+    {
+      title: "Upload Reports",
+      icon: <FaFileUpload size={48} className="text-green-700" />,
+      description: "Upload daily reports or PDFs",
+      bgColor: "bg-green-200",
+    },
+    {
+      title: "Child Photos",
+      icon: <FaCamera size={48} className="text-yellow-700" />,
+      description: "Upload and manage child photos",
+      bgColor: "bg-yellow-200",
+    },
+    {
+      title: "My Children",
+      icon: <FaChalkboardTeacher size={48} className="text-teal-700" />,
+      description: "View and manage your assigned children",
+      bgColor: "bg-teal-200",
+      onClick: fetchChildren,
+    },
+  ];
 
   return (
-    <div className="min-h-screen h-full flex flex-col md:flex-row bg-gradient-to-r from-blue-100 via-purple-100 to-pink-100">
-      {/* Sidebar */}
+    <div className={`flex h-screen w-screen overflow-hidden ${darkMode ? "bg-gray-900 text-white" : "bg-gradient-to-r from-blue-100 via-purple-100 to-pink-100"}`}>
+
+      {/* Sidebar (drawer on mobile) */}
       <aside
-        className={`fixed top-0 left-0 h-full bg-gradient-to-b from-blue-700 to-blue-900 text-white w-64 z-40 transform transition-transform duration-300 ease-in-out
-        ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
-        md:relative md:translate-x-0 flex flex-col`}
+        className={`fixed top-0 left-0 h-full w-64 bg-white shadow-md z-40 transform transition-transform duration-300 ease-in-out ${showSidebar ? "translate-x-0" : "-translate-x-full"
+          } md:translate-x-0 md:static md:block`}
       >
-        {/* Profile Section */}
-        <div className="flex flex-col items-center py-8 px-4 border-b border-blue-600">
-          <img
-            src={userProfilePic}
-            alt="Profile"
-            className="w-24 h-24 rounded-full object-cover mb-3 border-4 border-white shadow-lg"
-          />
-          <h2 className="text-xl font-semibold">{user?.name || "Teacher Name"}</h2>
-          <p className="text-sm opacity-80">{user?.email || "teacher@example.com"}</p>
-
-          <button
-            onClick={handleProfileUpload}
-            className="mt-4 flex items-center gap-2 text-sm px-4 py-2 bg-white text-blue-800 rounded hover:bg-blue-100 transition"
-          >
-            <FaUpload size={16} />
-            Upload Photo
-          </button>
-        </div>
-
-        {/* Nav Items */}
-        <nav className="flex-grow px-6 py-8 space-y-6 overflow-y-auto">
-          {[
-            ["Attendance", <FaChalkboardTeacher size={22} />],
-            ["Calendar", <FaCalendarAlt size={22} />],
-            ["Messages", <FaEnvelope size={22} />],
-            ["Upload Reports", <FaFileUpload size={22} />],
-            ["Child Photos", <FaCamera size={22} />],
-          ].map(([label, icon]) => (
-            <button
-              key={label}
-              className="flex items-center gap-4 text-lg hover:text-blue-300 transition-colors w-full"
-              onClick={closeSidebar}
-            >
-              {icon}
-              {label}
-            </button>
-          ))}
-        </nav>
-
-        {/* Logout Button */}
-        <div className="px-6 py-4 border-t border-blue-600">
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-3 w-full justify-center bg-red-600 hover:bg-red-700 transition-colors rounded-md py-2"
-          >
-            <FaSignOutAlt size={20} />
-            Logout
-          </button>
-        </div>
+        <Sidebar
+          user={user}
+          onLogout={handleLogout}
+          onUploadPhoto={handleProfileUpload}
+        />
       </aside>
 
-      {/* Backdrop */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden"
-          onClick={closeSidebar}
-        />
-      )}
-
-      {/* Mobile Toggle Button */}
+      {/* Hamburger Menu Button */}
       <button
-        className="md:hidden p-2 m-2 text-blue-700 bg-white rounded-md shadow-md focus:outline-none fixed top-2 left-2 z-50"
-        onClick={toggleSidebar}
-        aria-label="Toggle sidebar"
+        className="md:hidden fixed top-2 left-2 z-50 p-2 bg-gray-800 text-white rounded-md"
+        onClick={() => setShowSidebar(!showSidebar)}
       >
-        <svg
-          className="w-6 h-6"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M4 6h16M4 12h16M4 18h16"
-          />
-        </svg>
+        <FaBars />
+      </button>
+
+      {/* Dark Mode Toggle */}
+      <button
+        className="p-2 text-yellow-500 bg-gray-800 rounded-md shadow-md fixed top-2 right-2 z-50"
+        onClick={toggleDarkMode}
+        aria-label="Toggle dark mode"
+      >
+        {darkMode ? "Light Mode" : "Dark Mode"}
       </button>
 
       {/* Main Content */}
-      <main className="flex-grow p-8 grid grid-cols-1 sm:grid-cols-2 gap-8 md:gap-10">
-        {[
-          {
-            title: "Attendance",
-            icon: <FaChalkboardTeacher size={48} className="text-blue-700" />,
-            description: "View and manage student attendance",
-            bgColor: "bg-blue-200",
-          },
-          {
-            title: "Calendar",
-            icon: <FaCalendarAlt size={48} className="text-purple-700" />,
-            description: "Check upcoming events and holidays",
-            bgColor: "bg-purple-200",
-          },
-          {
-            title: "Messages",
-            icon: <FaEnvelope size={48} className="text-pink-600" />,
-            description: "View messages from parents and staff",
-            bgColor: "bg-pink-200",
-          },
-          {
-            title: "Upload Reports",
-            icon: <FaFileUpload size={48} className="text-green-700" />,
-            description: "Upload daily reports or PDFs",
-            bgColor: "bg-green-200",
-          },
-          {
-            title: "Child Photos",
-            icon: <FaCamera size={48} className="text-yellow-700" />,
-            description: "Upload and manage child photos",
-            bgColor: "bg-yellow-200",
-          },
-        ].map(({ title, icon, description, bgColor }) => (
-          <div
-            key={title}
-            className={`${bgColor} rounded-xl p-8 flex flex-col items-center justify-center text-center shadow-lg hover:shadow-2xl transition-shadow cursor-pointer min-h-[220px]`}
-          >
-            <div className="mb-4">{icon}</div>
-            <h3 className="text-2xl font-semibold mb-2">{title}</h3>
-            <p className="text-gray-700 font-medium">{description}</p>
-          </div>
-        ))}
+      <main className="flex-1 md:ml-64 overflow-y-auto p-8 mt-12 md:mt-0">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {showChildren ? (
+            <TeacherChildrenList onBack={() => setShowChildren(false)} />
+          ) : (
+            cards.map((card) => <DashboardCard key={card.title} {...card} />)
+          )}
+
+
+        </div>
       </main>
     </div>
   );
-};
+
+}
 
 export default TeacherDashboard;

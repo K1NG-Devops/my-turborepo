@@ -20,6 +20,7 @@ import TeacherDashboard from './pages/TeacherDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import './App.css';
 import TeacherDashboardPage from './pages/TeacherDashboardPage';
+import TeacherChildrenList from './components/Teacher/TeacherChildrenList';
 
 function App() {
 
@@ -50,6 +51,7 @@ function App() {
           <Route path="/attendance" element={<div>Attendance</div>} />
           <Route path="/admin-dashboard" element={<div>Admin Dashboard</div>} />
           <Route path="/teacher-dashboard" element={<TeacherDashboardPage />} />
+          <Route path="/teacher-children-list" element={<TeacherChildrenList />} />
           <Route path="/register-child" element={<RegisterChild />} />
         </Route>
 
