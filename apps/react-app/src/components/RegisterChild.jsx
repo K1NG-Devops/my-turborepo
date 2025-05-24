@@ -1,6 +1,29 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+
+const getClassByAge = (age) => {
+  if (age >= 1 && age <= 3) return 'Curious Cubs';
+  if (age === 4 || age === 5 || age === 6) return 'Panda';
+  return '';
+};
+
+const getGradeByAge = (age) => {
+  if (age >= 1 && age <= 3) return 'Nursery';
+  if (age === 4 || age === 5) return 'RR';
+  if (age === 6) return 'R';
+  return '';
+};
+
+const calculateAge = (dob) => {
+  const birthDate = new Date(dob);
+  const today = new Date();
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const m = today.getMonth() - birthDate.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+    age--;
+  }
+  return age;
+};
 
 const RegisterChild = () => {
   const [formData, setFormData] = useState({
@@ -13,12 +36,11 @@ const RegisterChild = () => {
     parent_id: null,
   });
 
-  const [loading, setLoading] = useState(false); // Spinner state
-  const [responseMessage, setResponseMessage] = useState(''); // Server response message
+  const [loading, setLoading] = useState(false);
+  const [responseMessage, setResponseMessage] = useState('');
 
   useEffect(() => {
     const storedParentId = localStorage.getItem('parent_id');
-    // Parse parent_id carefully, only if valid integer string
     const parsedParentId =
       storedParentId && !isNaN(parseInt(storedParentId, 10))
         ? parseInt(storedParentId, 10)
@@ -31,7 +53,24 @@ const RegisterChild = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    if (name === 'dob') {
+      const age = calculateAge(value);
+      const className = getClassByAge(age);
+      const grade = getGradeByAge(age);
+      setFormData((prev) => ({
+        ...prev,
+        dob: value,
+        age,
+        className,
+        grade,
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -39,7 +78,6 @@ const RegisterChild = () => {
     setLoading(true);
     setResponseMessage('');
 
-    // Check if parent_id is valid before submitting
     const parentId =
       formData.parent_id && Number.isInteger(formData.parent_id)
         ? formData.parent_id
@@ -51,7 +89,6 @@ const RegisterChild = () => {
       return;
     }
 
-    // Validate required fields
     if (
       !formData.name ||
       !formData.dob ||
@@ -76,9 +113,6 @@ const RegisterChild = () => {
     };
 
     try {
-      // Debug: log the data being sent
-      console.log('Sending child registration data:', data);
-
       const response = await fetch(
         'https://youngeagles-api-server.up.railway.app/api/auth/register-child',
         {
@@ -99,7 +133,7 @@ const RegisterChild = () => {
           gender: '',
           grade: '',
           className: '',
-          parent_id: parentId, // Keep parent_id in state for subsequent entries
+          parent_id: parentId,
         });
       } else {
         const errorData = await response.json();
@@ -151,10 +185,8 @@ const RegisterChild = () => {
                 type="number"
                 name="age"
                 value={formData.age}
-                onChange={handleChange}
-                required
-                min="1"
-                className="w-full p-2 border border-gray-300 rounded-md"
+                readOnly
+                className="w-full p-2 border border-gray-300 bg-gray-100 rounded-md"
               />
             </div>
             <div>
@@ -178,9 +210,8 @@ const RegisterChild = () => {
                 type="text"
                 name="grade"
                 value={formData.grade}
-                onChange={handleChange}
-                required
-                className="w-full p-2 border border-gray-300 rounded-md"
+                readOnly
+                className="w-full p-2 border border-gray-300 bg-gray-100 rounded-md"
               />
             </div>
             <div>
@@ -189,9 +220,9 @@ const RegisterChild = () => {
                 type="text"
                 name="className"
                 value={formData.className}
-                onChange={handleChange}
+                readOnly
                 required
-                className="w-full p-2 border border-gray-300 rounded-md"
+                className="w-full p-2 border border-gray-300 bg-gray-100 rounded-md"
               />
             </div>
           </div>
@@ -202,9 +233,12 @@ const RegisterChild = () => {
           >
             {loading ? 'Registering...' : 'Register Child'}
           </button>
-          <button className='mt-6 w-full bg-gray-600 text-white font-semibold py-2 rounded-md hover:bg-gray-700 transition'>
-            <Link to="/dashboard">Back</Link>
-          </button>
+          <Link
+            to="/dashboard"
+            className="block text-center mt-4 bg-gray-600 text-white font-semibold py-2 rounded-md hover:bg-gray-700 transition"
+          >
+            Back
+          </Link>
         </form>
         {responseMessage && (
           <div className="mt-4 p-4 text-center text-white bg-blue-500 rounded-md">
