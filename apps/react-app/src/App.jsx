@@ -21,6 +21,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import './App.css';
 import TeacherDashboardPage from './pages/TeacherDashboardPage';
 import TeacherChildrenList from './components/Teacher/TeacherChildrenList';
+import AttendancePage from "./components/Teacher/AttendancePage";
 
 function App() {
 
@@ -51,6 +52,7 @@ function App() {
           <Route path="/attendance" element={<div>Attendance</div>} />
           <Route path="/admin-dashboard" element={<div>Admin Dashboard</div>} />
           <Route path="/teacher-dashboard" element={<TeacherDashboard />} />
+          <Route path='/attendance' element={<AttendancePage />} />
           <Route path="/teacher-children-list" element={<TeacherChildrenList />} />
           <Route path="/register-child" element={<RegisterChild />} />
         </Route>
