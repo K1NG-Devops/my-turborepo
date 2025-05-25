@@ -78,7 +78,7 @@ const TeacherAttendance = ({ onBack }) => {
       }
 
       await axios.post(
-        "http://localhost:3000/api/attendance/mark-attendance",
+        "https://youngeagles-api-server.up.railway.app/api/attendance/mark-attendance",
         records,
         {
           headers: {

@@ -8,6 +8,7 @@ import {
   FaSignOutAlt,
   FaUpload,
 } from "react-icons/fa";
+import { Link } from "react-router-dom";
 
 const Sidebar = ({ user = {}, onLogout, onUploadPhoto, closeSidebar }) => {
   const defaultAvatar = "https://www.gravatar.com/avatar/?d=mp";
@@ -27,7 +28,7 @@ const Sidebar = ({ user = {}, onLogout, onUploadPhoto, closeSidebar }) => {
   ];
 
   return (
-    <aside className="min-h-screen bg-gradient-to-b from-blue-700 to-blue-900 text-white w-64 flex flex-col flex-grow">
+    <aside className="h-full bg-gradient-to-b from-blue-700 to-blue-900 text-white w-64 flex flex-col flex-grow">
       <div className="flex flex-col items-center py-8 px-4 border-b border-blue-600">
         <img
           src={profilePic}
@@ -57,7 +58,12 @@ const Sidebar = ({ user = {}, onLogout, onUploadPhoto, closeSidebar }) => {
             {label}
           </button>
         ))}
+
       </nav>
+      <div className="p-4 space-y-4">
+      <Link to="/view-attendance" className="block">Attendance</Link>
+      {/* Add more links here */}
+    </div>
 
       <div className="px-6 py-4 border-t border-blue-600">
       <button

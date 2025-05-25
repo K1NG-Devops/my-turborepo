@@ -1,4 +1,3 @@
-// auth.js
 import axios from "axios";
 
 export async function teacherLogin(email, password) {
@@ -11,16 +10,14 @@ export async function teacherLogin(email, password) {
 
     const token = response.data.token;
 
-    // Basic decode function without external libs
+    // JWT decode function
     function parseJwt(token) {
       const base64Url = token.split('.')[1];
       const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
       const jsonPayload = decodeURIComponent(
         atob(base64)
           .split('')
-          .map(function(c) {
-            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-          })
+          .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
           .join('')
       );
 
@@ -33,14 +30,21 @@ export async function teacherLogin(email, password) {
       throw new Error("You are not authorized to access this page.");
     }
 
+    // Set localStorage once here with consistent keys
     localStorage.setItem("accessToken", token);
-    localStorage.setItem("teacher_id", decodedToken.id);
+    localStorage.setItem("teacherId", decodedToken.id);  // consistent key
     localStorage.setItem("role", decodedToken.role);
     localStorage.setItem("user", JSON.stringify(decodedToken));
     localStorage.setItem("isLoggedIn", "true");
     localStorage.setItem("isTeacher", "true");
 
-    return { success: true, user: decodedToken };
+    return {
+      success: true,
+      teacherId: decodedToken.id,
+      message: "Login successful",
+      token: token,
+      user: decodedToken,
+    };
   } catch (error) {
     const message = error.response?.data?.message || error.message || "Login failed";
     return { success: false, message };

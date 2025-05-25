@@ -30,10 +30,11 @@ const TeacherLogin = () => {
     setIsLoading(true);
     setError("");
     setSuccess("");
-
+  
     const result = await teacherLogin(email, password);
-
+  
     if (result.success) {
+      // No need to set localStorage here again, it's already set inside teacherLogin
       setSuccess("Login successful!");
       toast.success("Login successful!");
       navigate("/teacher-dashboard");
@@ -43,6 +44,7 @@ const TeacherLogin = () => {
     }
     setIsLoading(false);
   };
+  
 
   return (
     <div

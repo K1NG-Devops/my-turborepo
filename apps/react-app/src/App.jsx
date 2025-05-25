@@ -52,7 +52,7 @@ function App() {
           <Route path="/attendance" element={<div>Attendance</div>} />
           <Route path="/admin-dashboard" element={<div>Admin Dashboard</div>} />
           <Route path="/teacher-dashboard" element={<TeacherDashboard />} />
-          <Route path='/attendance' element={<AttendancePage />} />
+          <Route path='/view-attendance' element={<AttendancePage />} />
           <Route path="/teacher-children-list" element={<TeacherChildrenList />} />
           <Route path="/register-child" element={<RegisterChild />} />
         </Route>
