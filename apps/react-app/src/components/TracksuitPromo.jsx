@@ -53,7 +53,7 @@ const TracksuitPromo = () => {
                         Stylish, warm, and school-branded — our new winter tracksuits are perfect for the season!
                     </p>
                     <a
-                        href="https://wa.me/27696893612?text=I'm%20interested%20in%20ordering%20a%20tracksuit"
+                        href="https://forms.gle/q6FAbaE4bBkST14o8"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-500"

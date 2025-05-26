@@ -9,7 +9,7 @@ const TeacherChildrenList = ({ onBack }) => {
   useEffect(() => {
     const fetchChildren = async () => {
       try {
-        const token = localStorage.getItem("token");
+        const token = localStorage.getItem("accessToken");
         if (!token) {
           throw new Error("You are not logged in. Please log in to view your children.");
         }
@@ -23,27 +23,20 @@ const TeacherChildrenList = ({ onBack }) => {
           }
         );
 
-        const data = res.data;
-        setChildren(data.children || []);
-      } catch (err) {
-        if (err.response) {
-          // Server responded but with a non-200 status
-          if (err.response.status === 404) {
-            setError("Children not found. Make sure you have registered any children.");
-          } else if (err.response.status === 401) {
-            setError("Unauthorized. Please log in again.");
-          } else if (err.response.status === 403) {
-            setError("Access denied. You must be a teacher to view this page.");
-          } else {
-            setError("An error occurred: " + err.response.data.message || "Unknown error.");
-          }
-        } else if (err.request) {
-          // No response received
-          setError("No response from server. Please check your internet connection.");
+        console.log("Fetched children response:", res.data);
+
+        // Normalize data: ensure it's always an array
+        if (Array.isArray(res.data.children)) {
+          setChildren(res.data.children);
+        } else if (res.data.children) {
+          setChildren([res.data.children]); // wrap single object in array
         } else {
-          // Other errors
-          setError(err.message);
+          setChildren([]); // fallback
         }
+
+      } catch (err) {
+        console.error("Fetch error:", err.message);
+        setError(err.message);
       } finally {
         setLoading(false);
       }
@@ -52,26 +45,27 @@ const TeacherChildrenList = ({ onBack }) => {
     fetchChildren();
   }, []);
 
-
   if (loading) return <p>Loading children...</p>;
-  if (error) return <p>Error: {error}</p>;
+  if (error) return <p className="text-red-500">Error: {error}</p>;
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-md col-span-full">
       <h2 className="text-2xl font-bold mb-4">My Children</h2>
-      {children.length === 0 ? (
-        <p>No children found.</p>
-      ) : (
+
+      {Array.isArray(children) && children.length > 0 ? (
         <ul className="space-y-2">
           {children.map((child) => (
             <li
               key={child.id}
               className="bg-blue-100 px-4 py-2 rounded-md text-blue-800 font-semibold"
             >
-              {child.name} — Grade: {child.grade} — DOB: {child.dob}
+              {child.name} — Grade: {child.grade} — DOB:{" "}
+              {new Date(child.dob).toLocaleDateString()}
             </li>
           ))}
         </ul>
+      ) : (
+        <p>No children found.</p>
       )}
 
       <button

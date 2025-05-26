@@ -21,7 +21,7 @@ const Dashboard = () => {
       : defaultAvatar;
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
+    localStorage.removeItem('accessToken');
     navigate('/login');
     window.location.reload();
   };
@@ -37,6 +37,8 @@ const Dashboard = () => {
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
   };
+
+
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -117,6 +119,7 @@ const Dashboard = () => {
                   </div>
                 )}
               </div>
+
             </div>
 
             {/* Sidebar Links */}
@@ -130,7 +133,7 @@ const Dashboard = () => {
                   >
                     Dashboard
                   </Link>
-                </li>                
+                </li>
                 <li>
                   <Link
                     to="/attendance"
@@ -173,10 +176,16 @@ const Dashboard = () => {
                     className={`block px-4 py-2 rounded hover:bg-gray-200 ${location.pathname === '/register-child' ? 'bg-gray-200 font-bold' : ''
                       }`}
                   >
-                   👶 Register Child
+                    👶 Register Child
                   </Link>
                 </li>
               </ul>
+              <Link
+                to="/popupload"
+                className="ml-2 inline-block px-8 mt-5 bg-pink-500 text-white text-lg font-semibold rounded-lg shadow-md hover:bg-pink-600 transition" AOS="fade-up"
+              >
+                Upload POP
+              </Link>
             </nav>
           </div>
         </div>
