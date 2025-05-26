@@ -32,7 +32,7 @@ const AttendancePage = () => {
             return;
         }
         try {
-            const response = await axios.get(`http://localhost:3000/api/attendance/teacher/${teacherId}`, {
+            const response = await axios.get(`https://youngeagles-api-server.up.railway.app/api/attendance/${teacherId}`, {
                 params: { search, start, end, page, status, includeMissing, groupBy },
             });
 
@@ -72,7 +72,7 @@ const AttendancePage = () => {
     const handleExport = async () => {
         try {
             const res = await axios.get(
-                `https://youngeagles-api-server.up.railway.app/api/attendance/teacher/${teacherId}`,
+                `https://youngeagles-api-server.up.railway.app/api/attendance/${teacherId}`,
                 {
                     params: {
                         search,

@@ -22,8 +22,15 @@ import './App.css';
 import TeacherDashboardPage from './pages/TeacherDashboardPage';
 import TeacherChildrenList from './components/Teacher/TeacherChildrenList';
 import AttendancePage from "./components/Teacher/AttendancePage";
+import AOS from 'aos';
+import 'aos/dist/aos.css';
+import { useEffect } from 'react';
+
 
 function App() {
+  useEffect(() => {
+    AOS.init({ duration: 800 });
+  }, []);
 
   return (
     <Router>

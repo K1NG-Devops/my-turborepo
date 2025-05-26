@@ -2,38 +2,63 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { decodeToken } from "../../utils/decodeToken";
 
-const mockChildren = [
-  { id: 1, name: "Phenyo Lethlake" },
-  { id: 2, name: "Jane Doe" },
-  { id: 3, name: "Olivia Makunyane" },
-  { id: 4, name: "John Satege" },
-];
-
 const TeacherAttendance = ({ onBack }) => {
+  const [children, setChildren] = useState([]);
   const [attendance, setAttendance] = useState({});
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [teacherId, setTeacherId] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
-    if (token) {
-      const decoded = decodeToken(token);
-      if (decoded && decoded.id) {
-        setTeacherId(decoded.id);
-      } else {
-        console.warn("No teacher id found in token");
-      }
-    } else {
+    if (!token) {
       alert("You must be logged in");
+      return;
     }
-
-    const initialAttendance = {};
-    mockChildren.forEach((child) => {
-      initialAttendance[child.id] = { status: "none", late: false };
-    });
-    setAttendance(initialAttendance);
+  
+    const decoded = decodeToken(token);
+    if (!decoded?.id) {
+      console.warn("No teacher ID found in token");
+      return;
+    }
+  
+    setTeacherId(decoded.id);
+  
+    // ✅ Fetch children using the authenticated route
+    axios.get("https://youngeagles-api-server.up.railway.app/api/children", {
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Cache-Control": "no-cache",
+      }
+    })
+    .then((res) => {
+      console.log("API response:", res.data);
+    
+      const fetchedChildren = res.data.children || res.data;
+      console.log("Fetched children:", fetchedChildren);
+    
+      if (!Array.isArray(fetchedChildren)) {
+        throw new Error("Children list not returned properly.");
+      }
+    
+      setChildren(fetchedChildren);
+    
+      const initialAttendance = {};
+      fetchedChildren.forEach((child) => {
+        initialAttendance[child.id] = { status: "none", late: false };
+      });
+      setAttendance(initialAttendance);
+    })
+    
+      
+      .catch((err) => {
+        console.error("Error fetching children:", err.response?.data || err.message);
+        alert("Could not load children list.");
+      })
+      .finally(() => setLoading(false));
   }, []);
+  
 
   const markAttendance = (childId, status) => {
     setAttendance((prev) => ({
@@ -47,36 +72,31 @@ const TeacherAttendance = ({ onBack }) => {
 
   const handleSubmit = async () => {
     if (!teacherId) {
-      console.error("Teacher ID is missing");
-      alert("Unable to submit: Teacher ID not found.");
+      alert("Teacher ID missing.");
+      return;
+    }
+
+    const records = [];
+    for (const child of children) {
+      const record = attendance[child.id];
+      if (record?.status && record.status !== "none") {
+        records.push({
+          teacherId,
+          childId: child.id,
+          date,
+          status: record.status.toLowerCase(),
+          late: !!record.late,
+        });
+      }
+    }
+
+    if (records.length === 0) {
+      alert("Please mark attendance for at least one child.");
       return;
     }
 
     setIsSubmitting(true);
-
     try {
-      const records = [];
-
-      for (const child of mockChildren) {
-        const record = attendance[child.id];
-        const { status, late } = record || {};
-        if (status && status !== "none") {
-          records.push({
-            teacherId,
-            childId: child.id,
-            date,
-            status: status.toLowerCase(),
-            late: !!late,
-          });
-        }
-      }
-
-      if (records.length === 0) {
-        alert("Please mark attendance for at least one child.");
-        setIsSubmitting(false);
-        return;
-      }
-
       await axios.post(
         "https://youngeagles-api-server.up.railway.app/api/attendance/mark-attendance",
         records,
@@ -86,7 +106,6 @@ const TeacherAttendance = ({ onBack }) => {
           },
         }
       );
-
       alert("Attendance submitted successfully.");
     } catch (error) {
       console.error("Error submitting attendance:", error.response?.data || error.message);
@@ -96,8 +115,16 @@ const TeacherAttendance = ({ onBack }) => {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="text-center py-10">
+        <p className="text-purple-700 dark:text-white">Loading children...</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md w-full">
+    <div className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg shadow-md w-full">
       <h2 className="text-2xl font-bold mb-4 text-center text-purple-700 dark:text-white">
         Today's Attendance
       </h2>
@@ -114,33 +141,37 @@ const TeacherAttendance = ({ onBack }) => {
         />
       </div>
 
-      {mockChildren.map((child) => (
-        <div
-          key={child.id}
-          className="flex items-center justify-between mb-4 p-4 bg-gray-100 dark:bg-gray-700 rounded-lg"
-        >
-          <span className="font-medium text-gray-800 dark:text-gray-200">
-            {child.name}
-          </span>
-          <div className="flex gap-2">
-            {["Present", "Absent", "Late"].map((status) => (
-              <button
-                key={status}
-                onClick={() => markAttendance(child.id, status)}
-                className={`px-3 py-1 rounded text-sm font-semibold ${
-                  attendance[child.id]?.status === status
-                    ? "bg-purple-600 text-white"
-                    : "bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200"
-                }`}
-              >
-                {status}
-              </button>
-            ))}
+      {children.length === 0 ? (
+        <p className="text-gray-600 dark:text-gray-300">No children found for this teacher.</p>
+      ) : (
+        children.map((child) => (
+          <div
+            key={child.id}
+            className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 p-4 bg-gray-100 dark:bg-gray-700 rounded-lg"
+          >
+            <span className="font-medium text-gray-800 dark:text-gray-200 mb-2 sm:mb-0">
+              {child.name}
+            </span>
+            <div className="flex flex-wrap gap-2">
+              {["Present", "Absent", "Late"].map((status) => (
+                <button
+                  key={status}
+                  onClick={() => markAttendance(child.id, status)}
+                  className={`px-3 py-1 rounded text-sm font-semibold ${
+                    attendance[child.id]?.status === status
+                      ? "bg-purple-600 text-white"
+                      : "bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200"
+                  }`}
+                >
+                  {status}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
-      ))}
+        ))
+      )}
 
-      <div className="flex justify-between mt-6">
+      <div className="flex flex-col sm:flex-row justify-between mt-6 gap-2">
         <button
           onClick={onBack}
           className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"

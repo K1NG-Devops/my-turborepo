@@ -3,8 +3,28 @@ import { Link } from 'react-router-dom';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import TracksuitPromo from '../components/TracksuitPromo';
+import CountUp from 'react-countup';
+//           fillRule="evenodd"
+//             d="M2 4a2 2 0 012-2h12a2 2 0 012 2v12a2 2 0 01-2 2H4a2 2 0 01-2-2V4zm3.293 3.293a1 1 0 011.414-1.414L10 8.586l3.293-3.293a1 1 0 111.414 1.414L11.414 10l3.293 3.293a1 1 0 01-1.414 1.414L10 11.414l-3.293 3.293a1 1 0 01-1.414-1.414L8.586 10l-3.293-3.293z"
+//             clipRule="evenodd"
+//           />
+//         </svg>
+//       </button>
+//       {/* Sidebar */}
 
-//import Swiper and SwiperSlide from 'swiper/react';
+//       {/* Swiper and SwiperSlide */}
+<Swiper
+  modules={[Autoplay]}
+  autoplay={{ delay: 3000, disableOnInteraction: false }}
+  className="mySwiper"
+>
+  <SwiperSlide>
+    <img src={winterTracksuit} alt="Winter Tracksuit" />
+  </SwiperSlide>
+  <SwiperSlide>
+    <img src={winterTracksuit2} alt="Winter Tracksuit 2" />
+  </SwiperSlide>
+</Swiper>
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
 import 'swiper/css/autoplay';
@@ -22,46 +42,59 @@ const Home = () => {
     AOS.init({
       duration: 1000,
       easing: "ease-in-out",
+      once: false,
     });
   }, []);
 
   return (
     <>
-      <div className="mt-16 p-6 bg-pink-50 min-h-screen space-y-16">
+      <div className="mt-16 p-6 bg-pink-50 min-h-screen space-y-16 overflow-x-hidden">
         {/* Hero */}
         <header className="text-center mb-8" data-aos="fade-down">
-          <h1 className="text-4xl md:text-5xl font-bold text-pink-700">Welcome to Young Eagles Day Care</h1>
+          <div className="flex flex-col md:flex-row items-center justify-center text-center overflow-x-hidden text-pink-700 font-bold">
+            <div data-aos="fade-right" data-aos-delay="200" className="text-xl md:text-5xl">
+              Welcome to
+            </div>
+            <div data-aos="fade-down" data-aos-delay="400" className="md:ml-4 text-base md:text-5xl text-pink-800">
+              Young Eagles
+            </div>
+            <div className="md:ml-4 text-xl md:text-5xl" data-aos="fade-left" data-aos-delay="600">
+              Day Care
+            </div>
+          </div>
+
+
           <p className="mt-4 text-xl text-gray-700 max-w-3xl mx-auto">
             Where learning meets love. We nurture little minds with big dreams through play, care, and creativity.
           </p>
         </header>
 
-        <div className="flex justify-center mb-10" data-aos="zoom-in">
-          <img
-            src={kidsImage}
-            alt="Happy children playing"
-            className="rounded-3xl shadow-xl w-[90%] md:w-[70%] md:h-[400px] sm:h-[400px] object-cover"
-          />
-        </div>
+        <div className="flex justify-center mb-10 overflow-hidden" data-aos="zoom-in">
+  <img
+    src={kidsImage}
+    alt="Happy children playing"
+    className="rounded-3xl shadow-xl w-[90%] md:w-[70%] md:h-[400px] sm:h-[400px] object-cover transition-transform hover:scale-105 max-w-full"
+  />
+</div>
 
         {/* Why Choose Us */}
-        <section className="text-center mb-12" data-aos="fade-up">
-          <h2 className="text-3xl font-semibold text-purple-700">Why Choose Us?</h2>
-          <p className="mt-4 text-lg text-gray-600 max-w-4xl mx-auto">
+        <section className="text-center mb-12" data-aos="fade-up transform hover:scale-105 transition duration-300 ease-in-out">
+          <h2 className="text-3xl font-semibold text-purple-700 animate-bounce" data-aos="zoom-in">Why Choose Us?</h2><div className="animate-bounce text-pink-400 text-4xl mt-2">💖</div>
+          <p className="mt-4 text-lg text-gray-600 max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-md w-full">
             At Young Eagles, your child's happiness, safety, and development come first. Our professional staff fosters creativity, communication, and curiosity in a safe and playful environment.
           </p>
         </section>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto mb-12" data-aos="fade-up">
-          <div className="bg-white p-6 rounded-2xl shadow-md hover:shadow-lg transition">
+          <div className="bg-white p-6 rounded-2xl shadow-md hover:shadow-lg transition" data-aos="fade-up" data-aos-delay="0">
             <h3 className="text-xl font-bold text-blue-600 mb-2">Play-Based Learning</h3>
             <p className="text-gray-600">Fun, engaging activities that support emotional and cognitive growth.</p>
           </div>
-          <div className="bg-white p-6 rounded-2xl shadow-md hover:shadow-lg transition">
+          <div className="bg-white p-6 rounded-2xl shadow-md hover:shadow-lg transition" data-aos="fade-up" data-aos-delay="200">
             <h3 className="text-xl font-bold text-green-600 mb-2">Safe Environment</h3>
             <p className="text-gray-600">Secure and clean facilities that give you peace of mind.</p>
           </div>
-          <div className="bg-white p-6 rounded-2xl shadow-md hover:shadow-lg transition">
+          <div className="bg-white p-6 rounded-2xl shadow-md hover:shadow-lg transition" data-aos="fade-up" data-aos-delay="400">
             <h3 className="text-xl font-bold text-pink-600 mb-2">Experienced Teachers</h3>
             <p className="text-gray-600">Loving educators who support each child’s unique journey.</p>
           </div>
@@ -70,7 +103,7 @@ const Home = () => {
         {/* Society 5.0 */}
         <section className="shadow-lg rounded-lg bg-white p-8" data-aos="fade-up">
           <h2 className="text-3xl font-bold text-blue-900 text-center mb-4">Introducing Society 5.0</h2>
-          <p className="text-lg text-gray-700 text-center max-w-4xl mx-auto">
+          <p className="text-lg text-gray-700 text-center max-w-2xl mx-auto">
             Society 5.0 is a human-centered society that balances economic advancement with solving social problems through deep integration of cyberspace and the physical world.
           </p>
         </section>
@@ -84,7 +117,9 @@ const Home = () => {
           <div className="flex justify-center">
             <Link
               to="/dashboard"
-              className="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-500 transition"
+              className="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-500 transform hover:scale-105 transition duration-300 ease-in-out"
+              data-aos="fade-left"
+              data-aos-delay="200"
             >
               Explore Student Dashboard
             </Link>
@@ -93,21 +128,34 @@ const Home = () => {
 
         {/* Aftercare */}
         <section className="bg-yellow-50 p-8 rounded-xl shadow-md" data-aos="fade-up">
-          <h2 className="text-3xl font-bold text-center text-yellow-700 mb-4">Aftercare & Robotics</h2>
-          <p className="text-center text-gray-700 mb-6 max-w-3xl mx-auto">
-            For curious minds beyond preschool, our <strong>aftercare robotics program</strong> continues nurturing innovation through tech-based activities.
-          </p>
+          <h2
+            className="text-3xl font-bold text-center text-yellow-700 mb-4"
+            data-aos="fade-right"
+            data-aos-delay="350"
+          >
+            Aftercare & Robotics
+          </h2>
+          <div className="text-center text-gray-700 mb-6 max-w-3xl mx-auto" data-aos="fade-left" data-aos-delay="350">
+            <p data-aos="fade-left" data-aos-delay="400" className="mb-4">
+              Our aftercare program offers a safe, engaging space for kids to unwind and explore.
+              With activities like arts and crafts, outdoor play, and interactive learning, we ensure every child feels at home.
+            </p>
+            <p>
+              For curious minds beyond preschool, our <strong>aftercare robotics program</strong> continues nurturing innovation through tech-based activities.
+            </p>
+          </div>
           <div className="flex justify-center">
             <a
               href="https://roboworld.co.za"
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-yellow-600 text-white px-6 py-3 rounded-lg hover:bg-yellow-500 transition"
+              className="bg-yellow-600 text-white px-6 py-3 rounded-lg hover:bg-yellow-500 transition shadow-md hover:shadow-lg transform hover:scale-105 transition duration-300 ease-in-out"
             >
               Visit RoboWorld
             </a>
           </div>
         </section>
+
 
         {/* Tracksuit Promo */}
         <section className="bg-white p-8 rounded-xl shadow-lg border" data-aos="fade-up">
@@ -133,7 +181,11 @@ const Home = () => {
                 <img
                   src={src}
                   alt={`Gallery ${index + 1}`}
-                  className="md:h-100 h-50 w-full object-cover rounded-xl"
+                  className="md:h-100 h-50 w-full object-cover rounded-xl transition-transform hover:scale-105"
+                  data-aos="fade-up"
+                  data-aos-delay={`${index * 100}`}
+                  data-aos-duration="500"
+                  data-aos-easing="ease-in-out"
                 />
               </SwiperSlide>
             ))}
@@ -146,13 +198,13 @@ const Home = () => {
         <div className="text-center" data-aos="zoom-in">
           <Link
             to="/login"
-            className="inline-block px-8 py-3 bg-pink-600 text-white text-lg font-semibold rounded-full shadow-md hover:bg-pink-500 transition mb-4 md:mb-0"
+            className="inline-block px-8 py-3 bg-pink-600 text-white text-lg font-semibold rounded-full shadow-md hover:bg-pink-500 transition mb-4 md:mb-0 transform hover:scale-115 transition duration-300 ease-in-out"
           >
             Parent Login
           </Link>
           <Link
             to="/popupload"
-            className="ml-2 inline-block px-8 py-3 bg-purple-600 text-white text-lg font-semibold rounded-full shadow-md hover:bg-purple-500 transition"
+            className="ml-2 inline-block px-8 py-3 bg-purple-600 text-white text-lg font-semibold rounded-full shadow-md hover:bg-purple-500 transition transform hover:scale-115 transition duration-300 ease-in-out"
           >
             Upload POP
           </Link>

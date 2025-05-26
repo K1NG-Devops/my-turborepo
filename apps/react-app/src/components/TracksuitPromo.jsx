@@ -47,21 +47,23 @@ const TracksuitPromo = () => {
             )}
 
             {/* Text + Button */}
-            <div className="bg-slate-200 p-5 rounded-lg md:ml-30 flex-1 flex flex-col items-center md:items-start">
-                <div className="text-center md:text-left max-w-sm space-y-4 mt-6 md:mt-0">
-                    <p className="mb-10 text-gray-700 text-lg">
-                        Stylish, warm, and school-branded — our new winter tracksuits are perfect for the season!
-                    </p>
-                    <a
-                        href="https://forms.gle/q6FAbaE4bBkST14o8"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-500"
-                    >
-                        Order Now
-                    </a>
-                </div>
-            </div>
+            <div className="bg-slate-200 p-5 rounded-lg flex-1 flex flex-col items-center md:items-start md:ml-10">
+  <div className="text-center md:text-left w-full max-w-md space-y-4 mt-6 md:mt-0">
+    <p className="mb-6 text-gray-700 text-base md:text-lg">
+      Stylish, warm, and school-branded — our new winter tracksuits are perfect for the season!
+    </p>
+    <div className="flex justify-center md:justify-start">
+      <a
+        href="https://forms.gle/q6FAbaE4bBkST14o8"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-500 transform hover:scale-105 transition duration-300 ease-in-out"
+      >
+        Order Now
+      </a>
+    </div>
+  </div>
+</div>
         </div>
 
     );
