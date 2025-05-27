@@ -10,7 +10,6 @@ import Login from './components/Login';
 import TeacherLogin from './components/TeacherLogin';
 import Register from './components/Register';
 import RegisterChild from './components/RegisterChild';
-import Attendance from './pages/Attendance';
 import Homework from './pages/Homework';
 import Lessons from './pages/Lessons';
 import Notifications from './pages/Notifications';
@@ -56,7 +55,6 @@ function App() {
           <Route path="/lessons" element={<Lessons />} />
           <Route path="/resources" element={<Resources />} />
           <Route path="/videos" element={<Videos />} />
-          <Route path="/attendance" element={<div>Attendance</div>} />
           <Route path="/admin-dashboard" element={<div>Admin Dashboard</div>} />
           <Route path="/teacher-dashboard" element={<TeacherDashboard />} />
           <Route path='/view-attendance' element={<AttendancePage />} />
