@@ -28,7 +28,8 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchHomeworks = async () => {
       try {
-        const response = await fetch("https://youngeagles-api-server.up.railway.app/api/homeworks/list");
+        const response = await fetch(`https://youngeagles-api-server.up.railway.app/api/homeworks/list?className=${className}&grade=${grade}`
+        );
         const data = await response.json();
         setHomeworkList(data);
       } catch (err) {
@@ -295,7 +296,7 @@ const Dashboard = () => {
             label="Homework"
             icon={<FaBook />}
             color="bg-yellow-200"
-            to="/student/homework"
+            to="/student/homeworks"
             isActive={true}
           />
           <DashboardTile

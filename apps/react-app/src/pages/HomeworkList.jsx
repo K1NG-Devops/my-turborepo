@@ -1,36 +1,46 @@
+import { useLocation } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
 import HomeworkTile from '../components/Parents/HomeworkTile';
-// import DashboardNav from '../components/Parents/DashboardNav';
 
 const HomeworkList = () => {
   const [homeworks, setHomeworks] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const className = 'Panda'; // Temporary hardcoded (to be replaced by dynamic session later)
-  const grade = 'Grade RR & R';
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  const className = params.get('className');
+  const grade = params.get('grade');
 
   useEffect(() => {
     if (!className || !grade) return;
-    
+
     const fetchHomeworks = async () => {
       try {
         const response = await fetch(
           `https://youngeagles-api-server.up.railway.app/api/homeworks/list?className=${className}&grade=${grade}`
         );
         const data = await response.json();
-        setHomeworks(data);
+
+        if (Array.isArray(data)) {
+          setHomeworks(data);
+        } else {
+          console.error('Expected array, got:', data);
+          setHomeworks([]);
+        }
       } catch (err) {
         console.error('Error fetching homework:', err);
+        setHomeworks([]);
       } finally {
         setLoading(false);
       }
     };
 
     fetchHomeworks();
-  }, []);
+  }, [className, grade]);
 
   if (loading) return <p>Loading...</p>;
-  if (homeworks.length === 0) return <p>No homework found for {className} / {grade}.</p>;
+  if (homeworks.length === 0)
+    return <p>No homework found for {className} / {grade}.</p>;
 
   return (
     <div className="max-w-3xl mx-auto mt-10">
