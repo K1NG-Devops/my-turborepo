@@ -1,9 +1,19 @@
 // src/pages/Dashboard.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import DashboardTile from '../components/DashboardTile';
-import useAuth from '../hooks/useAuth';
+import DashboardTile from '../../components/DashboardTile';
+import useAuth from '../../hooks/useAuth';
 import { FaBook, FaCalendarCheck, FaClipboardList, FaVideo, FaChalkboardTeacher, FaBell } from 'react-icons/fa';
+import AOS from 'aos';
+import 'aos/dist/aos.css';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import HomeworkTile from '../../components/Parents/HomeworkTile';
+
+const linkStyles = "block mb-2 px-4 py-2 rounded hover:bg-gray-200 transition-colors duration-200 text-gray-800 hover:text-gray-800";
+const linkStyles2 = "bg-cyan-800 font-bold text-white hover:bg-cyan-700 transition-colors duration-200";
+const linkStylesActive = "bg-pink-500 font-bold text-gray-800";
+
 
 const Dashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -12,6 +22,42 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { auth } = useAuth();
+
+  const [homeworkList, setHomeworkList] = useState([]);
+
+  useEffect(() => {
+    const fetchHomeworks = async () => {
+      try {
+        const response = await fetch("https://youngeagles-api-server.up.railway.app/api/homeworks/list");
+        const data = await response.json();
+        setHomeworkList(data);
+      } catch (err) {
+        console.error("Failed to fetch homework:", err);
+      }
+    };
+
+    fetchHomeworks();
+  }, []);
+
+
+  useEffect(() => {
+    AOS.init({
+      duration: 1000,
+      easing: 'ease-in-out',
+      once: false,
+    });
+    AOS.refresh();
+  }, []);
+
+  useEffect(() => {
+    if (!auth?.user) {
+      toast.error('Please log in to access the dashboard.', {
+        position: toast.POSITION.TOP_RIGHT,
+        autoClose: 5000,
+      });
+      navigate('/login');
+    }
+  }, [auth, navigate]);
 
   const userName = auth?.user?.name || 'Parent';
   const defaultAvatar = 'https://www.gravatar.com/avatar/?d=mp';
@@ -22,8 +68,11 @@ const Dashboard = () => {
 
   const handleLogout = () => {
     localStorage.removeItem('accessToken');
-    navigate('/login');
-    window.location.reload();
+    toast.success('Logged out successfully');
+    setTimeout(() => {
+      navigate('/login');
+      window.location.reload();
+    }, 1000);
   };
 
   const toggleSidebar = () => {
@@ -55,16 +104,34 @@ const Dashboard = () => {
       {/* Hamburger menu (mobile only) */}
       <button
         onClick={toggleSidebar}
-        className="fixed top-4 left-4 z-50 sm:hidden sm:p-0 text-white bg-gray-800 rounded focus:outline-none"
+        className="fixed top-4 left-4 z-50 sm:hidden sm:p-0 text-white bg-cyan-800 rounded focus:outline-none"
       >
-        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-          <path
-            fillRule="evenodd"
-            clipRule="evenodd"
-            d="M3 5h14a1 1 0 110 2H3a1 1 0 110-2zm0 4h14a1 1 0 110 2H3a1 1 0 110-2zm0 4h14a1 1 0 110 2H3a1 1 0 110-2z"
-          />
-        </svg>
+        {isSidebarOpen ? (
+          // X icon
+          <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+            <path
+              fillRule="evenodd"
+              clipRule="evenodd"
+              d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 
+           1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 
+           1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 
+           10 4.293 5.707a1 1 0 010-1.414z"
+            />
+          </svg>
+        ) : (
+          // Hamburger icon
+          <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+            <path
+              fillRule="evenodd"
+              clipRule="evenodd"
+              d="M3 5h14a1 1 0 110 2H3a1 1 0 110-2zm0 
+           4h14a1 1 0 110 2H3a1 1 0 110-2zm0 
+           4h14a1 1 0 110 2H3a1 1 0 110-2z"
+            />
+          </svg>
+        )}
       </button>
+
 
       {/* Sidebar Backdrop */}
       {isSidebarOpen && (
@@ -76,7 +143,7 @@ const Dashboard = () => {
 
       {/* Sidebar */}
       <aside
-        className={`fixed top-0 left-0 z-40 w-64 h-full bg-white shadow transform transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        className={`fixed top-0 left-0 z-40 w-64 h-full bg-cyan-300 shadow transform transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
           } sm:translate-x-0`}
       >
         <div className="h-full p-4 flex flex-col justify-between">
@@ -128,7 +195,7 @@ const Dashboard = () => {
                 <li>
                   <Link
                     to="/dashboard"
-                    className={`block px-4 py-2 rounded hover:bg-gray-200 ${location.pathname === '/dashboard' ? 'bg-gray-200 font-bold' : ''
+                    className={`${linkStyles} ${linkStylesActive} ${location.pathname === '/dashboard' ? linkStyles2 : ''
                       }`}
                   >
                     Dashboard
@@ -137,8 +204,10 @@ const Dashboard = () => {
                 <li>
                   <Link
                     to="/attendance"
-                    className={`block px-4 py-2 rounded hover:bg-gray-200 ${location.pathname === '/attendance' ? 'bg-gray-200 font-bold' : ''
+                    className={`${linkStyles} ${location.pathname === '/dashboard' ? linkStyles2 : ''
                       }`}
+                    data-aos="fade-right"
+                    data-aos-duration="500"
                   >
                     📅 Attendance
                   </Link>
@@ -146,8 +215,10 @@ const Dashboard = () => {
                 <li>
                   <Link
                     to="/resources"
-                    className={`block px-4 py-2 rounded hover:bg-gray-200 ${location.pathname === '/resources' ? 'bg-gray-200 font-bold' : ''
-                      }`}
+                    className={`${linkStyles} ${location.pathname === '/dashboard' ? linkStyles2 : ''}`}
+                    data-aos="fade-right"
+                    data-aos-duration="500"
+                    data-aos-delay="200"
                   >
                     📂 Resources
                   </Link>
@@ -155,8 +226,10 @@ const Dashboard = () => {
                 <li>
                   <Link
                     to="/videos"
-                    className={`block px-4 py-2 rounded hover:bg-gray-200 ${location.pathname === '/videos' ? 'bg-gray-200 font-bold' : ''
-                      }`}
+                    className={`${linkStyles} ${location.pathname === '/dashboard' ? linkStyles2 : ''}`}
+                    data-aos="fade-right"
+                    data-aos-duration="500"
+                    data-aos-delay="400"
                   >
                     🎥 Videos
                   </Link>
@@ -164,8 +237,10 @@ const Dashboard = () => {
                 <li>
                   <Link
                     to="/lessons"
-                    className={`block px-4 py-2 rounded hover:bg-gray-200 ${location.pathname === '/lessons' ? 'bg-gray-200 font-bold' : ''
-                      }`}
+                    className={`${linkStyles} ${location.pathname === '/dashboard' ? linkStyles2 : ''}`}
+                    data-aos="fade-right"
+                    data-aos-duration="500"
+                    data-aos-delay="600"
                   >
                     📚 Lessons
                   </Link>
@@ -173,8 +248,11 @@ const Dashboard = () => {
                 <li>
                   <Link
                     to="/register-child"
-                    className={`block px-4 py-2 rounded hover:bg-gray-200 ${location.pathname === '/register-child' ? 'bg-gray-200 font-bold' : ''
+                    className={`${linkStyles} ${location.pathname === '/dashboard' ? linkStyles2 : ''
                       }`}
+                    data-aos="fade-right"
+                    data-aos-duration="500"
+                    data-aos-delay="800"
                   >
                     👶 Register Child
                   </Link>
@@ -182,7 +260,10 @@ const Dashboard = () => {
               </ul>
               <Link
                 to="/popupload"
-                className="ml-2 inline-block px-8 mt-5 bg-pink-500 text-white text-lg font-semibold rounded-lg shadow-md hover:bg-pink-600 transition" AOS="fade-up"
+                className="ml-2 inline-block px-8 mt-5 bg-pink-500 text-white text-lg font-semibold rounded-lg shadow-md hover:bg-pink-600 transition"
+                data-aos="fade-up"
+                data-aos-duration="500"
+                data-aos-delay="1000"
               >
                 Upload POP
               </Link>
@@ -191,10 +272,22 @@ const Dashboard = () => {
         </div>
       </aside>
 
-      {/* Page Content */}
-      <main className="sm:ml-64 p-4 min-h-screen bg-gray-300 transition-all duration-300 ease-in-out flex-col flex">
-        <div className="flex justify-end mb-4">
-          <h1 className="md:text-xl text-base font-bold">Welcome, {userName} 👋</h1>
+      <main className="sm:ml-64 p-4 min-h-screen bg-gray-300 transition-all duration-300 ease-in-out flex flex-col">
+        <div className="flex justify-end mb-4 bg-gray-700 shadow-lg rounded-lg p-4 text-white w-full">
+          <div className="flex items-center space-x-4">
+            <Link
+              to="/home"
+              className="text-gray-300 hover:text-white bg-red-500 py-2 px-4 hover:bg-red-800 rounded-lg font-medium"
+            >
+              Home
+            </Link>
+            <button
+              onClick={handleLogout}
+              className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-700 transition"
+            >
+              Logout
+            </button>
+          </div>
         </div>
         {/* Dashboard tiles */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -202,7 +295,7 @@ const Dashboard = () => {
             label="Homework"
             icon={<FaBook />}
             color="bg-yellow-200"
-            to="/homework"
+            to="/student/homework"
             isActive={true}
           />
           <DashboardTile
@@ -242,18 +335,31 @@ const Dashboard = () => {
           />
         </div>
 
-        <div className="mt-6">
-          <h2 className="text-md font-semibold cursor-pointer mb-4"><Link to='activities'>Recent Activities</Link></h2>
-          {/* Add your recent activities component here */}
+        <div className=' flex-col mt-6 bg-white shadow-lg rounded-lg p-6'>
+          <div className="mt-6">
+            <h2 className="text-md font-semibold cursor-pointer mb-4 hover:bg-pink-500 hover:text-white rounded-lg w-60" data-aos="fade-left"><Link to='activities'>Recent Activities</Link></h2>
+            {/* Add your recent activities component here */}
+          </div>
+          <div className="mt-6">
+            <h2 className="text-md font-semibold cursor-pointer mb-4 hover:bg-pink-500 hover:text-white rounded-lg w-60" data-aos="fade-left" data-aos-delay="200"><Link to='notifications'>Notifications</Link></h2>
+            {/* Add your notifications component here */}
+          </div>
+          <div className="mt-6">
+            <h2 className="text-md font-semibold cursor-pointer mb-4 hover:bg-pink-500 hover:text-white-600 rounded-lg w-60 " data-aos="fade-left" data-aos-delay="400"><Link to='messages'>Messages</Link></h2>
+            {/* Add your messages component here */}
+          </div>
         </div>
-        <div className="mt-6">
-          <h2 className="text-md font-semibold cursor-pointer mb-4"><Link to='notifications'>Notifications</Link></h2>
-          {/* Add your notifications component here */}
+        <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {homeworkList.map((hw, index) => (
+            <HomeworkTile
+              key={index}
+              title={hw.title}
+              dueDate={hw.dueDate}
+              status={hw.status}
+            />
+          ))}
         </div>
-        <div className="mt-6">
-          <h2 className="text-md font-semibold cursor-pointer mb-4"><Link to='messages'>Messages</Link></h2>
-          {/* Add your messages component here */}
-        </div>
+
       </main>
     </>
   );

@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { storage } from "../firebase";
+import { storage } from "../../firebase";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { useNavigate } from "react-router-dom";
 
 const PopUploadForm = () => {
     const [formData, setFormData] = useState({
@@ -25,6 +26,11 @@ const PopUploadForm = () => {
             ...formData,
             [e.target.name]: e.target.value,
         });
+    };
+
+    const navigate = useNavigate();
+    const handleBack = () => {
+        navigate("/dashboard");
     };
 
     const handleFileChange = (e) => {
@@ -75,10 +81,10 @@ const PopUploadForm = () => {
         }
     };
 
-    const inputClass = "bg-gray-50 border border-gray-300 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 dark:bg-pink-100 dark:border-pink-600 dark:text-gray dark:focus:ring-blue-500 dark:focus:border-blue-500";
+    const inputClass = "mt-2 bg-gray-50 border border-gray-300 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 dark:bg-pink-100 dark:border-pink-600 dark:text-gray dark:focus:ring-blue-500 dark:focus:border-blue-500";
 
     return (
-        <form onSubmit={handleSubmit} className="max-w-md mx-auto p-4 bg-white shadow-md rounded">
+        <form onSubmit={handleSubmit} className="max-w-md mx-auto mt-6 p-4 bg-white shadow-md rounded">
             <h2 className="text-lg font-bold mb-4">Upload Payment Proof</h2>
             <input type="text" name="fullname" placeholder="Full Name" onChange={handleChange} required className={inputClass} />
             <input type="email" name="email" placeholder="Email" onChange={handleChange} required className={inputClass} />
@@ -110,6 +116,13 @@ const PopUploadForm = () => {
                 ) : (
                     "Submit POP"
                 )}
+            </button>
+            <button
+                className="bg-gray-600 mt-2 p-2 rounded-lg w-full cursor-pointer text-white text-lg hover:bg-blue-500 flex items-center justify-center"
+                onClick={handleBack}
+                type="button"
+            >
+                Back to Dashboard
             </button>
             {message && <p className="text-red-500 text-lg mt-2">{message}</p>}
         </form>

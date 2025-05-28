@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 
 const AttendancePage = () => {
+    
     const [records, setRecords] = useState([]);
     const [search, setSearch] = useState("");
     const [status, setStatus] = useState("");
@@ -12,62 +13,53 @@ const AttendancePage = () => {
     const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(false);
     const [teacherId, setTeacherId] = useState(localStorage.getItem("teacherId"));
-
+    
     const [stats, setStats] = useState({
         present: 0,
         absent: 0,
         late: 0,
     });
+    
+    const fetchAttendance = async () => {
+        try {
+            const res = await axios.get(`https://youngeagles-api-server.up.railway.app/api/attendance/${teacherId}`, {
+                params: {
+                    search,
+                    start,
+                    end,
+                    status,
+                    includeMissing,
+                    groupBy,
+                    page,
+                },
+            });
+    
+            console.log("Fetched attendance response:", res.data);
+    
+            // Extract only the attendance records
+            const records = res.data.data;
+            const pagination = res.data.pagination;
+    
+            setRecords(records);
+            setHasMore(pagination?.has_next || false);
+    
+            setStats({
+                present: records.filter(r => r.status === "present").length,
+                absent: records.filter(r => r.status === "absent").length,
+                late: records.filter(r => r.status === "late").length,
+            });
+        } catch (err) {
+            console.error("Error fetching attendance:", err);
+        }
+    };
+    
+    
 
     useEffect(() => {
         if (teacherId) {
             fetchAttendance();
         }
     }, [page, teacherId, search, start, end, status, includeMissing, groupBy]);
-
-
-    const fetchAttendance = async () => {
-        if (!teacherId) {
-            console.error("No teacher ID found in localStorage.");
-            return;
-        }
-        try {
-            const response = await axios.get(`https://youngeagles-api-server.up.railway.app/api/attendance/${teacherId}`, {
-                params: { search, start, end, page, status, includeMissing, groupBy },
-            });
-
-            console.log("API response:", response.data);
-
-            setRecords(response.data.data || []);
-            setHasMore(
-                response.data && response.data.pagination
-                    ? response.data.pagination.hasMore
-                    : false
-            );
-
-            // Stats
-            const flatRecords = (response.data.data || []).flatMap((item) =>
-                item.records ? item.records : [item]
-            );
-            const newStats = {
-                present: flatRecords.filter((r) => r.status === "present").length,
-                absent: flatRecords.filter((r) => r.status === "absent").length,
-                late: flatRecords.filter((r) => r.late === true).length,
-            };
-            setStatus(newStats);
-        } catch (err) {
-            console.error("Error fetching attendance:", err);
-        }
-    };
-
-    useEffect(() => {
-        if (teacherId) {
-            fetchAttendance();
-        } else {
-            console.error("No teacherId found; skipping attendance fetch.");
-        }
-    }, [page, teacherId]);  // Add teacherId as dependency
-
 
     const handleExport = async () => {
         try {
@@ -83,7 +75,7 @@ const AttendancePage = () => {
                         groupBy,
                         format: "csv",
                     },
-                    responseType: "blob", // for file
+                    responseType: "blob",
                 }
             );
             const blob = new Blob([res.data], { type: "text/csv" });
@@ -114,12 +106,14 @@ const AttendancePage = () => {
                 <input
                     type="date"
                     value={start}
+                    placeholder="Start Date"
                     onChange={(e) => setStart(e.target.value)}
                     className="p-2 border rounded"
                 />
                 <input
                     type="date"
                     value={end}
+                    placeholder="End Date"
                     onChange={(e) => setEnd(e.target.value)}
                     className="p-2 border rounded"
                 />

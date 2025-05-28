@@ -124,7 +124,7 @@ const TeacherAttendance = ({ onBack }) => {
   }
 
   return (
-    <div className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg shadow-md w-full">
+    <div className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg shadow-md">
       <h2 className="text-2xl font-bold mb-4 text-center text-purple-700 dark:text-white">
         Today's Attendance
       </h2>
@@ -137,7 +137,15 @@ const TeacherAttendance = ({ onBack }) => {
           type="date"
           value={date}
           onChange={(e) => setDate(e.target.value)}
-          className="mt-1 p-2 border rounded-md w-full"
+          className="mt-1 p-2 border rounded-md w-full bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400"
+          min="2023-01-01"
+          max={new Date().toISOString().split("T")[0]}
+          data-testid="attendance-date-input"
+          data-cy="attendance-date-input"
+          aria-label="Attendance Date"
+          aria-required="true"
+          aria-describedby="attendance-date-description"
+          id="attendance-date-input"
         />
       </div>
 

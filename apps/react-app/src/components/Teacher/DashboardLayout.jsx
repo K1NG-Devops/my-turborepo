@@ -17,7 +17,7 @@ const DashboardLayout = ({ children, user, onLogout, onUploadPhoto }) => {
         }`}
       >
         <Sidebar
-          user={user}
+          user={parent_id}
           onLogout={onLogout}
           onUploadPhoto={onUploadPhoto}
           closeSidebar={closeSidebar}
@@ -27,7 +27,7 @@ const DashboardLayout = ({ children, user, onLogout, onUploadPhoto }) => {
       {/* Backdrop overlay on mobile */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden"
+          className="fixed inset-0 bg-black bg-opacity-50 z-50 md:hidden"
           onClick={closeSidebar}
         />
       )}

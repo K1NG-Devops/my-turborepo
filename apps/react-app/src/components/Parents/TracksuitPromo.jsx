@@ -2,8 +2,8 @@ import React, { use } from "react";
 import { useState, useEffect } from "react";
 import AOS from "aos";
 
-import winterTracksuit1 from "../assets/track_suit1.png";
-import winterTracksuit2 from "../assets/track_suit2.png";
+import winterTracksuit1 from "../../assets/track_suit1.png";
+import winterTracksuit2 from "../../assets/track_suit2.png";
 
 
 const TracksuitPromo = () => {

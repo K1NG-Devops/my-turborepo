@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import useAuth from '../hooks/useAuth'; // ✅ fix import
+import useAuth from '../hooks/useAuth';
 
 const Login = () => {
-  const { login } = useAuth(); // from custom hook
+  const { login } = useAuth(); 
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -26,8 +26,8 @@ const Login = () => {
 
       const data = response.data;
       login(data); // save to auth context
-      localStorage.setItem('parent_id', data.user.id); // optional, if needed for later requests
-      localStorage.setItem('token', data.token); // optional, if needed for later requests
+      localStorage.setItem('parent_id', data.user.id);
+      localStorage.setItem('accessToken', data.token);
       setSuccessMessage('Login successful!');
       setErrorMessage('');
       navigate('/dashboard');

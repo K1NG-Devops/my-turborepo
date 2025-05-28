@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
-import Sidebar from "../components/Teacher/Sidebar";
+import Sidebar from "../../components/Teacher/Sidebar";
 import { useNavigate } from "react-router-dom";
-import DashboardCard from "../components/Teacher/DashboardCard";
+import DashboardCard from "../../components/Teacher/DashboardCard";
 import {
   FaChalkboardTeacher,
   FaCalendarAlt,
@@ -11,8 +11,8 @@ import {
   FaBars,
   FaTimes,
 } from "react-icons/fa";
-import TeacherChildrenList from "../components/Teacher/TeacherChildrenList";
-import TeacherAttendance from "../components/Teacher/TeacherAttendance";
+import TeacherChildrenList from "../../components/Teacher/TeacherChildrenList";
+import TeacherAttendance from "../../components/Teacher/TeacherAttendance";
 
 const TeacherDashboard = ({ user }) => {
   const [darkMode, setDarkMode] = useState(false);
@@ -50,8 +50,8 @@ const TeacherDashboard = ({ user }) => {
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("teacherId");
     navigate("/login");
   };
 
@@ -163,7 +163,7 @@ const TeacherDashboard = ({ user }) => {
 
       {/* Main Content */}
       <main className="flex-1 md:ml-0 overflow-y-auto p-8 mt-12 md:mt-0">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {showChildren ? (
             <TeacherChildrenList onBack={() => setShowChildren(false)} />
           ) : showAttendance ? (

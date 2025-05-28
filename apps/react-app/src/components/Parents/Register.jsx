@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
-import AuthFormLayout from './AuthFormLayout';
+import AuthFormLayout from '../AuthFormLayout';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -13,7 +13,7 @@ const Register = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (localStorage.getItem('token')) {
+    if (localStorage.getItem('accessToken')) {
       navigate('/dashboard');
     }
   }, [navigate]);
