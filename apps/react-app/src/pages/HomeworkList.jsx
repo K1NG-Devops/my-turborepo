@@ -1,53 +1,65 @@
-import { useLocation } from 'react-router-dom';
-import React, { useEffect, useState } from 'react';
-import HomeworkTile from '../components/Parents/HomeworkTile';
+import { useEffect, useState } from 'react';
+import axios from 'axios';
 
 const HomeworkList = () => {
   const [homeworks, setHomeworks] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const location = useLocation();
-  const params = new URLSearchParams(location.search);
-  const className = params.get('className');
-  const grade = params.get('grade');
+  // Replace with however you store parent ID
+  const parentId = localStorage.getItem('parentId'); 
 
   useEffect(() => {
-    if (!className || !grade) return;
-
     const fetchHomeworks = async () => {
       try {
-        const response = await fetch(
-          `https://youngeagles-api-server.up.railway.app/api/homeworks/list?className=${className}&grade=${grade}`
+        const token = localStorage.getItem('token'); // Or use a context
+        const response = await axios.get(
+          `https://youngeagles-api-server.up.railway.app/api/homeworks/for-parent/${parentId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
         );
-        const data = await response.json();
-
-        if (Array.isArray(data)) {
-          setHomeworks(data);
-        } else {
-          console.error('Expected array, got:', data);
-          setHomeworks([]);
-        }
+        setHomeworks(response.data.homeworks || []);
       } catch (err) {
-        console.error('Error fetching homework:', err);
-        setHomeworks([]);
+        console.error('Error fetching homeworks:', err);
+        setError('Could not load homework list');
       } finally {
         setLoading(false);
       }
     };
 
     fetchHomeworks();
-  }, [className, grade]);
+  }, [parentId]);
 
-  if (loading) return <p>Loading...</p>;
-  if (homeworks.length === 0)
-    return <p>No homework found for {className} / {grade}.</p>;
+  if (loading) return <p>Loading homeworks...</p>;
+  if (error) return <p>{error}</p>;
 
   return (
-    <div className="max-w-3xl mx-auto mt-10">
-      <h1 className="text-2xl font-bold mb-6">📚 Homework List</h1>
-      {homeworks.map(hw => (
-        <HomeworkTile key={hw.id} {...hw} />
-      ))}
+    <div className="p-4">
+      <h2 className="text-xl font-semibold mb-4">Homework List</h2>
+      {homeworks.length === 0 ? (
+        <p>No homework available for your child’s class.</p>
+      ) : (
+        <ul className="space-y-2">
+          {homeworks.map(hw => (
+            <li key={hw.id} className="p-3 border rounded shadow">
+              <h3 className="text-lg font-medium">{hw.title}</h3>
+              <p>Due: {new Date(hw.due_date).toLocaleDateString()}</p>
+              <p>Class: {hw.class_name}</p>
+              <a
+                href={hw.file_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-500 underline"
+              >
+                View Homework
+              </a>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 };

@@ -20,6 +20,7 @@ import TeacherChildrenList from './components/Teacher/TeacherChildrenList';
 import AttendancePage from "./components/Teacher/AttendancePage";
 import AutoLogout from './components/AutoLogout';
 import HomeworkList from './pages/HomeworkList';
+import UploadHomework from './pages/TeacherDashboard/UploadHomework';
 import AOS from 'aos';
 import './App.css';
 
@@ -53,6 +54,7 @@ function App() {
             <Route path="/teacher-dashboard" element={<TeacherDashboard />} />
             <Route path="/view-attendance" element={<AttendancePage />} />
             <Route path="/teacher-children-list" element={<TeacherChildrenList />} />
+            <Route path="/homework/upload" element={<UploadHomework />} />
             <Route path="/register-child" element={<RegisterChild />} />
           </Route>
 

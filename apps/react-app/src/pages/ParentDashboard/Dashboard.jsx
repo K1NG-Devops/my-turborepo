@@ -8,12 +8,14 @@ import AOS from 'aos';
 import 'aos/dist/aos.css';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import HomeworkTile from '../../components/Parents/HomeworkTile';
+import HomeworkList from '../../pages/HomeworkList';
 
 const linkStyles = "block mb-2 px-4 py-2 rounded hover:bg-gray-200 transition-colors duration-200 text-gray-800 hover:text-gray-800";
 const linkStyles2 = "bg-cyan-800 font-bold text-white hover:bg-cyan-700 transition-colors duration-200";
 const linkStylesActive = "bg-pink-500 font-bold text-gray-800";
 
+const className = localStorage.getItem('className') || 'Class 1';
+const grade = localStorage.getItem('grade') || 'Grade 1';
 
 const Dashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -25,22 +27,7 @@ const Dashboard = () => {
 
   const [homeworkList, setHomeworkList] = useState([]);
 
-  useEffect(() => {
-    const fetchHomeworks = async () => {
-      try {
-        const response = await fetch(`https://youngeagles-api-server.up.railway.app/api/homeworks/list?className=${className}&grade=${grade}`
-        );
-        const data = await response.json();
-        setHomeworkList(data);
-      } catch (err) {
-        console.error("Failed to fetch homework:", err);
-      }
-    };
-
-    fetchHomeworks();
-  }, []);
-
-
+  
   useEffect(() => {
     AOS.init({
       duration: 1000,
@@ -296,7 +283,8 @@ const Dashboard = () => {
             label="Homework"
             icon={<FaBook />}
             color="bg-yellow-200"
-            to="/student/homeworks"
+            to={`/student/homework?className=${encodeURIComponent(className)}&grade=${encodeURIComponent(grade)}`}
+
             isActive={true}
           />
           <DashboardTile
@@ -360,6 +348,8 @@ const Dashboard = () => {
             />
           ))}
         </div>
+
+        <HomeworkList />
 
       </main>
     </>

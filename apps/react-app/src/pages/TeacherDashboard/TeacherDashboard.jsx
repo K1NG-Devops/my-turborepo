@@ -98,10 +98,11 @@ const TeacherDashboard = ({ user }) => {
       bgColor: "bg-green-200",
     },
     {
-      title: "Child Photos",
-      icon: <FaCamera size={48} className="text-yellow-700" />,
-      description: "Upload and manage child photos",
-      bgColor: "bg-yellow-200",
+      title: "Post Homework",
+      icon: <FaFileUpload size={48} className="text-orange-700" />,
+      description: "Post homework assignments for students",
+      bgColor: "bg-orange-200",
+      onClick: () => navigate("/homework/upload"),
     },
     {
       title: "My Children",
