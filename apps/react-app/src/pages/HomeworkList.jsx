@@ -14,7 +14,7 @@ const HomeworkList = () => {
       try {
         const token = localStorage.getItem('accessToken'); // Or use a context
         const response = await axios.get(
-          `https://youngeagles-api-server.up.railway.app/api/for-parent/${parent_id}`,
+          `https://youngeagles-api-server.up.railway.app/api/homeworks/for-parent/${parent_id}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
