@@ -7,14 +7,14 @@ const HomeworkList = () => {
   const [error, setError] = useState(null);
 
   // Replace with however you store parent ID
-  const parentId = localStorage.getItem('parentId'); 
+  const parent_id = localStorage.getItem('parent_id'); 
 
   useEffect(() => {
     const fetchHomeworks = async () => {
       try {
-        const token = localStorage.getItem('token'); // Or use a context
+        const token = localStorage.getItem('accessToken'); // Or use a context
         const response = await axios.get(
-          `https://youngeagles-api-server.up.railway.app/api/homeworks/for-parent/${parentId}`,
+          `https://youngeagles-api-server.up.railway.app/api/for-parent/${parent_id}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -31,7 +31,7 @@ const HomeworkList = () => {
     };
 
     fetchHomeworks();
-  }, [parentId]);
+  }, [parent_id]);
 
   if (loading) return <p>Loading homeworks...</p>;
   if (error) return <p>{error}</p>;
