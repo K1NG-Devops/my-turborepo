@@ -11,7 +11,9 @@ const TeacherUploadHomework = () => {
         dueDate: "",
         className: "",
         grade: "",
+        instructions: "",
     });
+    
 
     const [file, setFile] = useState(null);
     const [uploading, setUploading] = useState(false);
@@ -21,9 +23,33 @@ const TeacherUploadHomework = () => {
     useEffect(() => {
         if (!teacherId) {
             navigate("/login");
-        }
-    }, [teacherId]);
+        } else {
+            const fetchTeacherInfo = async () => {
+                try {
+                    const token = localStorage.getItem("accessToken");
 
+                    const res = await axios.get(
+                        `https://youngeagles-api-server.up.railway.app/api/teachers/${teacherId}`,
+                        {
+                            headers: {
+                                Authorization: `Bearer ${token}`,
+                            },
+                        }
+                    );
+                    const { className, grade } = res.data.teacher;
+                    setFormData((prev) => ({
+                        ...prev,
+                        className,
+                        grade,
+                    }));
+                } catch (error) {
+                    console.error("Error fetching teacher info", error);
+                }
+            };
+            fetchTeacherInfo();
+        }
+    }, [teacherId, navigate]);
+ 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
@@ -35,30 +61,40 @@ const TeacherUploadHomework = () => {
     const handleUpload = async (e) => {
         e.preventDefault();
         if (!file) return alert("Select a file first!");
-
+    
         try {
             setUploading(true);
-
+    
             const fileRef = ref(storage, `homeworks/${Date.now()}-${file.name}`);
             await uploadBytes(fileRef, file);
             const fileUrl = await getDownloadURL(fileRef);
-
-            // Submit data to backend
+    
             const token = localStorage.getItem("accessToken");
+    
+            const homeworkData = {
+                ...formData,
+                className: formData.className || "N/A",
+                grade: formData.grade || "N/A",
+                id: uuidv4(),
+                uploadedBy: teacherId,
+                fileUrl,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                status: "pending",
+                feedback: "",
+                feedbackGivenBy: "",
+            };
+    
             await axios.post(
                 "https://youngeagles-api-server.up.railway.app/api/homeworks/upload",
-                {
-                    ...formData,
-                    uploadedBy: teacherId,
-                    fileUrl,
-                },
+                homeworkData,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
                 }
             );
-
+    
             alert("Homework uploaded!");
             navigate("/teacher-dashboard");
         } catch (error) {
@@ -68,6 +104,10 @@ const TeacherUploadHomework = () => {
             setUploading(false);
         }
     };
+
+    // if (!formData.className || !formData.grade) {
+    //     return <div className="text-center mt-20">Loading teacher info...</div>;
+    // }    
 
     return (
         <div className="p-6 max-w-xl mx-auto mt-12 bg-white shadow-lg rounded-2xl">
@@ -97,7 +137,7 @@ const TeacherUploadHomework = () => {
                     className="w-full p-3 border rounded-md"
                     value={formData.className}
                     onChange={handleChange}
-                    required
+                    readOnly
                 />
                 <input
                     type="text"
@@ -105,6 +145,14 @@ const TeacherUploadHomework = () => {
                     placeholder="Grade"
                     className="w-full p-3 border rounded-md"
                     value={formData.grade}
+                    onChange={handleChange}
+                    readOnly
+                />
+                <textarea
+                    name="instructions"
+                    placeholder="Instructions"
+                    className="w-full p-3 border rounded-md h-24"
+                    value={formData.instructions}
                     onChange={handleChange}
                     required
                 />
