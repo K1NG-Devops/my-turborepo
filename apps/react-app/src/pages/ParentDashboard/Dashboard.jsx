@@ -27,7 +27,7 @@ const Dashboard = () => {
 
   const [homeworkList, setHomeworkList] = useState([]);
 
-  
+
   useEffect(() => {
     AOS.init({
       duration: 1000,
@@ -202,6 +202,15 @@ const Dashboard = () => {
                 </li>
                 <li>
                   <Link
+                    to="/submit-work"
+                    className={`${linkStyles} ${location.pathname === '/submit-work' ? linkStyles2 : ''}`}
+                  >
+                    📤 Submit Work
+                  </Link>
+                </li>
+
+                <li>
+                  <Link
                     to="/resources"
                     className={`${linkStyles} ${location.pathname === '/dashboard' ? linkStyles2 : ''}`}
                     data-aos="fade-right"
@@ -288,11 +297,11 @@ const Dashboard = () => {
             isActive={true}
           />
           <DashboardTile
-            label="Attendance"
-            icon={<FaCalendarCheck />}
-            color="bg-green-200"
-            to="/attendance"
-            isActive={false}
+            label="Submit Work"
+            icon={<FaClipboardList />}
+            color="bg-orange-300"
+            to="/submit-work"
+            isActive={true}
           />
           <DashboardTile
             label="Resources"

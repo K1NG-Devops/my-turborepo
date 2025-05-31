@@ -21,6 +21,8 @@ import AttendancePage from "./components/Teacher/AttendancePage";
 import AutoLogout from './components/AutoLogout';
 import HomeworkList from './pages/HomeworkList';
 import UploadHomework from './pages/TeacherDashboard/UploadHomework';
+import SubmitWork from './pages/ParentDashboard/SubmitWork';
+import { Toaster } from 'sonner';
 import AOS from 'aos';
 import './App.css';
 
@@ -29,6 +31,28 @@ function App() {
   return (
     <Router>
       <AutoLogout>
+        <Toaster
+          position="top-right"
+          richColors
+          closeButton
+          toastOptions={{
+            success: {
+              className: 'bg-green-500 text-white',
+              style: {
+                backgroundColor: '#4CAF50',
+                color: '#fff',
+              },
+            },
+            error: {
+              className: 'bg-red-500 text-white',
+              style: {
+                backgroundColor: '#F44336',
+                color: '#fff',
+              },
+            },
+          }}
+          expand
+        />
         <Routes>
           {/* Public Layout */}
           <Route element={<Layout />}>
@@ -47,6 +71,7 @@ function App() {
             <Route path="/popupload" element={<PopUploadForm />} />
             <Route path="/notifications" element={<Notifications />} />
             <Route path="/student/homework" element={<HomeworkList />} />
+            <Route path="/submit-work" element={<SubmitWork />} />
             <Route path="/lessons" element={<Lessons />} />
             <Route path="/resources" element={<Resources />} />
             <Route path="/videos" element={<Videos />} />
