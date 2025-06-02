@@ -73,6 +73,9 @@ const TeacherUploadHomework = () => {
     
             const homeworkData = {
                 ...formData,
+                title: formData.title || "Untitled Homework",
+                dueDate: formData.dueDate || new Date().toISOString().split("T")[0],
+                instructions: formData.instructions || "No instructions provided",
                 className: formData.className || "N/A",
                 grade: formData.grade || "N/A",
                 id: uuidv4(),
