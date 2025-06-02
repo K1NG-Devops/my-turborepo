@@ -24,7 +24,8 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { auth } = useAuth();
-
+  const [children, setChildren] = useState([]);
+  const [selectedChild, setSelectedChild] = useState('');
   const [homeworkList, setHomeworkList] = useState([]);
 
 
@@ -189,17 +190,17 @@ const Dashboard = () => {
                     Dashboard
                   </Link>
                 </li>
-                <li>
-                  <Link
-                    to="/attendance"
-                    className={`${linkStyles} ${location.pathname === '/dashboard' ? linkStyles2 : ''
-                      }`}
-                    data-aos="fade-right"
-                    data-aos-duration="500"
-                  >
-                    📅 Attendance
-                  </Link>
-                </li>
+                <select
+                  className="w-full p-2 border rounded bg-white text-black"
+                  onChange={(e) => setSelectedChild(e.target.value)}
+                >
+                  <option value="">Select a child</option>
+                  {children.map((child) => (
+                    <option key={child.id} value={child.id}>
+                      {child.name}
+                    </option>
+                  ))}
+                </select>
                 <li>
                   <Link
                     to="/submit-work"

@@ -11,11 +11,21 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Card, CardContent, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { toast } from 'sonner';
+import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
+import { storage } from '../../firebase';
 
 const HomeworkList = () => {
   const [homeworks, setHomeworks] = useState([]);
   const [previewUrl, setPreviewUrl] = useState('');
   const [loading, setLoading] = useState(true);
+  const [file, setFile] = useState(null);
+  const [comment, setComment] = useState('');
+  const [uploading, setUploading] = useState(false);
+  const [selectedHomework, setSelectedHomework] = useState(null);
 
   const parent_id = localStorage.getItem('parent_id');
   const token = localStorage.getItem('accessToken');
@@ -23,7 +33,7 @@ const HomeworkList = () => {
   useEffect(() => {
     const fetchHomeworks = async () => {
       try {
-        const response = await axios.get(
+        const res = await axios.get(
           `https://youngeagles-api-server.up.railway.app/api/homeworks/for-parent/${parent_id}`,
           {
             headers: {
@@ -31,16 +41,72 @@ const HomeworkList = () => {
             },
           }
         );
-        setHomeworks(response.data.homeworks || []);
+
+        console.log("Homework data:", res.data); // inspect structure
+
+        // Use the correct path based on actual structure
+        const hwList = Array.isArray(res.data) ? res.data : res.data.homeworks || [];
+
+        setHomeworks(hwList);
       } catch (err) {
         console.error('Error loading homeworks:', err);
       } finally {
         setLoading(false);
       }
     };
-
     fetchHomeworks();
   }, [parent_id]);
+
+  const handleFileChange = (e) => setFile(e.target.files[0]);
+
+  const handleSubmitWork = async () => {
+    if (!file || !selectedHomework) {
+      toast.error('Please select a file and homework.');
+      return;
+    }
+
+    try {
+      setUploading(true);
+      const storageRef = ref(storage, `submissions/${file.name}`);
+      const uploadTask = uploadBytesResumable(storageRef, file);
+
+      uploadTask.on(
+        'state_changed',
+        null,
+        (error) => {
+          toast.error('Upload failed: ' + error.message);
+          setUploading(false);
+        },
+        async () => {
+          const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+
+          await axios.post(
+            'https://youngeagles-api-server.up.railway.app/api/submissions',
+            {
+              homeworkId: selectedHomework.id,
+              fileURL: downloadURL,
+              comment,
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
+          toast.success('Homework submitted successfully.');
+          setFile(null);
+          setComment('');
+          setSelectedHomework(null);
+        }
+      );
+    } catch (err) {
+      toast.error('Submission error.');
+      console.error(err);
+    } finally {
+      setUploading(false);
+    }
+  };
 
   if (loading) return <p className="text-center py-4">Loading homework...</p>;
   if (!parent_id) return <p className="text-center py-4">Please log in to view homework.</p>;
@@ -56,48 +122,99 @@ const HomeworkList = () => {
             <Card key={hw.id} className="w-72 shadow-lg m-2 border border-gray-200">
               <CardContent className="p-4">
                 <CardTitle className="text-lg font-semibold mb-2">{hw.title}</CardTitle>
-                <p className="text-sm text-muted-foreground mb-1">Class: {hw.className}</p>
+                {hw.className && (
+                  <p className="text-sm text-muted-foreground mb-1">Class: {hw.className}</p>
+                )}
                 <p className="text-sm text-muted-foreground mb-1">Due: {new Date(hw.dueDate).toLocaleDateString()}</p>
                 <p className={`text-sm ${hw.submitted ? "text-green-600" : "text-red-600"}`}>
                   {hw.submitted ? "Submitted" : "Not Submitted"}
                 </p>
-                  <p className="mt-2 text-gray-700">{hw.description}</p>
+                <p className="mt-2 text-gray-700">{hw.description}</p>
 
-                  <div className="mt-4 flex gap-3">
-                    {hw.file_url ? (
-                      <>
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <Button variant="outline" onClick={() => setPreviewUrl(hw.file_url)}>
-                              Preview
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent className="sm:max-w-3xl">
-                            <DialogHeader>
-                              <DialogTitle>{hw.title} - Preview</DialogTitle>
-                            </DialogHeader>
-                            <div className="w-full h-[75vh] overflow-hidden">
-                              <iframe
-                                src={previewUrl}
-                                title="Preview"
-                                className="w-full h-full border rounded"
-                              ></iframe>
+                <div className="mt-4 flex flex-wrap gap-3">
+                  {hw.file_url ? (
+                    <>
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button className={"hover:bg-pink-600 hover:text-white"} variant="outline" onClick={() => setPreviewUrl(hw.file_url)}>
+                            Preview
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-3xl">
+                          <DialogHeader>
+                            <DialogTitle>{hw.title} - Preview</DialogTitle>
+                          </DialogHeader>
+                          <div className="w-full h-[75vh] overflow-hidden">
+                            <iframe
+                              src={previewUrl}
+                              title="Preview"
+                              className="w-full h-full border rounded"
+                            ></iframe>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+
+                      <a href={hw.file_url} target="_blank" rel="noopener noreferrer">
+                        <Button>Download</Button>
+                      </a>
+                      <Button
+                        variant="destructive"
+                        onClick={async () => {
+                          try {
+                            await axios.delete(`https://youngeagles-api-server.up.railway.app/api/submissions/${hw.id}`, {
+                              headers: {
+                                Authorization: `Bearer ${token}`,
+                              },
+                              data: {
+                                homeworkId: hw.id,
+                              },
+                            });
+                            toast.success('Submission deleted successfully.');
+                          } catch (err) {
+                            toast.error('Error deleting submission.');
+                            console.error(err);
+                          }
+                        }
+                      }>
+                        Delete Submission
+                      </Button>
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button onClick={() => setSelectedHomework(hw)}>Submit Work</Button>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-lg">
+                          <DialogHeader>
+                            <DialogTitle>Submit Work for: {hw.title}</DialogTitle>
+                          </DialogHeader>
+                          <div className="space-y-4">
+                            <div>
+                              <Label htmlFor="comment">Comment (optional)</Label>
+                              <Textarea
+                                placeholder="Add notes for the teacher..."
+                                value={comment}
+                                onChange={(e) => setComment(e.target.value)}
+                              />
                             </div>
-                          </DialogContent>
-                        </Dialog>
+                            <div>
+                              <Label htmlFor="file">Upload File</Label>
+                              <Input
+                                type="file"
+                                accept="image/*,application/pdf,video/*"
+                                onChange={handleFileChange}
+                              />
+                            </div>
+                            <Button onClick={handleSubmitWork} disabled={uploading}>
+                              {uploading ? 'Uploading...' : 'Submit'}
+                            </Button>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                    </>
+                  ) : (
+                    <p className="text-gray-500 italic">No file attached</p>
+                  )}
 
-                        <a
-                          href={hw.file_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <Button>Download</Button>
-                        </a>
-                      </>
-                    ) : (
-                      <p className="text-gray-500 italic">No file attached</p>
-                    )}
-                  </div>
+                </div>
               </CardContent>
             </Card>
           ))
