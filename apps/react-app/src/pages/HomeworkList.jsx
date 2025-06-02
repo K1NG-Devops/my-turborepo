@@ -122,12 +122,12 @@ const HomeworkList = () => {
   return (
     <div className="w-full bg-slate-300 mx-auto px-4 py-6">
       <h2 className="text-2xl font-semibold text-center mb-6">Homework List</h2>
-      <div className="w-full mx-auto grid md:grid-cols-2 gap-6 lg:grid-cols-3 xl:grid-cols-4">
+      <div className="w-full bg-green-700 grid lg:grid-cols-2 justify-center">
         {homeworks.length === 0 ? (
           <p className="text-center text-gray-500">No homework available.</p>
         ) : (
           homeworks.map((hw) => (
-            <Card key={hw.id} className="w-72 shadow-lg m-2 border border-gray-200">
+            <Card key={hw.id} className="w-100 px-4 flex flex-row shadow-lg m-2 border border-gray-200">
               <CardContent className="p-4">
                 <CardTitle className="text-lg font-semibold mb-2">{hw.title}</CardTitle>
                 {hw.className && (
