@@ -42,13 +42,10 @@ const HomeworkList = () => {
           }
         );
 
-        console.log("Homework data:", res.data); // inspect structure
-
-        // Use the correct path based on actual structure
         const hwList = Array.isArray(res.data) ? res.data : res.data.homeworks || [];
-
         setHomeworks(hwList);
       } catch (err) {
+        toast.error('Failed to load homework.');
         console.error('Error loading homeworks:', err);
       } finally {
         setLoading(false);
@@ -67,7 +64,8 @@ const HomeworkList = () => {
 
     try {
       setUploading(true);
-      const storageRef = ref(storage, `submissions/${file.name}`);
+      const filePath = `submissions/${selectedHomework.id}/${file.name}`;
+      const storageRef = ref(storage, filePath);
       const uploadTask = uploadBytesResumable(storageRef, file);
 
       uploadTask.on(
@@ -78,26 +76,36 @@ const HomeworkList = () => {
           setUploading(false);
         },
         async () => {
-          const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+          try {
+            const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
 
-          await axios.post(
-            'https://youngeagles-api-server.up.railway.app/api/submissions',
-            {
-              homeworkId: selectedHomework.id,
-              fileURL: downloadURL,
-              comment,
-            },
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
+            await axios.post(
+              'https://youngeagles-api-server.up.railway.app/api/submissions',
+              {
+                homeworkId: selectedHomework.id,
+                fileURL: downloadURL,
+                comment,
               },
-            }
-          );
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              }
+            );
 
-          toast.success('Homework submitted successfully.');
-          setFile(null);
-          setComment('');
-          setSelectedHomework(null);
+            toast.success('Homework submitted successfully.');
+            setFile(null);
+            setComment('');
+            setSelectedHomework(null);
+
+            const updatedHomeworks = homeworks.map((hw) =>
+              hw.id === selectedHomework.id ? { ...hw, submitted: true } : hw
+            );
+            setHomeworks(updatedHomeworks);
+          } catch (err) {
+            toast.error('Submission upload succeeded but saving failed.');
+            console.error(err);
+          }
         }
       );
     } catch (err) {
@@ -108,8 +116,8 @@ const HomeworkList = () => {
     }
   };
 
-  if (loading) return <p className="text-center py-4">Loading homework...</p>;
   if (!parent_id) return <p className="text-center py-4">Please log in to view homework.</p>;
+  if (loading) return <p className="text-center py-4">Loading homework...</p>;
 
   return (
     <div className="w-full bg-slate-300 mx-auto px-4 py-6">
@@ -125,95 +133,110 @@ const HomeworkList = () => {
                 {hw.className && (
                   <p className="text-sm text-muted-foreground mb-1">Class: {hw.className}</p>
                 )}
-                <p className="text-sm text-muted-foreground mb-1">Due: {new Date(hw.dueDate).toLocaleDateString()}</p>
-                <p className={`text-sm ${hw.submitted ? "text-green-600" : "text-red-600"}`}>
-                  {hw.submitted ? "Submitted" : "Not Submitted"}
+                <p className="text-sm text-muted-foreground mb-1">Due: {new Date(hw.dueDate).toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                })}</p>
+                <p className={`text-sm ${hw.submitted ? 'text-green-600' : 'text-red-600'}`}>
+                  {hw.submitted ? 'Submitted' : 'Not Submitted'}
                 </p>
-                <p className="mt-2 text-gray-700">{hw.description}</p>
+                <p className="mt-2 text-gray-700 whitespace-pre-line">{hw.description}</p>
 
-                <div className="mt-4 flex flex-wrap gap-3">
+                <div className="mt-4 flex flex-col gap-3">
                   {hw.file_url ? (
                     <>
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <Button className={"hover:bg-pink-600 hover:text-white"} variant="outline" onClick={() => setPreviewUrl(hw.file_url)}>
-                            Preview
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent className="sm:max-w-3xl">
-                          <DialogHeader>
-                            <DialogTitle>{hw.title} - Preview</DialogTitle>
-                          </DialogHeader>
-                          <div className="w-full h-[75vh] overflow-hidden">
-                            <iframe
-                              src={previewUrl}
-                              title="Preview"
-                              className="w-full h-full border rounded"
-                            ></iframe>
-                          </div>
-                        </DialogContent>
-                      </Dialog>
-
-                      <a href={hw.file_url} target="_blank" rel="noopener noreferrer">
-                        <Button>Download</Button>
-                      </a>
-                      <Button
-                        variant="destructive"
-                        onClick={async () => {
-                          try {
-                            await axios.delete(`https://youngeagles-api-server.up.railway.app/api/submissions/${hw.id}`, {
-                              headers: {
-                                Authorization: `Bearer ${token}`,
-                              },
-                              data: {
-                                homeworkId: hw.id,
-                              },
-                            });
-                            toast.success('Submission deleted successfully.');
-                          } catch (err) {
-                            toast.error('Error deleting submission.');
-                            console.error(err);
-                          }
-                        }
-                      }>
-                        Delete Submission
-                      </Button>
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <Button onClick={() => setSelectedHomework(hw)}>Submit Work</Button>
-                        </DialogTrigger>
-                        <DialogContent className="sm:max-w-lg">
-                          <DialogHeader>
-                            <DialogTitle>Submit Work for: {hw.title}</DialogTitle>
-                          </DialogHeader>
-                          <div className="space-y-4">
-                            <div>
-                              <Label htmlFor="comment">Comment (optional)</Label>
-                              <Textarea
-                                placeholder="Add notes for the teacher..."
-                                value={comment}
-                                onChange={(e) => setComment(e.target.value)}
-                              />
-                            </div>
-                            <div>
-                              <Label htmlFor="file">Upload File</Label>
-                              <Input
-                                type="file"
-                                accept="image/*,application/pdf,video/*"
-                                onChange={handleFileChange}
-                              />
-                            </div>
-                            <Button onClick={handleSubmitWork} disabled={uploading}>
-                              {uploading ? 'Uploading...' : 'Submit'}
+                      <div className="flex flex-wrap gap-2">
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button
+                              className="hover:bg-pink-600 hover:text-white"
+                              variant="outline"
+                              onClick={() => setPreviewUrl(hw.file_url)}
+                            >
+                              Preview
                             </Button>
-                          </div>
-                        </DialogContent>
-                      </Dialog>
+                          </DialogTrigger>
+                          <DialogContent className="sm:max-w-3xl" aria-describedby="preview-description">
+                            <DialogHeader>
+                              <DialogTitle>{hw.title} - Preview</DialogTitle>
+                            </DialogHeader>
+                            <div className="w-full h-[75vh] overflow-hidden">
+                              <iframe
+                                src={previewUrl}
+                                title="Preview"
+                                className="w-full h-full border rounded"
+                              ></iframe>
+                            </div>
+                          </DialogContent>
+                        </Dialog>
+
+                        <a href={hw.file_url} target="_blank" rel="noopener noreferrer">
+                          <Button>Download</Button>
+                        </a>
+                      </div>
+
+                      <div className="flex flex-wrap gap-2">
+                        <Button
+                          variant="destructive"
+                          onClick={async () => {
+                            try {
+                              await axios.delete(`https://youngeagles-api-server.up.railway.app/api/submissions/${hw.id}`, {
+                                headers: { Authorization: `Bearer ${token}` },
+                                data: { homeworkId: hw.id },
+                              });
+                              toast.success('Submission deleted successfully.');
+                              setHomeworks((prev) => prev.map((h) => h.id === hw.id ? { ...h, submitted: false } : h));
+                            } catch (err) {
+                              toast.error('Error deleting submission.');
+                              console.error(err);
+                            }
+                          }}
+                        >
+                          Delete Submission
+                        </Button>
+
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button
+                              className="bg-green-600 hover:bg-green-700 text-white"
+                              onClick={() => setSelectedHomework(hw)}
+                            >
+                              Submit Work
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="sm:max-w-lg">
+                            <DialogHeader>
+                              <DialogTitle>Submit Work for: {hw.title}</DialogTitle>
+                            </DialogHeader>
+                            <div className="space-y-4">
+                              <div>
+                                <Label htmlFor="comment">Comment (optional)</Label>
+                                <Textarea
+                                  placeholder="Add notes for the teacher..."
+                                  value={comment}
+                                  onChange={(e) => setComment(e.target.value)}
+                                />
+                              </div>
+                              <div>
+                                <Label htmlFor="file">Upload File</Label>
+                                <Input
+                                  type="file"
+                                  accept="image/*,application/pdf,video/*"
+                                  onChange={handleFileChange}
+                                />
+                              </div>
+                              <Button onClick={handleSubmitWork} disabled={uploading}>
+                                {uploading ? 'Uploading...' : 'Submit'}
+                              </Button>
+                            </div>
+                          </DialogContent>
+                        </Dialog>
+                      </div>
                     </>
                   ) : (
                     <p className="text-gray-500 italic">No file attached</p>
                   )}
-
                 </div>
               </CardContent>
             </Card>
