@@ -1,22 +1,18 @@
+// useRedirect.js
 import { useNavigate } from 'react-router-dom';
-import { useCallback } from 'react';
 
 function useRedirect() {
   const navigate = useNavigate();
 
-  const redirect = useCallback((url, delay = 0) => {
-    if (delay > 0) {
-      setTimeout(() => {
-        navigate(url);
-      }, delay);
-    } else {
-      navigate(url);
-    }
-  }, [navigate]);
-
-  return redirect;
+  return (path, delay = 0) => {
+    setTimeout(() => {
+      if (path.startsWith('http')) {
+        window.location.href = path;
+      } else {
+        navigate(path);
+      }
+    }, delay);
+  };
 }
 
 export default useRedirect;
-
-

@@ -4,9 +4,18 @@ import { GiHamburgerMenu } from "react-icons/gi";
 import { RiCloseCircleFill } from "react-icons/ri";
 import logo from "../assets/logo.jpg";
 import useRedirect from "../hooks/useRedirect";
+import { motion, AnimatePresence } from "framer-motion";
+
+const links = [
+  { to: "/home", label: "Home" },
+  { to: "/programs", label: "Programs" },
+  { to: "/dashboard", label: "Dashboard" },
+  { to: "/popupload", label: "Upload POP", highlight: true },
+];
 
 const styles = {
-  link: "hover:text-white hover:bg-pink-500 transition-colors duration-700 px-2 py-1 rounded-lg",
+  link: "text-blue-800 font-medium hover:text-white hover:bg-pink-500 px-4 py-2 rounded-full transition-all duration-500",
+  highlight: "bg-pink-500 text-white px-4 py-2 rounded-full font-semibold hover:bg-pink-600 transition",
 };
 
 function Navbar() {
@@ -14,64 +23,100 @@ function Navbar() {
   const redirect = useRedirect();
 
   const toggleMenu = () => setIsMenuOpen(!IsMenuOpen);
-  const handleRedirect = (path) => redirect(path, 2000);
+
+  const handleRedirect = (path) => {
+    if (IsMenuOpen) toggleMenu();
+    redirect(path, 2000);
+  };
 
   return (
-    <nav className="navbar top-0 md:sticky left-0 w-full bg-gray-100 text-base-content shadow-md md:bg-slate-50">
-      <div className="w-full max-w-7xl mx-auto px-4 flex items-center justify-between py-3">
-        <Link to="/home" className="text-2xl font-bold text-pink-700 dark:text-pink-500 flex items-center gap-2">
-          <img src={logo} alt="Young Eagles Logo" className="h-12 w-12 rounded-full" />
+    <nav className="fixed w-full top-0 z-100 bg-white shadow-md backdrop-blur-md bg-opacity-80">
+      <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+        {/* Logo */}
+        <Link to="/home" className="flex items-center gap-3 text-xl font-bold text-pink-600">
+          <img src={logo} alt="Young Eagles Logo" className="h-10 w-10 rounded-full shadow-sm" />
           Young Eagles
         </Link>
-        {/* Desktop Nav */}
-        <ul className="flex gap-x-4 hidden md:flex">
-          <li><Link to="/" className={styles.link}>Home</Link></li>
-          <li><Link to="/programs" className={styles.link}>Programs</Link></li>
 
-          <li
-            onClick={() => {
-              toggleMenu();
-              setTimeout(() => {
-                window.location.href = "/projects";
-              }, 2000);
-            }}
-            className={`${styles.link} cursor-pointer`}
-          >
-            Projects
-          </li>
-
-          <li><Link to="/dashboard" className={`${styles.link} cursor-pointer`}>Dashboard</Link></li>
-          
-          <li><Link to="/popupload" className={`${styles.link} bg-pink-500`}>Upload POP</Link></li>
-        </ul>
-        <div className="cursor-pointer md:hidden" aria-label="Toggle Menu">
-          {IsMenuOpen ? (
-            <RiCloseCircleFill className="h-6 w-6" onClick={toggleMenu} />
-          ) : (
-            <GiHamburgerMenu className="h-6 w-6" onClick={toggleMenu} />
+        {/* Desktop Menu */}
+        <ul className="hidden md:flex items-center gap-4 ">
+          {links.map((link, i) =>
+            link.isRedirect ? (
+              <li key={i} onClick={() => handleRedirect(link.to)} className="cursor-pointer">
+                <span className={styles.link}>{link.label}</span>
+              </li>
+            ) : (
+              <li key={i}>
+                <Link
+                  to={link.to}
+                  className={link.highlight ? styles.highlight : styles.link}
+                >
+                  {link.label}
+                </Link>
+              </li>
+            )
           )}
+        </ul>
+
+        {/* Mobile Toggle */}
+        <div
+          className="sticky  right-4 z-[100] md:hidden bg-white p-2 rounded-full shadow-md"
+          onClick={toggleMenu}
+        >
+          {IsMenuOpen ? <RiCloseCircleFill className="text-pink-600 text-2xl" /> : <GiHamburgerMenu className="text-pink-600 text-2xl" />}
         </div>
       </div>
-      {/* Mobile Nav */}
-      {IsMenuOpen && (
-        <ul className="md:hidden flex flex-col gap-y-6 text-center pb-4">
-          <li><Link to="/home" className={`${styles.link} block`} onClick={toggleMenu}>Home</Link></li>
-          <li><Link to="/programs" className={`${styles.link} block`} onClick={toggleMenu}>Programs</Link></li>
-          <li
-            onClick={() => {
-              toggleMenu();
-              setTimeout(() => {
-                window.location.href = "/projects"; // or full Angular app URL
-              }, 2000); // 2000ms = 2 seconds
-            }}
-            className={`${styles.link} block`}
-          >
-            Projects
-          </li>          
-          <li><Link to='/dashboard' className={`${styles.link} block`} onClick={toggleMenu}>Dashboard</Link></li>
-          <li><Link to="/popupload" className={`${styles.link} block bg-pink-500`} onClick={toggleMenu}>Upload POP</Link></li>
-        </ul>
-      )}
+
+      {/* Mobile Menu */}
+      <AnimatePresence>
+        {IsMenuOpen && (
+          <>
+            {/* Background overlay */}
+            <motion.div
+              className="fixed inset-0 bg-white bg-opacity-40 z-40"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={toggleMenu} // Close menu when clicking outside
+            />
+
+            {/* Slide-in Sidebar */}
+            <motion.div
+              className="fixed top-0 left-0 w-2/3 max-w-sm h-screen bg-white z-50 shadow-lg"
+              initial={{ x: "-100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "-100%" }}
+              transition={{ type: "tween", duration: 0.3 }}
+              onClick={(e) => e.stopPropagation()} // Prevent click propagation to the overlay
+            >
+              <ul className="flex flex-col gap-y-6 p-6 mt-10 text-center">
+                {links.map((link, i) => (
+                  <motion.li
+                    key={i}
+                    initial={{ x: 50, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: 0.1 * (i + 1) }}
+                    className="cursor-pointer w-full"
+                    onClick={() =>
+                      link.isRedirect
+                        ? handleRedirect(link.to)
+                        : toggleMenu()
+                    }
+                  >
+                    {link.isRedirect ? (
+                      <span className={styles.link}>{link.label}</span>
+                    ) : (
+                      <Link to={link.to} className={link.highlight ? styles.highlight : styles.link}>
+                        {link.label}
+                      </Link>
+                    )}
+                  </motion.li>
+                ))}
+              </ul>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </nav>
   );
 }

@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import useAuth from '../hooks/useAuth'; // ✅ fix import
+import useAuth from '../hooks/useAuth';
 
 const Login = () => {
-  const { login } = useAuth(); // from custom hook
+  const { login } = useAuth(); 
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -26,7 +26,8 @@ const Login = () => {
 
       const data = response.data;
       login(data); // save to auth context
-      localStorage.setItem('token', data.token); // optional, if needed for later requests
+      localStorage.setItem('parent_id', data.user.id);
+      localStorage.setItem('accessToken', data.token);
       setSuccessMessage('Login successful!');
       setErrorMessage('');
       navigate('/dashboard');
@@ -90,10 +91,9 @@ const Login = () => {
         <div className="mt-6 text-sm text-gray-700 dark:text-gray-300 bg-white/80 dark:bg-gray-700/80 p-4 rounded">
           <p className="text-center mb-2">Are you logging in as:</p>
           <ul className="space-y-1">
-            <li className="text-center"><a href="/student/login" className="text-blue-500">Student</a></li>
-            <li className="text-center"><a href="/teacher/login" className="text-blue-500">Teacher</a></li>
-            <li className="text-center"><a href="/admin/login" className="text-blue-500">School Admin</a></li>
             <li className="text-center"><a href="/principal/login" className="text-blue-500">Principal</a></li>
+            <li className="text-center"><a href="/teacher/login" className="text-blue-500">Teacher</a></li>
+            <li className="text-center"><a href="/admin/login" className="text-blue-500">Admin</a></li>
           </ul>
           <p className="text-center">
             <a href="/home" className="text-white-600">Back to Home</a>

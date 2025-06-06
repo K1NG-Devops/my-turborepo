@@ -6,4 +6,9 @@
 @tailwind components;
 @tailwind utilities;
 
+.event-day-highlight {
+  background: #2563eb !important;
+  color: #fff !important;
+  border-radius: 50%;
+}
 
