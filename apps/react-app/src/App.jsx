@@ -24,6 +24,8 @@ import UploadHomework from './pages/TeacherDashboard/UploadHomework';
 import SubmitWork from './pages/ParentDashboard/SubmitWork';
 import { Toaster } from 'sonner';
 import AOS from 'aos';
+import NotificationPermission from './components/NotificationPermission';
+import PWAInstallPrompt from './components/PWAInstallPrompt';
 import './App.css';
 
 function App() {
@@ -86,6 +88,10 @@ function App() {
           {/* Catch-all 404 */}
           <Route path="*" element={<div>404 Not Found</div>} />
         </Routes>
+        
+        {/* PWA and Notification Components */}
+        <NotificationPermission />
+        <PWAInstallPrompt />
       </AutoLogout>
     </Router>
 
