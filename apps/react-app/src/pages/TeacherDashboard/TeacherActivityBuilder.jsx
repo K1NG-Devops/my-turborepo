@@ -250,7 +250,7 @@ async function fetchTeacherByClass(className, grade) {
 }
 
 // Submit activity/homework to backend
-async function submitHomework({ classInfo, teacher, activity }) {
+async function submitHomework({ classInfo, teacher, activity, dueDate, fileUrl = '' }) {
   const token = localStorage.getItem('accessToken');
   const payload = {
     title: activity.title,
@@ -258,8 +258,8 @@ async function submitHomework({ classInfo, teacher, activity }) {
     className: classInfo.className,
     grade: classInfo.grade,
     uploadedBy: teacher.id,
-    fileUrl: '', // If you have a file, set the URL here, otherwise leave as empty string
-    dueDate: new Date().toISOString().split('T')[0], // You may want to add a due date picker
+    fileUrl: fileUrl || '', // Support for file uploads
+    dueDate: dueDate || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // Default to 1 week from now
     // Add any other fields your backend expects
   };
   const response = await fetch('https://youngeagles-api-server.up.railway.app/api/homeworks/upload', {

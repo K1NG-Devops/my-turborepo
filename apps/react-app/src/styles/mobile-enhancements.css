@@ -1,0 +1,323 @@
+/* Mobile-First Responsive Enhancements for Young Eagles App */
+
+/* Global Mobile Utilities */
+.mobile-container {
+  @apply px-4 py-2 max-w-screen-xl mx-auto;
+}
+
+.mobile-card {
+  @apply bg-white rounded-lg shadow-md p-4 mb-4 border border-gray-100;
+}
+
+.mobile-button {
+  @apply w-full py-3 px-4 bg-blue-500 text-white rounded-lg font-semibold text-center 
+         active:bg-blue-600 transition-colors duration-200 
+         disabled:bg-gray-300 disabled:cursor-not-allowed;
+}
+
+.mobile-input {
+  @apply w-full p-3 border border-gray-300 rounded-lg text-base 
+         focus:border-blue-500 focus:ring-2 focus:ring-blue-200 
+         transition-all duration-200;
+}
+
+/* Touch-Friendly Interactive Elements */
+.touch-target {
+  @apply min-h-[44px] min-w-[44px] flex items-center justify-center;
+}
+
+.swipe-card {
+  @apply transform transition-transform duration-200 active:scale-95;
+}
+
+/* Homework Activity Mobile Styles */
+.activity-builder-mobile {
+  @apply space-y-4;
+}
+
+.activity-type-grid {
+  @apply grid grid-cols-2 gap-3;
+}
+
+.activity-type-card {
+  @apply p-4 rounded-xl border-2 border-gray-200 
+         active:border-blue-500 active:bg-blue-50 
+         transition-all duration-200 text-center;
+}
+
+.template-carousel {
+  @apply flex overflow-x-auto space-x-4 pb-4 snap-x snap-mandatory;
+}
+
+.template-card {
+  @apply min-w-[280px] bg-gradient-to-br from-blue-50 to-purple-50 
+         rounded-xl p-4 snap-start shadow-md;
+}
+
+/* Progress Tracking Mobile */
+.progress-stat-grid {
+  @apply grid grid-cols-2 gap-3;
+}
+
+.progress-stat-card {
+  @apply p-3 rounded-lg text-center transform 
+         active:scale-95 transition-transform duration-150;
+}
+
+/* Notification Mobile Styles */
+.notification-mobile {
+  @apply fixed top-0 left-0 right-0 z-50 
+         bg-white shadow-lg transform transition-transform duration-300;
+}
+
+.notification-list-mobile {
+  @apply space-y-2 max-h-[70vh] overflow-y-auto;
+}
+
+.notification-item-mobile {
+  @apply p-4 border-l-4 active:bg-gray-50 
+         transition-colors duration-150;
+}
+
+/* Parent Dashboard Mobile */
+.parent-dashboard-mobile {
+  @apply space-y-4 pb-20; /* Extra padding for mobile nav */
+}
+
+.homework-card-mobile {
+  @apply bg-white rounded-xl p-4 shadow-md border border-gray-100 
+         active:shadow-lg transition-shadow duration-200;
+}
+
+.homework-status-badge {
+  @apply px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide;
+}
+
+.homework-due-date {
+  @apply text-sm text-gray-600 font-medium;
+}
+
+/* Bottom Navigation for Mobile */
+.mobile-bottom-nav {
+  @apply fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 
+         px-4 py-2 flex justify-around items-center z-40;
+}
+
+.mobile-nav-item {
+  @apply flex flex-col items-center space-y-1 p-2 rounded-lg 
+         active:bg-gray-100 transition-colors duration-150;
+}
+
+.mobile-nav-icon {
+  @apply text-xl;
+}
+
+.mobile-nav-label {
+  @apply text-xs font-medium;
+}
+
+/* Loading States */
+.mobile-skeleton {
+  @apply animate-pulse bg-gray-200 rounded;
+}
+
+.mobile-spinner {
+  @apply animate-spin rounded-full border-2 border-gray-300 border-t-blue-600;
+}
+
+/* Floating Action Button */
+.fab {
+  @apply fixed bottom-20 right-4 w-14 h-14 bg-blue-500 text-white 
+         rounded-full shadow-lg flex items-center justify-center 
+         active:bg-blue-600 transition-colors duration-200 z-30;
+}
+
+/* Pull to Refresh */
+.pull-to-refresh {
+  @apply relative overflow-hidden;
+}
+
+.refresh-indicator {
+  @apply absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-full 
+         w-8 h-8 text-blue-500 transition-transform duration-300;
+}
+
+/* Swipe Actions */
+.swipe-action-container {
+  @apply relative overflow-hidden;
+}
+
+.swipe-action-background {
+  @apply absolute inset-y-0 right-0 flex items-center justify-center 
+         bg-red-500 text-white px-6 transform translate-x-full 
+         transition-transform duration-200;
+}
+
+/* Responsive Typography */
+.mobile-heading {
+  @apply text-2xl font-bold text-gray-900 leading-tight;
+}
+
+.mobile-subheading {
+  @apply text-lg font-semibold text-gray-700;
+}
+
+.mobile-body {
+  @apply text-base text-gray-600 leading-relaxed;
+}
+
+.mobile-caption {
+  @apply text-sm text-gray-500;
+}
+
+/* Form Enhancements */
+.mobile-form-group {
+  @apply space-y-2 mb-4;
+}
+
+.mobile-form-label {
+  @apply block text-sm font-medium text-gray-700;
+}
+
+.mobile-form-error {
+  @apply text-sm text-red-600 mt-1;
+}
+
+.mobile-form-success {
+  @apply text-sm text-green-600 mt-1;
+}
+
+/* Animation Classes */
+.slide-up {
+  animation: slideUp 0.3s ease-out;
+}
+
+.slide-down {
+  animation: slideDown 0.3s ease-out;
+}
+
+.fade-in-up {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+.bounce-in {
+  animation: bounceIn 0.6s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes bounceIn {
+  0% {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .mobile-card {
+    @apply bg-gray-800 border-gray-700;
+  }
+  
+  .mobile-input {
+    @apply bg-gray-800 border-gray-600 text-white;
+  }
+  
+  .mobile-heading,
+  .mobile-subheading {
+    @apply text-white;
+  }
+  
+  .mobile-body {
+    @apply text-gray-300;
+  }
+  
+  .mobile-caption {
+    @apply text-gray-400;
+  }
+}
+
+/* Accessibility Enhancements */
+.focus-visible {
+  @apply outline-none ring-2 ring-blue-500 ring-offset-2;
+}
+
+.reduced-motion {
+  @apply transition-none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+  .mobile-button {
+    @apply border-2 border-black;
+  }
+  
+  .mobile-input {
+    @apply border-2 border-black;
+  }
+}
+
+/* Large Text Support */
+@media (min-resolution: 192dpi) {
+  .mobile-heading {
+    @apply text-3xl;
+  }
+  
+  .mobile-subheading {
+    @apply text-xl;
+  }
+  
+  .mobile-body {
+    @apply text-lg;
+  }
+}
+
