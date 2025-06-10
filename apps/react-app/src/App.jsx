@@ -26,7 +26,6 @@ import { Toaster } from 'sonner';
 import AOS from 'aos';
 import NotificationPermission from './components/NotificationPermission';
 import PWAInstallPrompt from './components/PWAInstallPrompt';
-import ColorMatchPage from './pages/ColorMatchPage';
 import TeacherActivityBuilder from './pages/TeacherDashboard/TeacherActivityBuilder';
 import './App.css';
 
@@ -68,7 +67,6 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/teacher/login" element={<TeacherLogin />} />
-          <Route path="/color-match-homework" element={<ColorMatchPage />} />
 
           {/* Private Routes */}
           <Route element={<PrivateRoute />}>

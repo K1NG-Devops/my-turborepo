@@ -297,13 +297,6 @@ const Dashboard = () => {
             isActive={true}
           />
           <DashboardTile
-            label="Color Match Activity"
-            icon={<span role="img" aria-label="paint">🎨</span>}
-            color="bg-green-200"
-            to="/color-match-homework"
-            isActive={true}
-          />
-          <DashboardTile
             label="Submit Work"
             icon={<FaClipboardList />}
             color="bg-orange-300"
@@ -340,32 +333,56 @@ const Dashboard = () => {
           />
         </div>
 
-        <div className=' flex-col mt-6 bg-white shadow-lg rounded-lg p-6'>
-          <div className="mt-6">
-            <h2 className="text-md font-semibold cursor-pointer mb-4 hover:bg-pink-500 hover:text-white rounded-lg w-60" data-aos="fade-left"><Link to='activities'>Recent Activities</Link></h2>
-            {/* Add your recent activities component here */}
+        {/* Quick Actions Section */}
+        <div className="mt-6 bg-white shadow-lg rounded-lg p-6">
+          <h2 className="text-xl font-semibold mb-4 text-gray-800">Quick Actions</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <Link to="/student/homework" className="bg-blue-50 hover:bg-blue-100 p-4 rounded-lg border border-blue-200 transition-colors">
+              <div className="flex items-center space-x-3">
+                <FaBook className="text-blue-600 text-xl" />
+                <div>
+                  <h3 className="font-semibold text-blue-800">View Homework</h3>
+                  <p className="text-sm text-blue-600">See all assigned homework</p>
+                </div>
+              </div>
+            </Link>
+            <Link to="/submit-work" className="bg-green-50 hover:bg-green-100 p-4 rounded-lg border border-green-200 transition-colors">
+              <div className="flex items-center space-x-3">
+                <FaClipboardList className="text-green-600 text-xl" />
+                <div>
+                  <h3 className="font-semibold text-green-800">Submit Work</h3>
+                  <p className="text-sm text-green-600">Upload completed assignments</p>
+                </div>
+              </div>
+            </Link>
+            <Link to="/notifications" className="bg-yellow-50 hover:bg-yellow-100 p-4 rounded-lg border border-yellow-200 transition-colors">
+              <div className="flex items-center space-x-3">
+                <FaBell className="text-yellow-600 text-xl" />
+                <div>
+                  <h3 className="font-semibold text-yellow-800">Notifications</h3>
+                  <p className="text-sm text-yellow-600">Check recent updates</p>
+                </div>
+              </div>
+            </Link>
           </div>
-          <div className="mt-6">
-            <h2 className="text-md font-semibold cursor-pointer mb-4 hover:bg-pink-500 hover:text-white rounded-lg w-60" data-aos="fade-left" data-aos-delay="200"><Link to='notifications'>Notifications</Link></h2>
-            {/* Add your notifications component here */}
-          </div>
-          <div className="mt-6">
-            <h2 className="text-md font-semibold cursor-pointer mb-4 hover:bg-pink-500 hover:text-white-600 rounded-lg w-60 " data-aos="fade-left" data-aos-delay="400"><Link to='messages'>Messages</Link></h2>
-            {/* Add your messages component here */}
-          </div>
-        </div>
-        <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {homeworkList.map((hw, index) => (
-            <HomeworkTile
-              key={index}
-              title={hw.title}
-              dueDate={hw.dueDate}
-              status={hw.status}
-            />
-          ))}
         </div>
 
-        <HomeworkList />
+        {/* Progress Overview */}
+        <div className="mt-6 bg-white shadow-lg rounded-lg p-6">
+          <h2 className="text-xl font-semibold mb-4 text-gray-800">Homework Progress</h2>
+          <div className="mb-4">
+            <p className="text-gray-600 mb-2">Recent Assignments</p>
+            <div className="w-full bg-gray-200 rounded-full h-3">
+              <div className="bg-green-500 h-3 rounded-full" style={{width: '70%'}}></div>
+            </div>
+            <p className="text-sm text-gray-500 mt-1">7 of 10 assignments completed</p>
+          </div>
+        </div>
+
+        {/* Homework List Integration */}
+        <div className="mt-6">
+          <HomeworkList />
+        </div>
 
       </main>
     </>

@@ -119,10 +119,30 @@ const HomeworkList = () => {
   if (!parent_id) return <p className="text-center py-4">Please log in to view homework.</p>;
   if (loading) return <p className="text-center py-4">Loading homework...</p>;
 
+  const totalHomework = homeworks.length;
+  const submittedHomework = homeworks.filter(hw => hw.submitted).length;
+  const progressPercentage = totalHomework > 0 ? (submittedHomework / totalHomework) * 100 : 0;
+
   return (
-    <div className="w-full bg-slate-300 mx-auto px-4 py-6">
-      <h2 className="text-2xl font-semibold text-center mb-6">Homework List</h2>
-      <div className="w-full bg-green-700 grid lg:grid-cols-2 justify-center">
+    <div className="w-full bg-slate-50 mx-auto px-4 py-6">
+      <div className="max-w-6xl mx-auto">
+        <h2 className="text-3xl font-bold text-center mb-6 text-gray-800">📚 Homework Dashboard</h2>
+        {/* Progress Overview */}
+        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+          <h3 className="text-xl font-semibold mb-4 text-gray-700">Progress Overview</h3>
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-gray-600">Homework Completion</span>
+            <span className="font-semibold text-gray-800">{submittedHomework}/{totalHomework}</span>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-4 mb-4">
+            <div 
+              className="bg-gradient-to-r from-green-400 to-green-600 h-4 rounded-full transition-all duration-500" 
+              style={{width: `${progressPercentage}%`}}
+            ></div>
+          </div>
+          <p className="text-sm text-gray-500">{progressPercentage.toFixed(0)}% of assignments completed</p>
+        </div>
+        <div className="grid lg:grid-cols-1 xl:grid-cols-2 gap-4">
         {homeworks.length === 0 ? (
           <p className="text-center text-gray-500">No homework available.</p>
         ) : (
