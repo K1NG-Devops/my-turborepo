@@ -13,7 +13,8 @@ const StudentSelector = ({ students }) => {
       localStorage.setItem('selectedStudent', JSON.stringify({
         className: student.className,
         grade: student.grade,
-        name: student.name
+        name: student.name,
+        studentId: student.id
       }));
 
       navigate('/homeworks');

@@ -26,6 +26,8 @@ import { Toaster } from 'sonner';
 import AOS from 'aos';
 import NotificationPermission from './components/NotificationPermission';
 import PWAInstallPrompt from './components/PWAInstallPrompt';
+import ColorMatchPage from './pages/ColorMatchPage';
+import TeacherActivityBuilder from './pages/TeacherDashboard/TeacherActivityBuilder';
 import './App.css';
 
 function App() {
@@ -58,7 +60,7 @@ function App() {
         <Routes>
           {/* Public Layout */}
           <Route element={<Layout />}>
-            <Route path="/home" element={<Home />} />
+            <Route path="/" element={<Home />} />
             <Route path="/programs" element={<Programs />} />
           </Route>
 
@@ -66,6 +68,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/teacher/login" element={<TeacherLogin />} />
+          <Route path="/color-match-homework" element={<ColorMatchPage />} />
 
           {/* Private Routes */}
           <Route element={<PrivateRoute />}>
@@ -83,6 +86,7 @@ function App() {
             <Route path="/teacher-children-list" element={<TeacherChildrenList />} />
             <Route path="/homework/upload" element={<UploadHomework />} />
             <Route path="/register-child" element={<RegisterChild />} />
+            <Route path="/teacher-dashboard/activity-builder" element={<TeacherActivityBuilder />} />
           </Route>
 
           {/* Catch-all 404 */}

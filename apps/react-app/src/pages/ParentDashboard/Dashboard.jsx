@@ -294,7 +294,13 @@ const Dashboard = () => {
             icon={<FaBook />}
             color="bg-yellow-200"
             to={`/student/homework?className=${encodeURIComponent(className)}&grade=${encodeURIComponent(grade)}`}
-
+            isActive={true}
+          />
+          <DashboardTile
+            label="Color Match Activity"
+            icon={<span role="img" aria-label="paint">🎨</span>}
+            color="bg-green-200"
+            to="/color-match-homework"
             isActive={true}
           />
           <DashboardTile

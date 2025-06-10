@@ -86,22 +86,20 @@ const NotificationPermission = () => {
 
   const sendTokenToServer = async (token) => {
     try {
-      // Replace with your API endpoint
-      const response = await fetch('/api/fcm/token', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({ fcmToken: token })
+      const response = await fetch("/api/fcm/token", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token }),
       });
-      
       if (!response.ok) {
-        throw new Error('Failed to send token to server');
+        const text = await response.text();
+        console.error("FCM token POST failed:", response.status, text);
+        throw new Error(`Failed to send token to server: ${response.status} ${text}`);
       }
-    } catch (error) {
-      console.error('Error sending token to server:', error);
-      // Don't show error to user as this is backend functionality
+      console.log("FCM token sent to server successfully");
+    } catch (err) {
+      // Show a user-friendly message but do not break the app
+      console.warn("Could not send FCM token to server. Notifications may not work.", err.message);
     }
   };
 

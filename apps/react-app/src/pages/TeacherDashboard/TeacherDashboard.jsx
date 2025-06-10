@@ -111,6 +111,13 @@ const TeacherDashboard = ({ user }) => {
       bgColor: "bg-teal-200",
       onClick: fetchChildren,
     },
+    {
+      title: "Create Activity",
+      icon: <FaFileUpload size={48} className="text-indigo-700" />,
+      description: "Build interactive activities for your class",
+      bgColor: "bg-indigo-200",
+      onClick: () => navigate("/teacher-dashboard/activity-builder"),
+    },
   ];
 
   
