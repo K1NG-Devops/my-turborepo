@@ -262,6 +262,7 @@ const HomeworkList = () => {
             </Card>
           ))
         )}
+        </div>
       </div>
     </div>
   );
