@@ -9,6 +9,8 @@ import 'aos/dist/aos.css';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import HomeworkList from '../../pages/HomeworkList';
+import EventsCalendar from '../../components/Calendar/EventsCalendar';
+import axios from 'axios';
 
 const linkStyles = "block mb-2 px-4 py-2 rounded hover:bg-gray-200 transition-colors duration-200 text-gray-800 hover:text-gray-800";
 const linkStyles2 = "bg-cyan-800 font-bold text-white hover:bg-cyan-700 transition-colors duration-200";
@@ -27,6 +29,75 @@ const Dashboard = () => {
   const [children, setChildren] = useState([]);
   const [selectedChild, setSelectedChild] = useState('');
   const [homeworkList, setHomeworkList] = useState([]);
+  const [notifications, setNotifications] = useState([]);
+  const [homeworkProgress, setHomeworkProgress] = useState({
+    total: 0,
+    submitted: 0,
+    percentage: 0
+  });
+
+  const parent_id = localStorage.getItem('parent_id');
+  const token = localStorage.getItem('accessToken');
+
+  // Fetch homework data for progress tracking
+  const fetchHomeworkData = async () => {
+    if (!parent_id || !token) return;
+    
+    try {
+      const res = await axios.get(
+        `https://youngeagles-api-server.up.railway.app/api/homeworks/for-parent/${parent_id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      
+      const hwList = Array.isArray(res.data) ? res.data : res.data.homeworks || [];
+      setHomeworkList(hwList);
+      
+      // Calculate progress
+      const total = hwList.length;
+      const submitted = hwList.filter(hw => hw.submitted).length;
+      const percentage = total > 0 ? (submitted / total) * 100 : 0;
+      
+      setHomeworkProgress({
+        total,
+        submitted,
+        percentage
+      });
+    } catch (err) {
+      console.error('Error fetching homework:', err);
+    }
+  };
+
+  useEffect(() => {
+    fetchHomeworkData();
+  }, [parent_id, token]);
+
+  // Refresh homework data every 30 seconds to catch updates
+  useEffect(() => {
+    const interval = setInterval(fetchHomeworkData, 30000);
+    return () => clearInterval(interval);
+  }, [parent_id, token]);
+
+  // Fetch real notifications from API
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        // Replace with actual API call when notification system is implemented
+        // For now, keep empty to avoid placeholder data
+        setNotifications([]);
+      } catch (error) {
+        console.error('Error fetching notifications:', error);
+        setNotifications([]);
+      }
+    };
+    
+    fetchNotifications();
+  }, []);
+
+  const unreadNotifications = notifications.filter(n => !n.read).length;
 
 
   useEffect(() => {
@@ -270,120 +341,96 @@ const Dashboard = () => {
         </div>
       </aside>
 
-      <main className="sm:ml-64 p-4 min-h-screen bg-gray-300 transition-all duration-300 ease-in-out flex flex-col">
-        <div className="flex justify-end mb-4 bg-gray-700 shadow-lg rounded-lg p-4 text-white w-full">
-          <div className="flex items-center space-x-4">
-            <Link
-              to="/home"
-              className="text-gray-300 hover:text-white bg-red-500 py-2 px-4 hover:bg-red-800 rounded-lg font-medium"
-            >
-              Home
-            </Link>
-            <button
-              onClick={handleLogout}
-              className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-700 transition"
-            >
-              Logout
-            </button>
-          </div>
-        </div>
-        {/* Dashboard tiles */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <DashboardTile
-            label="Homework"
-            icon={<FaBook />}
-            color="bg-yellow-200"
-            to={`/student/homework?className=${encodeURIComponent(className)}&grade=${encodeURIComponent(grade)}`}
-            isActive={true}
-          />
-          <DashboardTile
-            label="Submit Work"
-            icon={<FaClipboardList />}
-            color="bg-orange-300"
-            to="/submit-work"
-            isActive={true}
-          />
-          <DashboardTile
-            label="Resources"
-            icon={<FaClipboardList />}
-            color="bg-blue-300"
-            to="/resources"
-            isActive={false}
-          />
-          <DashboardTile
-            label="Videos"
-            icon={<FaVideo />}
-            color="bg-purple-300"
-            to="/videos"
-            isActive={false}
-          />
-          <DashboardTile
-            label="Lessons"
-            icon={<FaChalkboardTeacher />}
-            color="bg-pink-300"
-            to="/lessons"
-            isActive={true}
-          />
-          <DashboardTile
-            label="Notices"
-            icon={<FaBell />}
-            color="bg-red-200"
-            to="/notices"
-            isActive={false}
-          />
-        </div>
-
-        {/* Quick Actions Section */}
-        <div className="mt-6 bg-white shadow-lg rounded-lg p-6">
-          <h2 className="text-xl font-semibold mb-4 text-gray-800">Quick Actions</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <Link to="/student/homework" className="bg-blue-50 hover:bg-blue-100 p-4 rounded-lg border border-blue-200 transition-colors">
-              <div className="flex items-center space-x-3">
-                <FaBook className="text-blue-600 text-xl" />
-                <div>
-                  <h3 className="font-semibold text-blue-800">View Homework</h3>
-                  <p className="text-sm text-blue-600">See all assigned homework</p>
-                </div>
-              </div>
-            </Link>
-            <Link to="/submit-work" className="bg-green-50 hover:bg-green-100 p-4 rounded-lg border border-green-200 transition-colors">
-              <div className="flex items-center space-x-3">
-                <FaClipboardList className="text-green-600 text-xl" />
-                <div>
-                  <h3 className="font-semibold text-green-800">Submit Work</h3>
-                  <p className="text-sm text-green-600">Upload completed assignments</p>
-                </div>
-              </div>
-            </Link>
-            <Link to="/notifications" className="bg-yellow-50 hover:bg-yellow-100 p-4 rounded-lg border border-yellow-200 transition-colors">
-              <div className="flex items-center space-x-3">
-                <FaBell className="text-yellow-600 text-xl" />
-                <div>
-                  <h3 className="font-semibold text-yellow-800">Notifications</h3>
-                  <p className="text-sm text-yellow-600">Check recent updates</p>
-                </div>
-              </div>
-            </Link>
-          </div>
-        </div>
-
-        {/* Progress Overview */}
-        <div className="mt-6 bg-white shadow-lg rounded-lg p-6">
-          <h2 className="text-xl font-semibold mb-4 text-gray-800">Homework Progress</h2>
-          <div className="mb-4">
-            <p className="text-gray-600 mb-2">Recent Assignments</p>
-            <div className="w-full bg-gray-200 rounded-full h-3">
-              <div className="bg-green-500 h-3 rounded-full" style={{width: '70%'}}></div>
+      <main className="sm:ml-64 min-h-screen bg-gray-50 transition-all duration-300 ease-in-out">
+        {/* Top Navigation */}
+        <div className="bg-white shadow-sm border-b p-4">
+          <div className="flex justify-between items-center">
+            <h1 className="text-2xl font-bold text-gray-800">Parent Dashboard</h1>
+            <div className="flex items-center space-x-3">
+              <Link
+                to="/home"
+                className="text-gray-600 hover:text-gray-800 font-medium transition-colors"
+              >
+                Home
+              </Link>
+              <button
+                onClick={handleLogout}
+                className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+              >
+                Logout
+              </button>
             </div>
-            <p className="text-sm text-gray-500 mt-1">7 of 10 assignments completed</p>
           </div>
         </div>
 
-        {/* Homework List Integration */}
-        <div className="mt-6">
-          <HomeworkList />
-        </div>
+        <div className="p-4 sm:p-6 space-y-6">
+          {/* Dashboard Overview Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <DashboardTile
+              label="Homework"
+              icon={<FaBook />}
+              color="bg-blue-100 hover:bg-blue-200"
+              to={`/student/homework?className=${encodeURIComponent(className)}&grade=${encodeURIComponent(grade)}`}
+              isActive={true}
+            />
+            <DashboardTile
+              label="Submit Work"
+              icon={<FaClipboardList />}
+              color="bg-green-100 hover:bg-green-200"
+              to="/submit-work"
+              isActive={true}
+            />
+            <DashboardTile
+              label="Notifications"
+              icon={
+                <div className="relative">
+                  <FaBell />
+                  {unreadNotifications > 0 && (
+                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center animate-pulse">
+                      {unreadNotifications}
+                    </span>
+                  )}
+                </div>
+              }
+              color="bg-red-100 hover:bg-red-200"
+              to="/notifications"
+              isActive={true}
+            />
+          </div>
 
+          {/* Progress Overview */}
+          <div className="bg-white shadow-sm rounded-lg p-6">
+            <h2 className="text-xl font-semibold mb-4 text-gray-800">Homework Progress</h2>
+            <div className="space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600">Completion Rate</span>
+                <span className="font-semibold text-gray-800">
+                  {homeworkProgress.submitted}/{homeworkProgress.total} 
+                  ({Math.round(homeworkProgress.percentage)}%)
+                </span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-3">
+                <div 
+                  className="bg-gradient-to-r from-green-400 to-green-600 h-3 rounded-full transition-all duration-500" 
+                  style={{width: `${homeworkProgress.percentage}%`}}
+                ></div>
+              </div>
+              {homeworkProgress.total === 0 && (
+                <p className="text-sm text-yellow-600">No homework assigned yet</p>
+              )}
+            </div>
+          </div>
+
+          {/* Events Calendar */}
+          <div>
+            <EventsCalendar />
+          </div>
+          
+          {/* Homework List Integration */}
+          <div>
+            <HomeworkList onProgressUpdate={fetchHomeworkData} />
+          </div>
+        </div>
       </main>
     </>
   );

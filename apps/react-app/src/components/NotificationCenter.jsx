@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FaBell, FaBookOpen, FaCalendarAlt, FaExclamationTriangle, FaCheckCircle, FaTimes } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-toastify';
+import { toast as sonnerToast } from 'sonner';
 
 const NotificationCenter = ({ parentId }) => {
   const [notifications, setNotifications] = useState([]);
@@ -13,7 +14,29 @@ const NotificationCenter = ({ parentId }) => {
     fetchNotifications();
     // Set up polling for new notifications every 30 seconds
     const interval = setInterval(fetchNotifications, 30000);
-    return () => clearInterval(interval);
+    // Poll for new homeworks every 60 seconds
+    const homeworkInterval = setInterval(async () => {
+      const parent_id = localStorage.getItem('parent_id');
+      const token = localStorage.getItem('accessToken');
+      if (!parent_id || !token) return;
+      try {
+        const res = await fetch(`https://youngeagles-api-server.up.railway.app/api/homeworks/for-parent/${parent_id}`, {
+          headers: { 'Authorization': `Bearer ${token}` },
+        });
+        const data = await res.json();
+        const newHomeworks = (data.homeworks || []).filter(hw => !localStorage.getItem(`notified-homework-${hw.id}`));
+        newHomeworks.forEach(hw => {
+          sonnerToast(`New homework posted: ${hw.title}`, { description: hw.instructions || '', duration: 8000 });
+          localStorage.setItem(`notified-homework-${hw.id}`, 'true');
+        });
+      } catch (err) {
+        // ignore
+      }
+    }, 60000);
+    return () => {
+      clearInterval(interval);
+      clearInterval(homeworkInterval);
+    };
   }, [parentId]);
 
   const fetchNotifications = async () => {

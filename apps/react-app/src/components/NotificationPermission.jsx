@@ -91,12 +91,17 @@ const NotificationPermission = () => {
         : 'http://localhost:3000';
       
       const authToken = localStorage.getItem('accessToken');
+      const parentId = localStorage.getItem('parent_id');
+      
       if (!authToken) {
         console.warn('No auth token found, skipping FCM token registration');
         return;
       }
       
-      const parentId = localStorage.getItem('parent_id');
+      if (!parentId) {
+        console.warn('No parent ID found, skipping FCM token registration');
+        return;
+      }
       
       const response = await fetch(`${apiUrl}/api/homeworks/fcm/token`, {
         method: "POST",

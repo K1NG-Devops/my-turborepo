@@ -6,25 +6,62 @@ import { Badge } from '@/components/ui/badge';
 import { FaEye, FaDownload, FaUser, FaClock, FaCheckCircle, FaTimesCircle, FaFileAlt } from 'react-icons/fa';
 import { toast } from 'sonner';
 
-const TeacherSubmissionsView = ({ homeworkId }) => {
-  const [submissions, setSubmissions] = useState([]);
-  const [homework, setHomework] = useState(null);
+const TeacherSubmissionsView = () => {
+  const [allSubmissions, setAllSubmissions] = useState([]);
+  const [homeworks, setHomeworks] = useState([]);
+  const [selectedHomework, setSelectedHomework] = useState(null);
   const [studentsWithStatus, setStudentsWithStatus] = useState([]);
   const [stats, setStats] = useState({ total: 0, submitted: 0, pending: 0 });
   const [loading, setLoading] = useState(true);
   const [selectedSubmission, setSelectedSubmission] = useState(null);
 
   const token = localStorage.getItem('accessToken');
+  const teacherId = localStorage.getItem('teacherId');
 
   useEffect(() => {
-    if (homeworkId) {
-      fetchSubmissions();
-    }
-  }, [homeworkId]);
+    fetchAllSubmissions();
+    fetchTeacherHomeworks();
+  }, []);
 
-  const fetchSubmissions = async () => {
+  const fetchAllSubmissions = async () => {
     try {
       setLoading(true);
+      const response = await axios.get(
+        'https://youngeagles-api-server.up.railway.app/api/homeworks/teacher/all-submissions',
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      setAllSubmissions(response.data.submissions || []);
+    } catch (error) {
+      console.error('Error fetching all submissions:', error);
+      toast.error('Failed to load submissions');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchTeacherHomeworks = async () => {
+    try {
+      const response = await axios.get(
+        `https://youngeagles-api-server.up.railway.app/api/homeworks/for-teacher/${teacherId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setHomeworks(response.data.homeworks || []);
+    } catch (error) {
+      console.error('Error fetching homeworks:', error);
+    }
+  };
+
+  const fetchSubmissionsForHomework = async (homeworkId) => {
+    try {
       const response = await axios.get(
         `https://youngeagles-api-server.up.railway.app/api/homeworks/${homeworkId}/submissions`,
         {
@@ -36,8 +73,7 @@ const TeacherSubmissionsView = ({ homeworkId }) => {
 
       const { homework, submissions, studentsWithStatus, totalStudents, submittedCount, pendingCount } = response.data;
       
-      setHomework(homework);
-      setSubmissions(submissions);
+      setSelectedHomework(homework);
       setStudentsWithStatus(studentsWithStatus);
       setStats({
         total: totalStudents,
@@ -45,10 +81,8 @@ const TeacherSubmissionsView = ({ homeworkId }) => {
         pending: pendingCount
       });
     } catch (error) {
-      console.error('Error fetching submissions:', error);
-      toast.error('Failed to load submissions');
-    } finally {
-      setLoading(false);
+      console.error('Error fetching submissions for homework:', error);
+      toast.error('Failed to load homework submissions');
     }
   };
 
@@ -71,35 +105,83 @@ const TeacherSubmissionsView = ({ homeworkId }) => {
     );
   }
 
-  if (!homework) {
-    return (
-      <div className="text-center p-8">
-        <p className="text-gray-500">No homework found</p>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6 mobile-container">
-      {/* Homework Info Header */}
+      {/* Header */}
       <Card className="mobile-card">
         <CardHeader className="bg-gradient-to-r from-blue-500 to-purple-600 text-white">
-          <CardTitle className="mobile-heading">{homework.title}</CardTitle>
-          <div className="flex flex-wrap gap-2 text-sm">
-            <Badge variant="secondary" className="bg-white/20 text-white">
-              Class: {homework.class_name}
-            </Badge>
-            <Badge variant="secondary" className="bg-white/20 text-white">
-              Due: {formatDate(homework.due_date)}
-            </Badge>
-            {homework.type && (
-              <Badge variant="secondary" className="bg-white/20 text-white">
-                Type: {homework.type}
-              </Badge>
-            )}
+          <CardTitle className="mobile-heading">Student Homework Submissions</CardTitle>
+          <div className="text-sm text-blue-100">
+            View and manage homework submissions from your students
           </div>
         </CardHeader>
       </Card>
+
+      {/* Homework Selection */}
+      <Card className="mobile-card">
+        <CardHeader>
+          <CardTitle>Select Homework to View Submissions</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {homeworks.map((hw) => {
+              const submissionsForHw = allSubmissions.filter(s => s.homework_id === hw.id);
+              return (
+                <div
+                  key={hw.id}
+                  onClick={() => fetchSubmissionsForHomework(hw.id)}
+                  className={`p-4 border-2 rounded-lg cursor-pointer transition-all hover:shadow-md ${
+                    selectedHomework?.id === hw.id 
+                      ? 'border-blue-500 bg-blue-50' 
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                >
+                  <h3 className="font-semibold text-gray-800 mb-2">{hw.title}</h3>
+                  <div className="space-y-1 text-sm text-gray-600">
+                    <div>Class: {hw.class_name}</div>
+                    <div>Due: {formatDate(hw.due_date)}</div>
+                    <div className="flex items-center justify-between mt-2">
+                      <span className="text-xs bg-gray-100 px-2 py-1 rounded">
+                        {hw.type || 'Written'}
+                      </span>
+                      <Badge className={`text-xs ${
+                        submissionsForHw.length > 0 
+                          ? 'bg-green-100 text-green-700' 
+                          : 'bg-gray-100 text-gray-600'
+                      }`}>
+                        {submissionsForHw.length} submissions
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Show detailed view when homework is selected */}
+      {selectedHomework && (
+        <>
+          {/* Selected Homework Info */}
+          <Card className="mobile-card">
+            <CardHeader className="bg-gradient-to-r from-green-500 to-teal-600 text-white">
+              <CardTitle className="mobile-heading">{selectedHomework.title}</CardTitle>
+              <div className="flex flex-wrap gap-2 text-sm">
+                <Badge variant="secondary" className="bg-white/20 text-white">
+                  Class: {selectedHomework.class_name}
+                </Badge>
+                <Badge variant="secondary" className="bg-white/20 text-white">
+                  Due: {formatDate(selectedHomework.due_date)}
+                </Badge>
+                {selectedHomework.type && (
+                  <Badge variant="secondary" className="bg-white/20 text-white">
+                    Type: {selectedHomework.type}
+                  </Badge>
+                )}
+              </div>
+            </CardHeader>
+          </Card>
 
       {/* Statistics Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -123,14 +205,14 @@ const TeacherSubmissionsView = ({ homeworkId }) => {
         </Card>
       </div>
 
-      {/* Students List with Submission Status */}
-      <Card className="mobile-card">
-        <CardHeader>
-          <CardTitle className="mobile-subheading">Student Submission Status</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            {studentsWithStatus.map((student) => (
+        {/* Students List with Submission Status */}
+        <Card className="mobile-card">
+          <CardHeader>
+            <CardTitle className="mobile-subheading">Student Submission Status</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {studentsWithStatus.map((student) => (
               <div
                 key={student.id}
                 className={`p-4 rounded-lg border transition-all ${
@@ -216,10 +298,53 @@ const TeacherSubmissionsView = ({ homeworkId }) => {
                   </div>
                 )}
               </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+        </>
+      )}
+
+      {/* All Recent Submissions Overview */}
+      {!selectedHomework && allSubmissions.length > 0 && (
+        <Card className="mobile-card">
+          <CardHeader>
+            <CardTitle>Recent Submissions (All Homework)</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {allSubmissions.slice(0, 10).map((submission) => (
+                <div
+                  key={`${submission.homework_id}-${submission.parent_id}`}
+                  className="p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-medium text-gray-800">
+                        {submission.student_name} {submission.student_last_name}
+                      </h4>
+                      <p className="text-sm text-gray-600">
+                        {submission.homework_title} • {submission.class_name}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        Submitted: {formatDate(submission.submitted_at)}
+                      </p>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setSelectedSubmission(submission)}
+                    >
+                      <FaEye className="mr-1" />
+                      View
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Detailed Submission View Modal */}
       {selectedSubmission && (

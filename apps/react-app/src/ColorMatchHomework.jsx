@@ -209,62 +209,40 @@ const DAYS = [
 
 const shuffled = (arr) => arr.map(value => ({ value, sort: Math.random() })).sort((a, b) => a.sort - b.sort).map(({ value }) => value);
 
-export default function ColorMatchHomework() {
-  const todayIndex = getTodayIndex();
-  const [dayIndex, setDayIndex] = useState(0);
-  const [exerciseIndex, setExerciseIndex] = useState(0);
-  const day = DAYS[dayIndex];
-  const exercise = day.exercises[exerciseIndex];
-  const [colorNames, setColorNames] = useState(shuffled(exercise.items));
-  const [matches, setMatches] = useState({});
+// Generic ColorMatchActivity: expects props { items, instructions, title, onSubmit, disabled, initialMatches }
+export default function ColorMatchActivity({ items = [], instructions = '', title = '', onSubmit, disabled = false, initialMatches = {} }) {
+  const [colorNames, setColorNames] = useState(shuffled(items));
+  const [matches, setMatches] = useState(initialMatches);
   const [dragged, setDragged] = useState(null);
   const [showResult, setShowResult] = useState(false);
-  const [completedExercises, setCompletedExercises] = useState([]); // per day
-  const [submitted, setSubmitted] = useState(false);
   const [showHints, setShowHints] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
   const navigate = useNavigate();
 
-  // Reset state when exercise changes
-  React.useEffect(() => {
-    setColorNames(shuffled(exercise.items));
-    setMatches({});
-    setDragged(null);
-    setShowResult(false);
-    setShowHints(false);
-  }, [exerciseIndex, dayIndex]);
+  function shuffled(arr) {
+    return arr.map(value => ({ value, sort: Math.random() })).sort((a, b) => a.sort - b.sort).map(({ value }) => value);
+  }
 
-  // Only allow going to next day if today or before
-  const canAccessDay = (idx) => idx <= todayIndex;
-  const isLastExercise = exerciseIndex === day.exercises.length - 1;
-  const allExercisesDone = completedExercises.length === day.exercises.length;
+  const isCorrect = (color) => matches[color] && items.find(c => c.color === color).name === matches[color];
+  const allMatched = Object.keys(matches).length === items.length;
+  const allCorrect = items.every(({ color }) => isCorrect(color));
 
   const handleDragStart = (name) => setDragged(name);
   const handleDrop = (color) => {
-    if (dragged) {
+    if (dragged && !disabled) {
       setMatches((prev) => ({ ...prev, [color]: dragged }));
       setDragged(null);
     }
   };
   const handleDragOver = (e) => e.preventDefault();
 
-  const isCorrect = (color) => matches[color] && exercise.items.find(c => c.color === color).name === matches[color];
-  const allMatched = Object.keys(matches).length === exercise.items.length;
-  const allCorrect = exercise.items.every(({ color }) => isCorrect(color));
-
   const handleCheck = () => {
     setShowResult(true);
     setShowHints(true);
   };
 
-  const handleNextExercise = () => {
-    setCompletedExercises((prev) => prev.includes(exerciseIndex) ? prev : [...prev, exerciseIndex]);
-    if (!isLastExercise) {
-      setExerciseIndex(exerciseIndex + 1);
-    }
-  };
-
   const handleRetry = () => {
-    setColorNames(shuffled(exercise.items));
+    setColorNames(shuffled(items));
     setMatches({});
     setDragged(null);
     setShowResult(false);
@@ -273,50 +251,8 @@ export default function ColorMatchHomework() {
 
   const handleSubmit = async () => {
     setSubmitted(true);
-    // Get student/class/grade from localStorage
-    const selectedStudent = JSON.parse(localStorage.getItem('selectedStudent') || '{}');
-    const { className, grade, studentId, name } = selectedStudent;
-    if (!studentId || !className || !grade) {
-      alert('Student info missing. Please select a student.');
-      setSubmitted(false);
-      return;
-    }
-    try {
-      // Get access token
-      const token = localStorage.getItem('accessToken');
-      // 1. Fetch teacherId for this class/grade
-      const teacherRes = await axios.get(
-        `https://youngeagles-api-server.up.railway.app/api/teachers/by-class-grade?className=${encodeURIComponent(className)}&grade=${encodeURIComponent(grade)}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      const teacherId = teacherRes.data.teacher?.id || teacherRes.data.id;
-      if (!teacherId) throw new Error('No teacher found for this class/grade.');
-      // 2. Prepare submission data
-      const submission = {
-        studentId,
-        studentName: name,
-        className,
-        grade,
-        teacherId,
-        date: new Date().toISOString(),
-        day: day.day,
-        results: day.exercises.map((ex, idx) => ({
-          title: ex.title,
-          correct: completedExercises.includes(idx),
-          matches: idx === exerciseIndex ? matches : undefined // Only for last exercise
-        })),
-        type: 'color-match',
-      };
-      // 3. Submit to backend
-      await axios.post(
-        'https://youngeagles-api-server.up.railway.app/api/homework-submissions',
-        submission,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      alert('Homework submitted to teacher!');
-    } catch (err) {
-      setSubmitted(false);
-      alert('Submission failed: ' + (err.response?.data?.message || err.message));
+    if (onSubmit) {
+      await onSubmit(matches);
     }
     setTimeout(() => {
       setShowResult(false);
@@ -324,49 +260,25 @@ export default function ColorMatchHomework() {
     }, 2000);
   };
 
-  // For custom getCircle or default color circle
-  const getCircle = exercise.getCircle || ((item) => <div style={{ background: item.color }} className="w-16 h-16 rounded-full" />);
+  // Default color circle
+  const getCircle = (item) => <div style={{ background: item.color }} className="w-16 h-16 rounded-full" />;
 
   return (
-    <div className="max-w-md mx-auto p-4 bg-white rounded shadow min-h-screen flex flex-col justify-center overflow-y-auto" style={{ minHeight: '100vh' }}>
+    <div className="max-w-md mx-auto p-4 bg-white rounded shadow flex flex-col justify-center overflow-y-auto">
       <div className="mb-4 flex flex-col items-center">
-        <h2 className="text-xl font-bold mb-2 text-center">{day.day}: {exercise.title}</h2>
-        <p className="mb-2 text-center">{exercise.instructions}</p>
-        <div className="mb-2 flex gap-2 flex-wrap justify-center">
-          {DAYS.map((d, idx) => (
-            <button
-              key={d.day}
-              className={`px-3 py-1 rounded ${dayIndex === idx ? 'bg-blue-500 text-white' : canAccessDay(idx) ? 'bg-gray-200 text-gray-700' : 'bg-gray-100 text-gray-400'} font-semibold`}
-              onClick={() => canAccessDay(idx) && setDayIndex(idx)}
-              disabled={!canAccessDay(idx)}
-            >
-              {d.day}
-            </button>
-          ))}
-        </div>
-        <div className="mb-2 flex gap-2 flex-wrap justify-center">
-          {day.exercises.map((ex, idx) => (
-            <button
-              key={ex.title}
-              className={`px-2 py-1 rounded ${exerciseIndex === idx ? 'bg-pink-500 text-white' : completedExercises.includes(idx) ? 'bg-green-200 text-green-800' : 'bg-gray-200 text-gray-700'} font-semibold text-xs`}
-              onClick={() => completedExercises.includes(idx - 1) || idx === 0 ? setExerciseIndex(idx) : null}
-              disabled={!(completedExercises.includes(idx - 1) || idx === 0)}
-            >
-              Ex {idx + 1}
-            </button>
-          ))}
-        </div>
+        <h2 className="text-xl font-bold mb-2 text-center">{title}</h2>
+        <p className="mb-2 text-center">{instructions}</p>
       </div>
       <div className="flex flex-col gap-6">
         {/* Circles to drop on */}
         <div className="flex justify-around mb-6 flex-wrap">
-          {exercise.items.map((item) => (
+          {items.map((item) => (
             <div
               key={item.color}
               onDrop={() => handleDrop(item.color)}
               onDragOver={handleDragOver}
               className={`w-16 h-16 rounded-full flex items-center justify-center border-2 ${matches[item.color] ? (isCorrect(item.color) ? 'border-green-500' : 'border-red-500') : 'border-gray-300'} transition-colors m-2`}
-              style={{ opacity: matches[item.color] ? 0.7 : 1, cursor: 'pointer' }}
+              style={{ opacity: matches[item.color] ? 0.7 : 1, cursor: disabled ? 'not-allowed' : 'pointer' }}
             >
               {matches[item.color] && (
                 <span className="text-white font-bold text-sm select-none">
@@ -383,9 +295,9 @@ export default function ColorMatchHomework() {
             !Object.values(matches).includes(name) && (
               <div
                 key={name}
-                draggable
+                draggable={!disabled}
                 onDragStart={() => handleDragStart(name)}
-                className="px-4 py-2 bg-gray-100 rounded shadow cursor-grab text-center font-medium border border-gray-300 hover:bg-gray-200 select-none"
+                className={`px-4 py-2 bg-gray-100 rounded shadow cursor-grab text-center font-medium border border-gray-300 hover:bg-gray-200 select-none ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
                 {name}
               </div>
@@ -397,7 +309,7 @@ export default function ColorMatchHomework() {
           <div className="mt-4 bg-yellow-100 border-l-4 border-yellow-500 p-3 rounded">
             <div className="font-semibold mb-1">Hints:</div>
             <ul className="list-disc pl-5">
-              {exercise.items.map((item) =>
+              {items.map((item) =>
                 !isCorrect(item.color) && matches[item.color] ? (
                   <li key={item.color}>{item.hint}</li>
                 ) : null
@@ -405,37 +317,31 @@ export default function ColorMatchHomework() {
             </ul>
           </div>
         )}
-        {/* Submit/Next/Result/Retry buttons */}
+        {/* Submit/Retry/Check buttons */}
         <div className="flex flex-col items-center mt-6 gap-2">
           {!submitted && (
             <>
               <button
                 className="bg-blue-500 text-white px-6 py-2 rounded font-bold disabled:opacity-50"
-                disabled={!allMatched}
+                disabled={!allMatched || disabled}
                 onClick={handleCheck}
               >
                 Check Answers
               </button>
-              {showResult && allCorrect && !isLastExercise && (
-                <button
-                  className="bg-green-500 text-white px-6 py-2 rounded font-bold mt-2"
-                  onClick={handleNextExercise}
-                >
-                  Next Exercise
-                </button>
-              )}
-              {showResult && allCorrect && isLastExercise && allExercisesDone && (
+              {showResult && allCorrect && (
                 <button
                   className="bg-green-600 text-white px-6 py-2 rounded font-bold mt-2"
                   onClick={handleSubmit}
+                  disabled={disabled}
                 >
-                  Submit to Teacher
+                  Submit
                 </button>
               )}
               {showResult && !allCorrect && (
                 <button
                   className="bg-yellow-500 text-white px-6 py-2 rounded font-bold mt-2"
                   onClick={handleRetry}
+                  disabled={disabled}
                 >
                   Retry
                 </button>
@@ -444,14 +350,7 @@ export default function ColorMatchHomework() {
           )}
           {submitted && (
             <div className="mt-4 text-center">
-              <span className="text-green-600 font-bold block mb-2">Great job! All assignments for {day.day} are done! 🎉</span>
-              <span className="text-blue-600 font-semibold block mb-2">More activities coming soon!</span>
-              <button
-                className="bg-pink-500 text-white px-6 py-2 rounded font-bold mt-2"
-                onClick={() => navigate('/dashboard')}
-              >
-                Return to Dashboard
-              </button>
+              <span className="text-green-600 font-bold block mb-2">Great job! Activity complete! 🎉</span>
             </div>
           )}
           {showResult && !allCorrect && (

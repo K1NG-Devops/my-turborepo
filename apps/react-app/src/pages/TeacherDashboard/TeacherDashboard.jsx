@@ -10,9 +10,13 @@ import {
   FaCamera,
   FaBars,
   FaTimes,
+  FaEye,
+  FaFileAlt,
 } from "react-icons/fa";
 import TeacherChildrenList from "../../components/Teacher/TeacherChildrenList";
 import TeacherAttendance from "../../components/Teacher/TeacherAttendance";
+import TeacherSubmissionsView from "../../components/TeacherSubmissionsView";
+import TeacherReportsView from "../../components/TeacherReportsView";
 
 const TeacherDashboard = ({ user }) => {
   const [darkMode, setDarkMode] = useState(false);
@@ -27,6 +31,7 @@ const TeacherDashboard = ({ user }) => {
   const [showReports, setShowReports] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [activeView, setActiveView] = useState('dashboard'); // dashboard, submissions, reports
   const navigate = useNavigate();
 
   const sidebarRef = useRef();
@@ -118,6 +123,20 @@ const TeacherDashboard = ({ user }) => {
       bgColor: "bg-indigo-200",
       onClick: () => navigate("/teacher-dashboard/activity-builder"),
     },
+    {
+      title: "View Submissions",
+      icon: <FaEye size={48} className="text-emerald-700" />,
+      description: "View homework submissions from students",
+      bgColor: "bg-emerald-200",
+      onClick: () => setActiveView('submissions'),
+    },
+    {
+      title: "Send Reports",
+      icon: <FaFileAlt size={48} className="text-cyan-700" />,
+      description: "Generate and send reports to parents",
+      bgColor: "bg-cyan-200",
+      onClick: () => setActiveView('reports'),
+    },
   ];
 
   
@@ -171,24 +190,52 @@ const TeacherDashboard = ({ user }) => {
 
       {/* Main Content */}
       <main className="flex-1 md:ml-0 overflow-y-auto p-8 mt-12 md:mt-0">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {showChildren ? (
-            <TeacherChildrenList onBack={() => setShowChildren(false)} />
-          ) : showAttendance ? (
-            <TeacherAttendance onBack={() => setShowAttendance(false)} />
-          ) :  (
-            cards.map((card) => (
-              <DashboardCard
-                key={card.title}
-                {...card}
-                onClick={() => {
-                  setShowSidebar(false); // Close sidebar when tile clicked
-                  card.onClick && card.onClick();
-                }}
-              />
-            ))
-          )}
-        </div>
+        {activeView === 'submissions' ? (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h1 className="text-2xl font-bold text-gray-800">Student Homework Submissions</h1>
+              <button
+                onClick={() => setActiveView('dashboard')}
+                className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+              >
+                Back to Dashboard
+              </button>
+            </div>
+            <TeacherSubmissionsView />
+          </div>
+        ) : activeView === 'reports' ? (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h1 className="text-2xl font-bold text-gray-800">Send Reports to Parents</h1>
+              <button
+                onClick={() => setActiveView('dashboard')}
+                className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+              >
+                Back to Dashboard
+              </button>
+            </div>
+            <TeacherReportsView />
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {showChildren ? (
+              <TeacherChildrenList onBack={() => setShowChildren(false)} />
+            ) : showAttendance ? (
+              <TeacherAttendance onBack={() => setShowAttendance(false)} />
+            ) : (
+              cards.map((card) => (
+                <DashboardCard
+                  key={card.title}
+                  {...card}
+                  onClick={() => {
+                    setShowSidebar(false); // Close sidebar when tile clicked
+                    card.onClick && card.onClick();
+                  }}
+                />
+              ))
+            )}
+          </div>
+        )}
       </main>
     </div>
   );

@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -131,16 +132,19 @@ const HomeworkList = ({ onProgressUpdate }) => {
     const hasAttempt = completionAnswers[selectedHomework.id]?.trim() || completedActivities[selectedHomework.id];
     const isInteractive = selectedHomework.type && INTERACTIVE_COMPONENTS[selectedHomework.type];
     
-    if (!hasAttempt && (!file || isInteractive)) {
-      toast.error('Please attempt the homework first.');
-      return;
-    }
-
-    // Check if completion is required and provided
-    const hasCompletion = completionAnswers[selectedHomework.id]?.trim();
-    if (!hasCompletion && !file) {
-      toast.error('Please complete the assignment or upload a file.');
-      return;
+    // For interactive activities, check if they have been completed
+    if (isInteractive) {
+      if (!hasAttempt) {
+        toast.error('Please complete the interactive activity first.');
+        return;
+      }
+    } else {
+      // For non-interactive homework, require file upload or written answer
+      const hasCompletion = completionAnswers[selectedHomework.id]?.trim();
+      if (!hasCompletion && !file) {
+        toast.error('Please complete the assignment or upload a file.');
+        return;
+      }
     }
 
     try {
@@ -331,7 +335,7 @@ const HomeworkList = ({ onProgressUpdate }) => {
                         >
                         {hw.type && INTERACTIVE_COMPONENTS[hw.type] ? '🎮' : <FaEdit className="text-xs sm:text-sm" />} 
                         <span className="hidden sm:inline">
-                          {hw.type && INTERACTIVE_COMPONENTS[hw.type] ? 'Play' : 'Complete'}
+                          {hw.type && INTERACTIVE_COMPONENTS[hw.type] ? 'Start' : 'Complete'}
                         </span>
                         </button>
                       )}
@@ -378,6 +382,9 @@ const HomeworkList = ({ onProgressUpdate }) => {
                                   <DialogContent className="max-w-4xl w-[95vw] h-[90vh]">
                                     <DialogHeader>
                                       <DialogTitle>{hw.title} - Assignment Preview</DialogTitle>
+                                      <DialogDescription>
+                                        Preview the assignment file provided by your teacher.
+                                      </DialogDescription>
                                     </DialogHeader>
                                     <div className="w-full h-full overflow-hidden">
                                       <iframe
@@ -660,6 +667,9 @@ const HomeworkList = ({ onProgressUpdate }) => {
           <DialogContent className="max-w-md">
             <DialogHeader>
               <DialogTitle>Confirm Homework Submission</DialogTitle>
+              <DialogDescription>
+                Please review your submission before confirming.
+              </DialogDescription>
             </DialogHeader>
             
             <div className="space-y-4">

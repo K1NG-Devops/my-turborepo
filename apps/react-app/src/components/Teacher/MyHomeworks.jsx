@@ -11,14 +11,14 @@ const MyHomeworks = () => {
         const fetchHomeworks = async () => {
             try {
                 const res = await axios.get(
-                    `https://youngeagles-api-server.up.railway.app/api/homeworks/teacher/${teacherId}`,
+                    `https://youngeagles-api-server.up.railway.app/api/homeworks/for-teacher/${teacherId}`,
                     {
                         headers: {
                             Authorization: `Bearer ${token}`,
                         },
                     }
                 );
-                setHomeworks(res.data);
+                setHomeworks(res.data.homeworks || []);
             } catch (error) {
                 console.error("Failed to fetch homeworks", error);
             } finally {
@@ -49,6 +49,7 @@ const MyHomeworks = () => {
                                 <th className="py-2 px-4 border-b">Grade</th>
                                 <th className="py-2 px-4 border-b">Class</th>
                                 <th className="py-2 px-4 border-b">Status</th>
+                                <th className="py-2 px-4 border-b">Type</th>
                                 <th className="py-2 px-4 border-b">File</th>
                             </tr>
                         </thead>
@@ -56,14 +57,19 @@ const MyHomeworks = () => {
                             {homeworks.map((hw) => (
                                 <tr key={hw.id}>
                                     <td className="py-2 px-4 border-b">{hw.title}</td>
-                                    <td className="py-2 px-4 border-b">{new Date(hw.dueDate).toLocaleDateString()}</td>
+                                    <td className="py-2 px-4 border-b">{hw.due_date ? new Date(hw.due_date).toLocaleDateString() : 'No due date'}</td>
                                     <td className="py-2 px-4 border-b">{hw.grade}</td>
-                                    <td className="py-2 px-4 border-b">{hw.className}</td>
+                                    <td className="py-2 px-4 border-b">{hw.class_name || hw.className}</td>
                                     <td className="py-2 px-4 border-b capitalize">{hw.status}</td>
+                                    <td className="py-2 px-4 border-b">{hw.type || '-'}</td>
                                     <td className="py-2 px-4 border-b">
-                                        <a href={hw.fileUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                                            View File
-                                        </a>
+                                        {(hw.file_url || hw.fileUrl) ? (
+                                            <a href={hw.file_url || hw.fileUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                                                View File
+                                            </a>
+                                        ) : (
+                                            <span className="text-gray-500">No file</span>
+                                        )}
                                     </td>
                                 </tr>
                             ))}
