@@ -86,20 +86,43 @@ const NotificationPermission = () => {
 
   const sendTokenToServer = async (token) => {
     try {
-      const response = await fetch("/api/fcm/token", {
+      const apiUrl = import.meta.env.MODE === 'production' 
+        ? 'https://youngeagles-api-server.up.railway.app' 
+        : 'http://localhost:3000';
+      
+      const authToken = localStorage.getItem('accessToken');
+      if (!authToken) {
+        console.warn('No auth token found, skipping FCM token registration');
+        return;
+      }
+      
+      const parentId = localStorage.getItem('parent_id');
+      
+      const response = await fetch(`${apiUrl}/api/homeworks/fcm/token`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token }),
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${authToken}`
+        },
+        body: JSON.stringify({ 
+          token,
+          parentId: parentId ? parseInt(parentId) : undefined
+        }),
       });
+      
       if (!response.ok) {
         const text = await response.text();
         console.error("FCM token POST failed:", response.status, text);
         throw new Error(`Failed to send token to server: ${response.status} ${text}`);
       }
+      
       console.log("FCM token sent to server successfully");
     } catch (err) {
       // Show a user-friendly message but do not break the app
       console.warn("Could not send FCM token to server. Notifications may not work.", err.message);
+      toast.error('Failed to register for notifications', {
+        description: 'Please try again later'
+      });
     }
   };
 

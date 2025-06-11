@@ -168,7 +168,7 @@ const HomeworkList = ({ onProgressUpdate }) => {
 
       // Submit to backend using the correct endpoint
       await axios.post(
-        'https://youngeagles-api-server.up.railway.app/api/submissions',
+        'https://youngeagles-api-server.up.railway.app/api/homeworks/submit',
         {
           homeworkId: selectedHomework.id,
           parentId: parent_id,
@@ -202,7 +202,7 @@ const HomeworkList = ({ onProgressUpdate }) => {
 
   const deleteSubmission = async (hw) => {
     try {
-      await axios.delete(`https://youngeagles-api-server.up.railway.app/api/submissions/${hw.submission_id}`, {
+      await axios.delete(`https://youngeagles-api-server.up.railway.app/api/homeworks/submissions/${hw.submission_id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       toast.success('Submission deleted successfully.');

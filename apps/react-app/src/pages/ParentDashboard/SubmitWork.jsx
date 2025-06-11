@@ -86,7 +86,7 @@ const SubmitWork = () => {
 
                     // Submit to backend
                     await axios.post(
-                        'https://youngeagles-api-server.up.railway.app/api/submissions',
+                        'https://youngeagles-api-server.up.railway.app/api/homeworks/submit',
                         {
                             homeworkId: selectedHomework,
                             fileURL: downloadURL,
