@@ -10,6 +10,7 @@
   "scope": "/",
   "lang": "en",
   "categories": ["education", "productivity"],
+  "gcm_sender_id": "482749285321",
   "icons": [
     {
       "src": "/pwa-72x72.png",
