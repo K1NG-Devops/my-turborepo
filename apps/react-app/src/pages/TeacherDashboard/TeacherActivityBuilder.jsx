@@ -3,6 +3,7 @@ import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { FaPuzzlePiece, FaPaintBrush, FaShapes, FaPalette, FaQuestion, FaBook, FaStar, FaAppleAlt, FaDog, FaMusic } from 'react-icons/fa';
 import Confetti from 'react-confetti';
 import { decodeToken } from '../../utils/decodeToken';
+import { useNavigate } from 'react-router-dom';
 let useSound, popSfx, successSfx;
 try {
   useSound = require('use-sound').default;
@@ -252,24 +253,123 @@ async function fetchTeacherByClass(className, grade) {
 // Submit activity/homework to backend
 async function submitHomework({ classInfo, teacher, activity, dueDate, fileUrl = '' }) {
   const token = localStorage.getItem('accessToken');
+  
+  // Debug logging to see what we're receiving
+  console.log('🔍 submitHomework received:', {
+    classInfo,
+    teacher,
+    activity,
+    dueDate,
+    fileUrl
+  });
+  
+  // Validate required data
+  if (!activity?.title) throw new Error('Activity title is required');
+  if (!classInfo?.className) throw new Error('Class name is required');
+  if (!classInfo?.grade) throw new Error('Grade is required');
+  if (!teacher?.id) throw new Error('Teacher ID is required');
+  
   const payload = {
     title: activity.title,
-    instructions: activity.instructions,
+    instructions: activity.instructions || '',
     className: classInfo.className,
     grade: classInfo.grade,
     uploadedBy: teacher.id,
     fileUrl: fileUrl || '', // Support for file uploads
     dueDate: dueDate || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // Default to 1 week from now
-    // Add any other fields your backend expects
+    type: activity.type || null,
+    items: activity.items || null,
   };
+  
+  console.log('📤 Sending payload:', payload);
   const response = await fetch('https://youngeagles-api-server.up.railway.app/api/homeworks/upload', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
     body: JSON.stringify(payload),
   });
-  if (!response.ok) throw new Error('Failed to submit homework');
-  return response.json();
+  
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+    console.error('❌ Server response error:', {
+      status: response.status,
+      statusText: response.statusText,
+      errorData
+    });
+    throw new Error(`Server error ${response.status}: ${errorData.error || errorData.message || response.statusText}`);
+  }
+  
+  const result = await response.json();
+  console.log('✅ Homework submitted successfully:', result);
+  return result;
 }
+
+// Update existing homework
+async function updateHomework(homeworkId, data) {
+  const token = localStorage.getItem('accessToken');
+  
+  const payload = {
+    title: data.title,
+    instructions: data.instructions,
+    type: data.type,
+    items: data.items
+  };
+  
+  const response = await fetch(`https://youngeagles-api-server.up.railway.app/api/homework/${homeworkId}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+    body: JSON.stringify(payload),
+  });
+  
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+    throw new Error(`Update failed: ${errorData.error || errorData.message}`);
+  }
+  
+  return await response.json();
+}
+
+// Helper to get item field labels based on type
+const getItemFields = (type) => {
+  switch (type) {
+    case 'quiz':
+      return [
+        { key: 'name', label: 'Question' },
+        { key: 'target', label: 'Answer' },
+        { key: 'hint', label: 'Hint (optional)' },
+      ];
+    case 'memory':
+      return [
+        { key: 'name', label: 'Item 1' },
+        { key: 'target', label: 'Item 2' },
+        { key: 'hint', label: 'Hint (optional)' },
+      ];
+    case 'sort':
+      return [
+        { key: 'name', label: 'Item' },
+        { key: 'target', label: 'Category' },
+        { key: 'hint', label: 'Hint (optional)' },
+      ];
+    case 'color':
+      return [
+        { key: 'name', label: 'Shape/Item' },
+        { key: 'target', label: 'Color' },
+        { key: 'hint', label: 'Hint (optional)' },
+      ];
+    case 'puzzle':
+      return [
+        { key: 'name', label: 'Piece' },
+        { key: 'target', label: 'Position/Target' },
+        { key: 'hint', label: 'Hint (optional)' },
+      ];
+    case 'match':
+    default:
+      return [
+        { key: 'name', label: 'Item' },
+        { key: 'target', label: 'Target' },
+        { key: 'hint', label: 'Hint (optional)' },
+      ];
+  }
+};
 
 export default function TeacherActivityBuilder() {
   const [type, setType] = useState('match');
@@ -284,6 +384,10 @@ export default function TeacherActivityBuilder() {
   const confettiRef = useRef();
   const [playPop] = useSound ? useSound(popSfx, { volume: 0.5 }) : [() => {}];
   const [playSuccess] = useSound ? useSound(successSfx, { volume: 0.5 }) : [() => {}];
+  const navigate = useNavigate();
+  const [homeworks, setHomeworks] = useState([]);
+  const [editingId, setEditingId] = useState(null);
+  const [dueDate, setDueDate] = useState('');
 
   // Auto-fill className and grade from JWT
   useEffect(() => {
@@ -293,6 +397,25 @@ export default function TeacherActivityBuilder() {
       if (decoded?.className) setClassName(decoded.className);
       if (decoded?.grade) setGrade(decoded.grade);
     }
+  }, []);
+
+  // Fetch posted homeworks
+  useEffect(() => {
+    const fetchHomeworks = async () => {
+      const teacherId = localStorage.getItem('teacherId');
+      const token = localStorage.getItem('accessToken');
+      if (!teacherId || !token) return;
+      try {
+        const res = await fetch(`https://youngeagles-api-server.up.railway.app/api/homeworks/for-teacher/${teacherId}`, {
+          headers: { 'Authorization': `Bearer ${token}` },
+        });
+        const data = await res.json();
+        setHomeworks(data.homeworks || []);
+      } catch (err) {
+        console.error('Error fetching homeworks:', err);
+      }
+    };
+    fetchHomeworks();
   }, []);
 
   // Template selection
@@ -331,26 +454,59 @@ export default function TeacherActivityBuilder() {
     setSubmitting(true);
     setError('');
     try {
-      // Only use class and teacher info for assignment
-      const classInfo = { className, grade };
-      let teacher = JSON.parse(localStorage.getItem('teacher'));
-      if (!teacher || !teacher.id) {
-        teacher = await fetchTeacherByClass(className, grade);
-        localStorage.setItem('teacher', JSON.stringify(teacher));
+      // Check if we're editing an existing homework
+      if (editingId) {
+        await updateHomework(editingId, {
+          title,
+          instructions,
+          type,
+          items: items.filter(item => item.name && item.target),
+        });
+        alert('Homework updated successfully!');
+        // Reset editing state
+        setEditingId(null);
+        setTitle('');
+        setInstructions('');
+        setItems([{ ...initialItem }]);
+        setType('match');
+        // Refresh homework list
+        const fetchHomeworks = async () => {
+          const teacherId = localStorage.getItem('teacherId');
+          const token = localStorage.getItem('accessToken');
+          if (!teacherId || !token) return;
+          try {
+            const res = await fetch(`https://youngeagles-api-server.up.railway.app/api/homeworks/for-teacher/${teacherId}`, {
+              headers: { 'Authorization': `Bearer ${token}` },
+            });
+            const data = await res.json();
+            setHomeworks(data.homeworks || []);
+          } catch (err) {
+            console.error('Error fetching homeworks:', err);
+          }
+        };
+        fetchHomeworks();
+      } else {
+        // Create new homework
+        const classInfo = { className, grade };
+        let teacher = JSON.parse(localStorage.getItem('teacher'));
+        if (!teacher || !teacher.id) {
+          teacher = await fetchTeacherByClass(className, grade);
+          localStorage.setItem('teacher', JSON.stringify(teacher));
+        }
+        const activity = {
+          type,
+          title,
+          instructions,
+          className,
+          grade,
+          items: items.filter(item => item.name && item.target),
+        };
+        await submitHomework({ classInfo, teacher, activity, dueDate });
+        setShowConfetti(true);
+        playSuccess();
+        setTimeout(() => setShowConfetti(false), 3000);
+        alert('Homework/activity submitted to your class!');
       }
-      const activity = {
-        type,
-        title,
-        instructions,
-        className,
-        grade,
-        items: items.filter(item => item.name && item.target),
-      };
-      await submitHomework({ classInfo, teacher, activity });
-      setShowConfetti(true);
-      playSuccess();
-      setTimeout(() => setShowConfetti(false), 3000);
-      alert('Homework/activity submitted to your class!');
     } catch (err) {
       setError(err.message);
       alert('Submission failed: ' + err.message);
@@ -359,8 +515,37 @@ export default function TeacherActivityBuilder() {
     }
   };
 
+  // Delete homework
+  const handleDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this homework?')) return;
+    const token = localStorage.getItem('accessToken');
+    try {
+      await fetch(`https://youngeagles-api-server.up.railway.app/api/homeworks/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      setHomeworks(homeworks.filter(hw => hw.id !== id));
+    } catch (err) {
+      alert('Failed to delete homework.');
+    }
+  };
+
+  // Edit homework
+  const handleEdit = (hw) => {
+    setEditingId(hw.id);
+    setType(hw.type || 'match');
+    setTitle(hw.title || '');
+    setInstructions(hw.instructions || '');
+    setItems(hw.items || [{ ...initialItem }]);
+    setClassName(hw.class_name || '');
+    setGrade(hw.grade || '');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <div className="max-w-4xl mx-auto p-4 sm:p-6 bg-white rounded shadow mt-8 overflow-x-auto animate-fade-in">
+      {/* Back to Dashboard Button */}
+      <button onClick={() => navigate('/teacher-dashboard')} className="mb-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700">Back to Dashboard</button>
       {showConfetti && <Confetti width={window.innerWidth} height={window.innerHeight} recycle={false} numberOfPieces={300} gravity={0.3} />}
       <h2 className="text-3xl font-bold mb-6 text-center text-blue-700 animate-bounce">Create Fun Homework Activity</h2>
       {error && <div className="mb-4 p-3 bg-red-100 text-red-800 rounded text-center font-semibold">{error}</div>}
@@ -432,6 +617,18 @@ export default function TeacherActivityBuilder() {
                 <input value={grade} readOnly className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-300 transition bg-gray-100 cursor-not-allowed" />
               </div>
             </div>
+            <div className="mb-3">
+              <label className="block font-semibold mb-1">Due Date <span className="text-red-500">*</span></label>
+              <input 
+                type="date" 
+                value={dueDate} 
+                onChange={e => setDueDate(e.target.value)} 
+                className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-300 transition" 
+                min={new Date().toISOString().split('T')[0]}
+                required
+              />
+              <p className="text-sm text-gray-600 mt-1">Select the date by which this homework should be completed.</p>
+            </div>
             <label className="block font-semibold mb-2">Items (Drag to reorder)</label>
             <DragDropContext onDragEnd={onDragEnd}>
               <Droppable droppableId="items-list" isDropDisabled={false}>
@@ -446,9 +643,15 @@ export default function TeacherActivityBuilder() {
                             {...provided.dragHandleProps}
                             className={`flex flex-col md:flex-row gap-2 mb-2 items-center w-full bg-white border rounded p-2 shadow-sm transition-transform duration-200 ${snapshot.isDragging ? 'ring-2 ring-blue-400 scale-105' : ''}`}
                           >
-                            <input placeholder="Name" value={item.name} onChange={e => handleItemChange(idx, 'name', e.target.value)} className="p-2 border rounded flex-1 focus:ring-2 focus:ring-pink-300 transition" />
-                            <input placeholder="Target/Answer" value={item.target} onChange={e => handleItemChange(idx, 'target', e.target.value)} className="p-2 border rounded flex-1 focus:ring-2 focus:ring-green-300 transition" />
-                            <input placeholder="Hint" value={item.hint} onChange={e => handleItemChange(idx, 'hint', e.target.value)} className="p-2 border rounded flex-1 focus:ring-2 focus:ring-yellow-300 transition" />
+                            {getItemFields(type).map(field => (
+                              <input
+                                key={field.key}
+                                placeholder={field.label}
+                                value={item[field.key] || ''}
+                                onChange={e => handleItemChange(idx, field.key, e.target.value)}
+                                className="p-2 border rounded flex-1 focus:ring-2 focus:ring-blue-300 transition"
+                              />
+                            ))}
                             <button type="button" onClick={() => removeItem(idx)} className="text-red-600 font-bold px-2 hover:scale-125 transition">✕</button>
                           </div>
                         )}
@@ -468,7 +671,13 @@ export default function TeacherActivityBuilder() {
             <div className="mb-2 text-sm text-gray-600">{instructions || <span className="text-gray-400">(No instructions yet)</span>}</div>
             <ul className="list-disc pl-5">
               {items.map((item, idx) => (
-                <li key={idx} className="transition-all duration-200 hover:scale-105"><b>{item.name}</b> → <span className="text-blue-700">{item.target}</span> <span className="text-gray-500">({item.hint})</span></li>
+                <li key={idx} className="transition-all duration-200 hover:scale-105">
+                  {getItemFields(type).map(field => (
+                    <span key={field.key} className="mr-2">
+                      <b>{field.label}:</b> {item[field.key] || <span className="text-gray-400">(empty)</span>}
+                    </span>
+                  ))}
+                </li>
               ))}
             </ul>
             <div className="mt-4 text-xs text-gray-500">(This is how children will see the activity!)</div>
@@ -484,6 +693,41 @@ export default function TeacherActivityBuilder() {
           </button>
         </div>
       </form>
+      {/* Posted Homeworks Section */}
+      <div className="mt-12">
+        <h3 className="font-bold text-xl mb-4 text-blue-700">My Posted Homeworks</h3>
+        {homeworks.length === 0 ? (
+          <div className="text-gray-500">No homeworks posted yet.</div>
+        ) : (
+          <table className="min-w-full text-sm text-left border">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="py-2 px-4 border-b">Title</th>
+                <th className="py-2 px-4 border-b">Type</th>
+                <th className="py-2 px-4 border-b">Due Date</th>
+                <th className="py-2 px-4 border-b">Class</th>
+                <th className="py-2 px-4 border-b">Grade</th>
+                <th className="py-2 px-4 border-b">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {homeworks.map(hw => (
+                <tr key={hw.id}>
+                  <td className="py-2 px-4 border-b">{hw.title}</td>
+                  <td className="py-2 px-4 border-b">{hw.type || '-'}</td>
+                  <td className="py-2 px-4 border-b">{hw.due_date ? new Date(hw.due_date).toLocaleDateString() : '-'}</td>
+                  <td className="py-2 px-4 border-b">{hw.class_name}</td>
+                  <td className="py-2 px-4 border-b">{hw.grade}</td>
+                  <td className="py-2 px-4 border-b">
+                    <button onClick={() => handleEdit(hw)} className="mr-2 px-2 py-1 bg-yellow-400 text-white rounded hover:bg-yellow-500">Edit</button>
+                    <button onClick={() => handleDelete(hw.id)} className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-700">Delete</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
     </div>
   );
 }
