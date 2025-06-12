@@ -314,7 +314,7 @@ const TeacherSubmissionsView = () => {
                     }`}></div>
                     <div>
                       <p className="font-medium mobile-body">
-                        {student.first_name} {student.last_name}
+                        {student.name}
                       </p>
                       <p className="text-sm text-gray-600 mobile-caption">
                         Class: {student.className}
@@ -407,7 +407,7 @@ const TeacherSubmissionsView = () => {
                   <div className="flex items-center justify-between">
                     <div>
                       <h4 className="font-medium text-gray-800">
-                        {submission.student_name} {submission.student_last_name}
+                        {submission.student_name}
                       </h4>
                       <p className="text-sm text-gray-600">
                         {submission.homework_title} • {submission.class_name}
@@ -450,7 +450,7 @@ const TeacherSubmissionsView = () => {
               <div className="space-y-4">
                 <div>
                   <label className="font-medium">Student:</label>
-                  <p>{selectedSubmission.student_name} {selectedSubmission.student_last_name}</p>
+                  <p>{selectedSubmission.student_name}</p>
                 </div>
                 
                 <div>
