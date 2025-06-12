@@ -233,7 +233,7 @@ const RoboticsActivity = ({ items = [], instructions = '', title = '', onSubmit 
                 <p className="text-xs text-gray-500">Robot position: ({robotPosition.x}, {robotPosition.y}) | Goal: (4, 4)</p>
               </div>
               {hasSubmitted && (
-                <p className="text-sm text-green-600 font-medium">✅ Submitted to teacher!</p>
+                <p className="text-sm text-green-600 font-medium">✅ Activity Completed!</p>
               )}
             </div>
             
@@ -428,8 +428,8 @@ const RoboticsActivity = ({ items = [], instructions = '', title = '', onSubmit 
                 )}
                 {hasSubmitted && (
                   <div className="bg-green-100 border border-green-300 rounded-lg p-4">
-                    <p className="text-green-800 font-semibold">✅ Submitted to Teacher!</p>
-                    <p className="text-sm text-green-600 mt-1">Your teacher will review your work.</p>
+                    <p className="text-green-800 font-semibold">✅ Activity Completed!</p>
+                    <p className="text-sm text-green-600 mt-1">Now use the Submit button to send your homework to the teacher.</p>
                   </div>
                 )}
               </div>

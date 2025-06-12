@@ -56,6 +56,7 @@ const HomeworkList = ({ onProgressUpdate }) => {
   const [editingHomework, setEditingHomework] = useState({});
   const [showSubmissionDialog, setShowSubmissionDialog] = useState(false);
   const [childInfoLoaded, setChildInfoLoaded] = useState(false);
+  const [submissionInProgress, setSubmissionInProgress] = useState({});
 
   const parent_id = localStorage.getItem('parent_id');
   const token = localStorage.getItem('accessToken');
@@ -204,6 +205,12 @@ const HomeworkList = ({ onProgressUpdate }) => {
       return;
     }
     
+    // Prevent multiple submissions for the same homework
+    if (submissionInProgress[selectedHomework.id]) {
+      console.log('Submission already in progress for homework:', selectedHomework.id);
+      return;
+    }
+    
     const isInteractive = selectedHomework.type && INTERACTIVE_COMPONENTS[selectedHomework.type];
     const hasActivityResult = completedActivities[selectedHomework.id];
     const hasWrittenAnswer = completionAnswers[selectedHomework.id]?.trim();
@@ -224,6 +231,11 @@ const HomeworkList = ({ onProgressUpdate }) => {
     }
 
     try {
+      // Set submission in progress for this specific homework
+      setSubmissionInProgress(prev => ({
+        ...prev,
+        [selectedHomework.id]: true
+      }));
       setUploading(true);
       let downloadURL = null;
 
@@ -279,6 +291,11 @@ const HomeworkList = ({ onProgressUpdate }) => {
       console.error(err);
     } finally {
       setUploading(false);
+      // Clear submission in progress for this homework
+      setSubmissionInProgress(prev => ({
+        ...prev,
+        [selectedHomework.id]: false
+      }));
     }
   };
 
@@ -697,14 +714,14 @@ const HomeworkList = ({ onProgressUpdate }) => {
                               setSelectedHomework(hw);
                               setShowSubmissionDialog(true);
                             }}
-                            disabled={uploading || !isReadyToSubmit}
+                            disabled={uploading || !isReadyToSubmit || submissionInProgress[hw.id]}
                             className={`w-full font-semibold py-3 transition-all mb-3 ${
-                              isReadyToSubmit 
+                              isReadyToSubmit && !submissionInProgress[hw.id]
                                 ? 'bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white cursor-pointer'
                                 : 'bg-gray-400 text-gray-600 cursor-not-allowed'
                             }`}
                           >
-                            {uploading ? (
+                            {(uploading || submissionInProgress[hw.id]) ? (
                               <>📤 Submitting... Please wait</>
                             ) : isReadyToSubmit ? (
                               <><FaUpload className="mr-2" /> Submit Homework</>
@@ -849,10 +866,10 @@ const HomeworkList = ({ onProgressUpdate }) => {
                     handleSubmitWork();
                     setShowSubmissionDialog(false);
                   }}
-                  disabled={uploading}
+                  disabled={uploading || (selectedHomework && submissionInProgress[selectedHomework.id])}
                   className="flex-1 bg-green-600 hover:bg-green-700"
                 >
-                  {uploading ? 'Submitting...' : 'Confirm Submit'}
+                  {(uploading || (selectedHomework && submissionInProgress[selectedHomework.id])) ? 'Submitting...' : 'Confirm Submit'}
                 </Button>
               </div>
             </div>
