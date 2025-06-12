@@ -86,9 +86,8 @@ const NotificationPermission = () => {
 
   const sendTokenToServer = async (token) => {
     try {
-      const apiUrl = import.meta.env.MODE === 'production' 
-        ? 'https://youngeagles-api-server.up.railway.app' 
-        : 'http://localhost:3000';
+      // Always use the production server for FCM token registration
+      const apiUrl = 'https://youngeagles-api-server.up.railway.app';
       
       const authToken = localStorage.getItem('accessToken');
       const parentId = localStorage.getItem('parent_id');
@@ -103,6 +102,7 @@ const NotificationPermission = () => {
         return;
       }
       
+      console.log('Sending FCM token to server:', apiUrl);
       const response = await fetch(`${apiUrl}/api/homeworks/fcm/token`, {
         method: "POST",
         headers: { 
@@ -123,11 +123,9 @@ const NotificationPermission = () => {
       
       console.log("FCM token sent to server successfully");
     } catch (err) {
-      // Show a user-friendly message but do not break the app
+      // Log the error but don't show user-facing errors for FCM registration
       console.warn("Could not send FCM token to server. Notifications may not work.", err.message);
-      toast.error('Failed to register for notifications', {
-        description: 'Please try again later'
-      });
+      // Don't show toast error for non-critical FCM registration failures
     }
   };
 

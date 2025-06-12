@@ -69,7 +69,7 @@ const Sidebar = ({ user = {}, onLogout, onUploadPhoto, closeSidebar }) => {
       <button
           onClick={() => {
             onLogout();
-            closeSidebar(); 
+            if (closeSidebar) closeSidebar();
           }}
           className="w-full py-2 text-center text-white bg-red-500 hover:bg-red-700 rounded-md"
         >

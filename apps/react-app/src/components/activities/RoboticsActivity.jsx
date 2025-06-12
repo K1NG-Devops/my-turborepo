@@ -43,22 +43,16 @@ const RoboticsActivity = ({ items = [], instructions = '', title = '', onSubmit 
     [0, 0, 0, 1, 2]
   ];
   
-  // Available arrow commands for the robot
+  // Available arrow commands for the robot (only 4 directional arrows)
   const availableCommands = [
     { name: 'Up', icon: <FaArrowUp />, color: 'bg-blue-500', description: 'Move one block up' },
     { name: 'Down', icon: <FaArrowDown />, color: 'bg-green-500', description: 'Move one block down' },
     { name: 'Left', icon: <FaArrowLeft />, color: 'bg-yellow-500', description: 'Move one block left' },
     { name: 'Right', icon: <FaArrowRight />, color: 'bg-red-500', description: 'Move one block right' },
-    { name: 'Move Forward', icon: <FaArrowUp />, color: 'bg-purple-500', description: 'Move forward in current direction' },
-    { name: 'Turn Left', icon: <FaRedo />, color: 'bg-orange-500', description: 'Turn 90 degrees left' },
-    { name: 'Turn Right', icon: <FaRedo style={{transform: 'scaleX(-1)'}} />, color: 'bg-pink-500', description: 'Turn 90 degrees right' },
-    { name: 'Pick Up', icon: <FaHandPaper />, color: 'bg-teal-500', description: 'Pick up an object' },
-    { name: 'Stop', icon: <FaStop />, color: 'bg-red-600', description: 'Stop the robot' },
-    { name: 'Go', icon: <FaPlay />, color: 'bg-green-600', description: 'Start the robot' },
   ];
   
   const maxAttempts = 3;
-  const maxCommands = 6; // Allow up to 6 commands (more manageable for kids)
+  const maxCommands = 8; // Allow up to 8 commands as requested
 
 
   const handleDragEnd = (result) => {
@@ -115,23 +109,24 @@ const RoboticsActivity = ({ items = [], instructions = '', title = '', onSubmit 
     
     if (shouldAutoSubmit) {
       setHasSubmitted(true);
-    }
-
-    // Always submit the attempt
-    if (onSubmit) {
-      onSubmit({
-        score: goalReached ? 1 : 0,
-        total: 1,
-        percentage: goalReached ? 100 : 0,
-        success: goalReached,
-        commands: programSequence.filter(cmd => cmd !== null),
-        attempted: true,
-        robotPosition: finalPosition, // Use the final position passed to the function
-        attempts: newAttempts,
-        maxAttempts: maxAttempts,
-        autoSubmitted: shouldAutoSubmit,
-        completedAt: new Date().toISOString()
-      });
+      
+      // Submit the activity immediately
+      if (onSubmit) {
+        onSubmit({
+          score: goalReached ? 1 : 0,
+          total: 1,
+          percentage: goalReached ? 100 : 0,
+          success: goalReached,
+          failed: !goalReached && newAttempts >= maxAttempts,
+          commands: programSequence.filter(cmd => cmd !== null),
+          attempted: true,
+          robotPosition: finalPosition,
+          attempts: newAttempts,
+          maxAttempts: maxAttempts,
+          autoSubmitted: shouldAutoSubmit,
+          completedAt: new Date().toISOString()
+        });
+      }
     }
   };
 
@@ -206,7 +201,7 @@ const RoboticsActivity = ({ items = [], instructions = '', title = '', onSubmit 
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto p-4">
+    <div className="w-full max-w-6xl mx-auto p-2 sm:p-4">
       {showConfetti && (
         <Confetti
           width={window.innerWidth}
@@ -227,7 +222,7 @@ const RoboticsActivity = ({ items = [], instructions = '', title = '', onSubmit 
           )}
         </CardHeader>
         
-        <CardContent className="p-6">
+        <CardContent className="p-3 sm:p-6">
           {/* Robot Grid Visualization */}
           <div className="mb-6">
             <h3 className="text-lg font-semibold mb-3 text-center">🤖 Robot Maze Adventure</h3>
@@ -242,7 +237,7 @@ const RoboticsActivity = ({ items = [], instructions = '', title = '', onSubmit 
               )}
             </div>
             
-            <div className="grid grid-cols-5 gap-1 w-fit mx-auto mb-4 p-4 bg-gray-800 rounded-lg">
+            <div className="grid grid-cols-5 gap-1 w-fit mx-auto mb-4 p-2 sm:p-4 bg-gray-800 rounded-lg">
               {Array.from({ length: 25 }, (_, i) => {
                 const row = Math.floor(i / 5);
                 const col = i % 5;
@@ -255,7 +250,7 @@ const RoboticsActivity = ({ items = [], instructions = '', title = '', onSubmit 
                 return (
                   <div
                     key={i}
-                    className={`w-12 h-12 border flex items-center justify-center text-xl font-bold relative ${
+                    className={`w-10 h-10 sm:w-12 sm:h-12 border flex items-center justify-center text-sm sm:text-xl font-bold relative ${
                       isWall
                         ? 'bg-gray-900 border-gray-700'
                         : isRobotHere
@@ -271,7 +266,7 @@ const RoboticsActivity = ({ items = [], instructions = '', title = '', onSubmit 
                   >
                     {isWall && '🧱'}
                     {isRobotHere && (
-                      <div className="text-2xl animate-bounce">
+                      <div className="text-lg sm:text-2xl animate-bounce">
                         <span>🤖</span>
                       </div>
                     )}
@@ -304,7 +299,7 @@ const RoboticsActivity = ({ items = [], instructions = '', title = '', onSubmit 
 
           {!showResult ? (
             <DragDropContext onDragEnd={handleDragEnd}>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                 {/* Available Commands */}
                 <div>
                   <h3 className="text-lg font-semibold mb-3">🔧 Arrow Commands</h3>
@@ -323,7 +318,7 @@ const RoboticsActivity = ({ items = [], instructions = '', title = '', onSubmit 
                                 ref={provided.innerRef}
                                 {...provided.draggableProps}
                                 {...provided.dragHandleProps}
-                                className={`p-4 rounded-lg border-2 cursor-move transition-all ${
+                                className={`p-3 sm:p-4 rounded-lg border-2 cursor-move transition-all ${
                                   snapshot.isDragging
                                     ? 'shadow-lg scale-105 rotate-3'
                                     : 'hover:shadow-md hover:scale-102'
@@ -332,7 +327,7 @@ const RoboticsActivity = ({ items = [], instructions = '', title = '', onSubmit 
                                 }`}
                               >
                                 <div className="flex items-center justify-center">
-                                  <span className="text-4xl">{command.icon}</span>
+                                  <span className="text-2xl sm:text-4xl">{command.icon}</span>
                                 </div>
                               </div>
                             )}
@@ -355,7 +350,7 @@ const RoboticsActivity = ({ items = [], instructions = '', title = '', onSubmit 
                           <div
                             ref={provided.innerRef}
                             {...provided.droppableProps}
-                            className={`p-3 min-h-[60px] border-2 border-dashed rounded-lg flex items-center ${
+                            className={`p-2 sm:p-3 min-h-[50px] sm:min-h-[60px] border-2 border-dashed rounded-lg flex items-center ${
                               snapshot.isDraggingOver
                                 ? 'border-purple-500 bg-purple-50'
                                 : 'border-gray-300 bg-gray-50'
@@ -370,8 +365,8 @@ const RoboticsActivity = ({ items = [], instructions = '', title = '', onSubmit 
                                 <span className="bg-purple-500 text-white px-3 py-1 rounded-full text-sm font-bold">
                                   {index + 1}
                                 </span>
-                                <div className={`flex items-center justify-center ${programSequence[index].color} text-white px-3 py-1 rounded-lg flex-1`}>
-                                  <span className="text-2xl">{programSequence[index].icon}</span>
+                                <div className={`flex items-center justify-center ${programSequence[index].color} text-white px-2 sm:px-3 py-1 rounded-lg flex-1`}>
+                                  <span className="text-lg sm:text-2xl">{programSequence[index].icon}</span>
                                 </div>
                                 {!hasSubmitted && (
                                   <button

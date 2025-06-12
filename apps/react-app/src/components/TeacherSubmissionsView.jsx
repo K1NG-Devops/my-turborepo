@@ -26,19 +26,44 @@ const TeacherSubmissionsView = () => {
   const fetchAllSubmissions = async () => {
     try {
       setLoading(true);
+      console.log('Fetching all submissions for teacher:', teacherId);
+      
       const response = await axios.get(
         'https://youngeagles-api-server.up.railway.app/api/homeworks/teacher/all-submissions',
         {
           headers: {
             Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
           },
         }
       );
 
-      setAllSubmissions(response.data.submissions || []);
+      console.log('All submissions response:', response.data);
+      setAllSubmissions(response.data.submissions || response.data || []);
+      
     } catch (error) {
       console.error('Error fetching all submissions:', error);
-      toast.error('Failed to load submissions');
+      
+      if (error.response) {
+        const status = error.response.status;
+        console.error('API Error:', {
+          status,
+          message: error.response.data?.message,
+          url: error.config?.url
+        });
+        
+        if (status === 500) {
+          toast.error('Server error: Unable to fetch submissions. Please try again later.');
+        } else if (status === 404) {
+          toast.error('No submissions found for this teacher.');
+        } else {
+          toast.error(`Failed to load submissions: ${error.response.data?.message || 'Unknown error'}`);
+        }
+      } else {
+        toast.error('Network error: Could not connect to server');
+      }
+      
+      setAllSubmissions([]);
     } finally {
       setLoading(false);
     }
@@ -62,27 +87,88 @@ const TeacherSubmissionsView = () => {
 
   const fetchSubmissionsForHomework = async (homeworkId) => {
     try {
+      console.log('Fetching submissions for homework ID:', homeworkId);
+      
       const response = await axios.get(
         `https://youngeagles-api-server.up.railway.app/api/homeworks/${homeworkId}/submissions`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
           },
         }
       );
 
-      const { homework, submissions, studentsWithStatus, totalStudents, submittedCount, pendingCount } = response.data;
+      console.log('Submissions API response:', response.data);
       
-      setSelectedHomework(homework);
-      setStudentsWithStatus(studentsWithStatus);
-      setStats({
-        total: totalStudents,
-        submitted: submittedCount,
-        pending: pendingCount
-      });
+      // Handle different possible response structures
+      const responseData = response.data;
+      
+      // Check if response has the expected structure
+      if (responseData && typeof responseData === 'object') {
+        const {
+          homework = null,
+          submissions = [],
+          studentsWithStatus = [],
+          totalStudents = 0,
+          submittedCount = 0,
+          pendingCount = 0
+        } = responseData;
+        
+        setSelectedHomework(homework);
+        setStudentsWithStatus(studentsWithStatus);
+        setStats({
+          total: totalStudents,
+          submitted: submittedCount,
+          pending: pendingCount
+        });
+        
+        console.log('Successfully loaded submissions:', {
+          homework: homework?.title,
+          totalSubmissions: submissions.length,
+          studentsCount: studentsWithStatus.length
+        });
+      } else {
+        console.warn('Unexpected response structure:', responseData);
+        toast.error('Received unexpected data format from server');
+      }
+      
     } catch (error) {
       console.error('Error fetching submissions for homework:', error);
-      toast.error('Failed to load homework submissions');
+      
+      // Provide more specific error messages
+      if (error.response) {
+        const status = error.response.status;
+        const message = error.response.data?.message || error.response.data?.error || 'Unknown error';
+        
+        console.error('API Error Details:', {
+          status,
+          message,
+          url: error.config?.url,
+          data: error.response.data
+        });
+        
+        if (status === 404) {
+          toast.error('Homework not found or no submissions available');
+        } else if (status === 403) {
+          toast.error('You do not have permission to view these submissions');
+        } else if (status === 401) {
+          toast.error('Please log in again to view submissions');
+        } else {
+          toast.error(`Failed to load submissions: ${message}`);
+        }
+      } else if (error.request) {
+        console.error('Network error:', error.request);
+        toast.error('Network error: Could not connect to server');
+      } else {
+        console.error('Request setup error:', error.message);
+        toast.error('Error setting up request');
+      }
+      
+      // Reset states on error
+      setSelectedHomework(null);
+      setStudentsWithStatus([]);
+      setStats({ total: 0, submitted: 0, pending: 0 });
     }
   };
 

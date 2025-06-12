@@ -51,15 +51,90 @@ const HomeworkList = ({ onProgressUpdate }) => {
   const [activeTab, setActiveTab] = useState({});
   const [completedActivities, setCompletedActivities] = useState({});
   const [selectedHomework, setSelectedHomework] = useState(null);
+  const [childInfo, setChildInfo] = useState({ name: '', id: '' });
+  const [activityFailures, setActivityFailures] = useState({});
   const [editingHomework, setEditingHomework] = useState({});
   const [showSubmissionDialog, setShowSubmissionDialog] = useState(false);
+  const [childInfoLoaded, setChildInfoLoaded] = useState(false);
 
   const parent_id = localStorage.getItem('parent_id');
   const token = localStorage.getItem('accessToken');
-
+  
   useEffect(() => {
-    fetchHomeworks();
-  }, [parent_id]);
+    if (parent_id) {
+      fetchHomeworks();
+      if (!childInfoLoaded) {
+        fetchChildInfo();
+      }
+    }
+  }, [parent_id, childInfoLoaded]);
+  
+  const fetchChildInfo = async () => {
+    if (childInfoLoaded) {
+      console.log('Child info already loaded, skipping');
+      return;
+    }
+    
+    try {
+      console.log('Fetching child info for parent ID:', parent_id);
+      
+      const res = await axios.get(
+        `https://youngeagles-api-server.up.railway.app/api/auth/parents/${parent_id}/children`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+        }
+      );
+      
+      console.log('Child info response:', res.data);
+      const children = Array.isArray(res.data) ? res.data : res.data.children || [];
+      
+      if (children.length > 0) {
+        const child = children[0];
+        const childInfo = {
+          name: `${child.first_name || ''} ${child.last_name || ''}`.trim() || 'Student',
+          id: child.id || ''
+        };
+        
+        setChildInfo(childInfo);
+        console.log('Child info set:', childInfo);
+        
+        // Store in localStorage for future use
+        localStorage.setItem('child_name', childInfo.name);
+        localStorage.setItem('child_id', childInfo.id);
+        setChildInfoLoaded(true);
+      } else {
+        console.warn('No children found in response');
+        throw new Error('No children found');
+      }
+      
+    } catch (err) {
+      console.error('Error fetching child info:', err);
+      
+      // Provide more specific error handling
+      if (err.response?.status === 404) {
+        console.warn('Parent or children not found (404), using fallback');
+      } else if (err.response?.status === 401) {
+        console.warn('Authentication error (401), please log in again');
+      } else {
+        console.warn('Network or other error, using fallback child info');
+      }
+      
+      // Fallback to localStorage or default values
+      const fallbackName = localStorage.getItem('child_name') || 'Student';
+      const fallbackId = localStorage.getItem('child_id') || '';
+      
+      setChildInfo({ 
+        name: fallbackName, 
+        id: fallbackId 
+      });
+      setChildInfoLoaded(true);
+      
+      console.log('Using fallback child info:', { name: fallbackName, id: fallbackId });
+    }
+  };
 
   const fetchHomeworks = async () => {
     try {
@@ -129,12 +204,13 @@ const HomeworkList = ({ onProgressUpdate }) => {
       return;
     }
     
-    const hasAttempt = completionAnswers[selectedHomework.id]?.trim() || completedActivities[selectedHomework.id];
     const isInteractive = selectedHomework.type && INTERACTIVE_COMPONENTS[selectedHomework.type];
+    const hasActivityResult = completedActivities[selectedHomework.id];
+    const hasWrittenAnswer = completionAnswers[selectedHomework.id]?.trim();
     
     // For interactive activities, check if they have been completed
     if (isInteractive) {
-      if (!hasAttempt) {
+      if (!hasActivityResult) {
         toast.error('Please complete the interactive activity first.');
         return;
       }
@@ -176,6 +252,8 @@ const HomeworkList = ({ onProgressUpdate }) => {
         {
           homeworkId: selectedHomework.id,
           parentId: parent_id,
+          childId: childInfo.id,
+          childName: childInfo.name,
           fileURL: downloadURL,
           comment: comment,
           completion_answer: completionAnswers[selectedHomework.id] || '',
@@ -234,7 +312,7 @@ const HomeworkList = ({ onProgressUpdate }) => {
   const progressPercentage = totalHomework > 0 ? (submittedHomework / totalHomework) * 100 : 0;
 
   return (
-    <div className="w-full bg-gray-50 mx-auto px-2 sm:px-4 py-6 mobile-container">
+    <div className="w-full min-h-screen bg-gray-50 mx-auto px-2 sm:px-4 py-6 mobile-container">
       <div className="max-w-7xl mx-auto parent-dashboard-mobile">
         <h2 className="text-2xl sm:text-3xl font-bold text-center mb-6 text-gray-800 mobile-heading">📚 Homework Dashboard</h2>
         
@@ -255,7 +333,7 @@ const HomeworkList = ({ onProgressUpdate }) => {
         </div>
         
         {/* Homework Cards */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-3 sm:gap-4 lg:gap-6">
           {homeworks.length === 0 ? (
             <div className="col-span-full text-center py-8">
               <FaFileAlt className="mx-auto text-4xl text-gray-400 mb-4" />
@@ -264,16 +342,18 @@ const HomeworkList = ({ onProgressUpdate }) => {
           ) : (
             homeworks.map((hw) => {
               const currentTab = activeTab[hw.id] || 'view';
+              const isInteractive = hw.type && INTERACTIVE_COMPONENTS[hw.type];
               const hasWrittenWork = completionAnswers[hw.id]?.trim();
               const hasActivityResult = completedActivities[hw.id];
-              const isAttempted = hasWrittenWork || hasActivityResult;
               const isEditing = editingHomework[hw.id];
+              
+              const isAttempted = isInteractive ? hasActivityResult : (hasWrittenWork || hasActivityResult);
               const isReadyToSubmit = isAttempted && !isEditing;
               
               return (
                 <Card 
                   key={hw.id} 
-                  className="shadow-lg border border-gray-200 overflow-hidden cursor-pointer hover:shadow-xl transition-shadow homework-card-mobile"
+                  className="w-full shadow-lg border border-gray-200 overflow-hidden cursor-pointer hover:shadow-xl transition-shadow homework-card-mobile"
                   onClick={() => setSelectedHomework(hw)}
                 >
                   <CardContent className="p-0">
@@ -296,16 +376,18 @@ const HomeworkList = ({ onProgressUpdate }) => {
                             🎮 {hw.type.charAt(0).toUpperCase() + hw.type.slice(1)} Activity
                           </span>
                         )}
-                        <span className={`px-2 py-1 rounded ${
+                        <span className={`px-2 py-1 rounded text-xs sm:text-sm ${
                           hw.submitted 
                             ? 'bg-green-500' 
                             : isEditing
                             ? 'bg-orange-500'
+                            : activityFailures[hw.id]
+                            ? 'bg-red-600'
                             : isAttempted 
                             ? 'bg-blue-500' 
                             : 'bg-red-500'
                         }`}>
-                          {hw.submitted ? '✅ Submitted' : isEditing ? '📝 Editing' : isAttempted ? '✅ Done' : '⏳ Pending'}
+                          {hw.submitted ? '✅ Submitted' : isEditing ? '📝 Editing' : activityFailures[hw.id] ? '❌ Failed' : isAttempted ? '✅ Done' : '⏳ Pending'}
                         </span>
                       </div>
                     </div>
@@ -407,22 +489,52 @@ const HomeworkList = ({ onProgressUpdate }) => {
                       )}
 
                       {currentTab === 'complete' && (
-                        <div className="space-y-4">
+                        <div className="space-y-4 w-full">
                           {/* Render interactive activity if this homework is an interactive type */}
                           {(hw.type && INTERACTIVE_COMPONENTS[hw.type]) ? (
-                            <div className="my-4">
+                            <div className="my-4 w-full overflow-x-auto">
                               {React.createElement(INTERACTIVE_COMPONENTS[hw.type], {
                                 items: hw.items || [],
                                 instructions: hw.instructions || '',
                                 title: hw.title || '',
                                 onSubmit: async (result) => {
                                   console.log('Activity result:', result);
-                                  toast.success('Activity completed! Great job! 🎉');
                                   
-                                  // Mark activity as completed
+                                  const isSuccess = result.success || result.score === 100 || result.percentage === 100;
+                                  const isFailed = result.failed || (result.attempts >= 3 && !isSuccess);
+                                  
+                                  if (isSuccess) {
+                                    toast.success('Activity completed! Great job! 🎉');
+                                  } else if (isFailed) {
+                                    toast.error('Activity submitted after 3 attempts. Your teacher will review it.');
+                                    setActivityFailures(prev => ({
+                                      ...prev,
+                                      [hw.id]: true
+                                    }));
+                                  }
+                                  
+                                  const activityResult = {
+                                    ...result,
+                                    completed: true,
+                                    success: isSuccess,
+                                    failed: isFailed,
+                                    completedAt: new Date().toISOString(),
+                                    childName: childInfo.name,
+                                    activityType: hw.type
+                                  };
+                                  
                                   setCompletedActivities(prev => ({
                                     ...prev,
-                                    [hw.id]: result
+                                    [hw.id]: activityResult
+                                  }));
+                                  
+                                  const completionText = isSuccess 
+                                    ? `Interactive ${hw.type} activity completed successfully by ${childInfo.name}`
+                                    : `Interactive ${hw.type} activity attempted 3 times by ${childInfo.name} - submitted for review`;
+                                  
+                                  setCompletionAnswers(prev => ({
+                                    ...prev,
+                                    [hw.id]: completionText
                                   }));
                                   
                                   // Mark as not editing when activity is completed
@@ -431,24 +543,36 @@ const HomeworkList = ({ onProgressUpdate }) => {
                                     [hw.id]: false
                                   }));
                                   
-                                  // Auto-save completion for interactive activities
+                                  // Auto-save completion for interactive activities (background save)
                                   try {
+                                    const saveData = {
+                                      parentId: parent_id,
+                                      childId: childInfo.id || '',
+                                      childName: childInfo.name || 'Student',
+                                      completion_answer: completionText,
+                                      activity_result: activityResult,
+                                      activity_type: hw.type,
+                                      completed: true,
+                                      timestamp: new Date().toISOString()
+                                    };
+                                    
                                     await axios.post(
                                       `https://youngeagles-api-server.up.railway.app/api/homeworks/${hw.id}/complete`,
-                                      {
-                                        completion_answer: JSON.stringify(result),
-                                        activity_result: result
-                                      },
+                                      saveData,
                                       {
                                         headers: {
                                           Authorization: `Bearer ${token}`,
+                                          'Content-Type': 'application/json'
                                         },
                                       }
                                     );
                                     
+                                    console.log('Activity auto-saved successfully');
+                                    
                                   } catch (err) {
-                                    console.error('Error saving activity result:', err);
-                                    toast.error('Failed to save your progress.');
+                                    console.error('Auto-save failed (non-critical):', err);
+                                    // Silently handle auto-save failures since the activity is already completed locally
+                                    // The final submission will include all necessary data
                                   }
                                 },
                                 disabled: hw.submitted
@@ -484,11 +608,20 @@ const HomeworkList = ({ onProgressUpdate }) => {
                                 </Button>
                                 <Button
                                 onClick={() => {
+                                    const workResult = {
+                                      text: completionAnswers[hw.id],
+                                      attempted: true,
+                                      completed: true,
+                                      completedAt: new Date().toISOString(),
+                                      childName: childInfo.name,
+                                      workType: 'written'
+                                    };
+                                    
                                     setCompletedActivities(prev => ({
                                       ...prev,
-                                      [hw.id]: { text: completionAnswers[hw.id], attempted: true }
+                                      [hw.id]: workResult
                                     }));
-                                    // Mark as not editing when saving
+                                    
                                     setEditingHomework(prev => ({
                                       ...prev,
                                       [hw.id]: false
