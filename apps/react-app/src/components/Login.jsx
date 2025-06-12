@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import useAuth from '../hooks/useAuth';
+import GoogleSignIn from './GoogleSignIn';
 
 const Login = () => {
   const { login } = useAuth(); 
@@ -40,64 +41,161 @@ const Login = () => {
   };
 
   return (
-    <div
-      className="min-h-screen bg-white dark:bg-gray-900 text-gray-800 dark:text-white bg-cover bg-center flex items-center justify-center px-4"
-      style={{
-        backgroundImage: 'url(https://i.pinimg.com/736x/9d/9f/18/9d9f18a89989da838bbc6f63bec8967b.jpg)',
-      }}
-    >
-      <div className="w-full max-w-md bg-white/90 dark:bg-gray-800/90 backdrop-blur-md p-6 rounded-lg shadow-lg">
-        <h2 className="text-2xl font-bold mb-4 text-center text-gray-900 dark:text-gray-100">Parent Login</h2>
-
-        <form onSubmit={handleLogin} className="space-y-4">
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            className="w-full border px-3 py-2 rounded focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <img
+            src="/logo.jpg"
+            alt="Young Eagles"
+            className="h-16 w-auto mx-auto mb-4"
           />
-          <div className="relative">
-            <input
-              type={showPassword ? 'text' : 'password'}
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="w-full border px-3 py-2 rounded focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-2/4 -translate-y-1/2 text-sm text-white-600 cursor-pointer"
-              title={showPassword ? 'Hide password' : 'Show password'}
-            >
-              {showPassword ? 'Hide' : 'Show'}
-            </button>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h1>
+          <p className="text-gray-600">Sign in to your parent account</p>
+        </div>
+
+        {/* Main Form Card */}
+        <div className="bg-white rounded-2xl shadow-xl p-8">
+          {/* Google Sign-In */}
+          <div className="mb-6">
+            <GoogleSignIn />
           </div>
-          <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
-            {isLoading ? 'Logging in...' : 'Login'}
-          </button>
-        </form>
 
-        {errorMessage && <p className="text-red-600 text-sm mt-2 text-center">{errorMessage}</p>}
-        {successMessage && <p className="text-green-600 text-sm mt-2 text-center">{successMessage}</p>}
+          {/* Divider */}
+          <div className="relative mb-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-300"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-white text-gray-500">Or continue with email</span>
+            </div>
+          </div>
 
-        <p className="text-center text-sm mt-4 text-gray-700 dark:text-gray-300">
-          Don't have an account? <Link to="/register" className="text-blue-500 underline">Register here</Link>
-        </p>
+          {/* Email/Password Form */}
+          <form onSubmit={handleLogin} className="space-y-6">
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                Email address
+              </label>
+              <input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+                placeholder="Enter your email"
+              />
+            </div>
 
-        <div className="mt-6 text-sm text-gray-700 dark:text-gray-300 bg-white/80 dark:bg-gray-700/80 p-4 rounded">
-          <p className="text-center mb-2">Are you logging in as:</p>
-          <ul className="space-y-1">
-            <li className="text-center"><a href="/principal/login" className="text-blue-500">Principal</a></li>
-            <li className="text-center"><a href="/teacher/login" className="text-blue-500">Teacher</a></li>
-            <li className="text-center"><a href="/admin/login" className="text-blue-500">School Admin</a></li>
-          </ul>
-          <p className="text-center">
-            <a href="/home" className="text-white-600">Back to Home</a>
-          </p>
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                Password
+              </label>
+              <div className="relative">
+                <input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 pr-12"
+                  placeholder="Enter your password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors duration-200"
+                >
+                  {showPassword ? (
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L8.5 8.5m1.378 1.378l4.242 4.242M12 3c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21l-6.132-6.132" />
+                    </svg>
+                  ) : (
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                  )}
+                </button>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <input
+                  id="remember-me"
+                  name="remember-me"
+                  type="checkbox"
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                />
+                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
+                  Remember me
+                </label>
+              </div>
+              <Link
+                to="/password-reset"
+                className="text-sm text-blue-600 hover:text-blue-500 font-medium"
+              >
+                Forgot password?
+              </Link>
+            </div>
+
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isLoading ? (
+                <div className="flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                  Signing in...
+                </div>
+              ) : (
+                'Sign in'
+              )}
+            </button>
+          </form>
+
+          {/* Error/Success Messages */}
+          {errorMessage && (
+            <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-red-600 text-sm text-center">{errorMessage}</p>
+            </div>
+          )}
+          {successMessage && (
+            <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+              <p className="text-green-600 text-sm text-center">{successMessage}</p>
+            </div>
+          )}
+
+          {/* Footer Links */}
+          <div className="mt-6 text-center">
+            <p className="text-sm text-gray-600">
+              Don't have an account?{' '}
+              <Link to="/register" className="text-blue-600 hover:text-blue-500 font-medium">
+                Sign up here
+              </Link>
+            </p>
+          </div>
+        </div>
+
+        {/* Role Navigation */}
+        <div className="mt-6 bg-white rounded-xl shadow-lg p-4">
+          <p className="text-center text-sm text-gray-600 mb-3">Sign in as:</p>
+          <div className="flex justify-center space-x-4 text-sm">
+            <Link to="/teacher/login" className="text-blue-600 hover:text-blue-500 font-medium">
+              Teacher
+            </Link>
+            <span className="text-gray-300">•</span>
+            <Link to="/admin/login" className="text-blue-600 hover:text-blue-500 font-medium">
+              Admin
+            </Link>
+            <span className="text-gray-300">•</span>
+            <Link to="/home" className="text-blue-600 hover:text-blue-500 font-medium">
+              Home
+            </Link>
+          </div>
         </div>
       </div>
     </div>

@@ -39,13 +39,42 @@ const Dashboard = () => {
   const parent_id = localStorage.getItem('parent_id');
   const token = localStorage.getItem('accessToken');
 
-  // Fetch homework data for progress tracking
-  const fetchHomeworkData = async () => {
+  // Fetch children for the dropdown
+  const fetchChildren = async () => {
     if (!parent_id || !token) return;
     
     try {
+      console.log('Fetching children for parent ID:', parent_id);
       const res = await axios.get(
-        `https://youngeagles-api-server.up.railway.app/api/homeworks/for-parent/${parent_id}`,
+        `https://youngeagles-api-server.up.railway.app/api/auth/parents/${parent_id}/children`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      
+      console.log('Children response:', res.data);
+      const childrenData = Array.isArray(res.data) ? res.data : res.data.children || [];
+      setChildren(childrenData);
+      
+      // Auto-select first child if no child is selected
+      if (childrenData.length > 0 && !selectedChild) {
+        setSelectedChild(childrenData[0].id.toString());
+      }
+    } catch (err) {
+      console.error('Error fetching children:', err);
+      setChildren([]);
+    }
+  };
+
+// Fetch homework data for progress tracking
+  const fetchHomeworkData = async () => {
+    if (!parent_id || !token || !selectedChild) return;
+    
+    try {
+      const res = await axios.get(
+        `https://youngeagles-api-server.up.railway.app/api/homeworks/for-parent/${parent_id}?child_id=${selectedChild}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -72,6 +101,7 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
+    fetchChildren();
     fetchHomeworkData();
   }, [parent_id, token]);
 
@@ -263,12 +293,13 @@ const Dashboard = () => {
                 </li>
                 <select
                   className="w-full p-2 border rounded bg-white text-black"
+                  value={selectedChild}
                   onChange={(e) => setSelectedChild(e.target.value)}
                 >
                   <option value="">Select a child</option>
                   {children.map((child) => (
                     <option key={child.id} value={child.id}>
-                      {child.name}
+                      {child.name} - {child.className || 'No Class'}
                     </option>
                   ))}
                 </select>

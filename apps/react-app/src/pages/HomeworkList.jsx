@@ -57,18 +57,20 @@ const HomeworkList = ({ onProgressUpdate }) => {
   const [showSubmissionDialog, setShowSubmissionDialog] = useState(false);
   const [childInfoLoaded, setChildInfoLoaded] = useState(false);
   const [submissionInProgress, setSubmissionInProgress] = useState({});
+  const [availableChildren, setAvailableChildren] = useState([]);
+  const [selectedChildId, setSelectedChildId] = useState('');
 
   const parent_id = localStorage.getItem('parent_id');
   const token = localStorage.getItem('accessToken');
   
   useEffect(() => {
     if (parent_id) {
-      fetchHomeworks();
+      fetchHomeworks(selectedChildId || null);
       if (!childInfoLoaded) {
         fetchChildInfo();
       }
     }
-  }, [parent_id, childInfoLoaded]);
+  }, [parent_id, childInfoLoaded, selectedChildId]);
   
   const fetchChildInfo = async () => {
     if (childInfoLoaded) {
@@ -137,19 +139,28 @@ const HomeworkList = ({ onProgressUpdate }) => {
     }
   };
 
-  const fetchHomeworks = async () => {
+  const fetchHomeworks = async (childId = null) => {
     try {
-      const res = await axios.get(
-        `https://youngeagles-api-server.up.railway.app/api/homeworks/for-parent/${parent_id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      // Build URL with optional child filter
+      let url = `https://youngeagles-api-server.up.railway.app/api/homeworks/for-parent/${parent_id}`;
+      if (childId) {
+        url += `?child_id=${childId}`;
+      }
+      
+      const res = await axios.get(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-      const hwList = Array.isArray(res.data) ? res.data : res.data.homeworks || [];
+      const responseData = res.data || {};
+      const hwList = Array.isArray(responseData.homeworks) ? responseData.homeworks : responseData.homeworks || [];
       setHomeworks(hwList);
+      
+      // Update available children from the response
+      if (responseData.children && Array.isArray(responseData.children)) {
+        setAvailableChildren(responseData.children);
+      }
       
       // Initialize completion answers for each homework
       const initialAnswers = {};
@@ -259,13 +270,13 @@ const HomeworkList = ({ onProgressUpdate }) => {
       }
 
       // Submit to backend using the correct endpoint
-      await axios.post(
+        await axios.post(
         'https://youngeagles-api-server.up.railway.app/api/homeworks/submit',
         {
           homeworkId: selectedHomework.id,
           parentId: parent_id,
-          childId: childInfo.id,
-          childName: childInfo.name,
+          childId: selectedChildId || childInfo.id,
+          childName: getSelectedChildName(),
           fileURL: downloadURL,
           comment: comment,
           completion_answer: completionAnswers[selectedHomework.id] || '',
@@ -284,8 +295,8 @@ const HomeworkList = ({ onProgressUpdate }) => {
       setComment('');
       setSelectedHomework(null);
 
-      // Refresh homework list
-      fetchHomeworks();
+      // Refresh homework list with current child filter
+      fetchHomeworks(selectedChildId || null);
     } catch (err) {
       toast.error('Submission failed.');
       console.error(err);
@@ -299,6 +310,15 @@ const HomeworkList = ({ onProgressUpdate }) => {
     }
   };
 
+  // Helper function to get selected child's name
+  const getSelectedChildName = () => {
+    if (selectedChildId && availableChildren.length > 0) {
+      const selectedChild = availableChildren.find(child => child.id.toString() === selectedChildId.toString());
+      return selectedChild ? selectedChild.name : childInfo.name;
+    }
+    return childInfo.name;
+  };
+
   const deleteSubmission = async (hw) => {
     try {
       await axios.delete(`https://youngeagles-api-server.up.railway.app/api/homeworks/submissions/${hw.submission_id}`, {
@@ -310,6 +330,15 @@ const HomeworkList = ({ onProgressUpdate }) => {
       toast.error('Error deleting submission.');
       console.error(err);
     }
+  };
+
+  // Handle child selection change
+  const handleChildSelection = (childId) => {
+    setSelectedChildId(childId);
+    // Reset submission states when changing child
+    setSubmissionInProgress({});
+    setCompletedActivities({});
+    setEditingHomework({});
   };
 
   const setTab = (hwId, tab) => {
@@ -332,6 +361,33 @@ const HomeworkList = ({ onProgressUpdate }) => {
     <div className="w-full min-h-screen bg-gray-50 mx-auto px-2 sm:px-4 py-6 mobile-container">
       <div className="max-w-7xl mx-auto parent-dashboard-mobile">
         <h2 className="text-2xl sm:text-3xl font-bold text-center mb-6 text-gray-800 mobile-heading">📚 Homework Dashboard</h2>
+        
+        {/* Child Selection */}
+        {availableChildren.length > 1 && (
+          <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 mb-6">
+            <h3 className="text-lg sm:text-xl font-semibold mb-4 text-gray-700">Select Child</h3>
+            <div className="flex items-center gap-4">
+              <label className="text-sm font-medium text-gray-600">View homework for:</label>
+              <select
+                className="flex-1 p-2 border rounded bg-white text-black"
+                value={selectedChildId}
+                onChange={(e) => handleChildSelection(e.target.value)}
+              >
+                <option value="">All Children</option>
+                {availableChildren.map((child) => (
+                  <option key={child.id} value={child.id}>
+                    {child.name} - {child.className || 'No Class'}
+                  </option>
+                ))}
+              </select>
+            </div>
+            {selectedChildId && (
+              <p className="text-sm text-gray-600 mt-2">
+                Showing homework for: <strong>{getSelectedChildName()}</strong>
+              </p>
+            )}
+          </div>
+        )}
         
         {/* Progress Overview */}
         <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 mb-6">

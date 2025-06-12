@@ -27,6 +27,10 @@ import AOS from 'aos';
 import NotificationPermission from './components/NotificationPermission';
 import PWAInstallPrompt from './components/PWAInstallPrompt';
 import TeacherActivityBuilder from './pages/TeacherDashboard/TeacherActivityBuilder';
+import FirebaseActionHandler from './components/FirebaseActionHandler';
+import PasswordReset from './components/PasswordReset';
+import PasswordlessLogin from './components/PasswordlessLogin';
+import PhoneLogin from './components/PhoneLogin';
 import './App.css';
 
 function App() {
@@ -67,6 +71,10 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/teacher/login" element={<TeacherLogin />} />
+          <Route path="/password-reset" element={<PasswordReset />} />
+          <Route path="/passwordless-login" element={<PasswordlessLogin />} />
+          <Route path="/phone-login" element={<PhoneLogin />} />
+          <Route path="/auth/action" element={<FirebaseActionHandler />} />
 
           {/* Private Routes */}
           <Route element={<PrivateRoute />}>
