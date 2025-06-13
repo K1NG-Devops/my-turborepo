@@ -1,9 +1,9 @@
 // src/pages/Dashboard.jsx
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import DashboardTile from '../../components/DashboardTile';
 import useAuth from '../../hooks/useAuth';
-import { FaBook, FaCalendarCheck, FaClipboardList, FaVideo, FaChalkboardTeacher, FaBell } from 'react-icons/fa';
+import { FaBook, FaCalendarCheck, FaClipboardList, FaVideo, FaChalkboardTeacher, FaBell, FaSpinner, FaChevronUp } from 'react-icons/fa';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import { toast } from 'react-toastify';
@@ -22,12 +22,16 @@ const grade = localStorage.getItem('grade') || 'Grade 1';
 const Dashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [showBackToTop, setShowBackToTop] = useState(false);
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
   const location = useLocation();
   const { auth } = useAuth();
   const [children, setChildren] = useState([]);
-  const [selectedChild, setSelectedChild] = useState('');
+  const [selectedChild, setSelectedChild] = useState(() => {
+    // Load from localStorage on initialization
+    return localStorage.getItem('selectedChild') || '';
+  });
   const [homeworkList, setHomeworkList] = useState([]);
   const [notifications, setNotifications] = useState([]);
   const [homeworkProgress, setHomeworkProgress] = useState({
@@ -35,13 +39,26 @@ const Dashboard = () => {
     submitted: 0,
     percentage: 0
   });
+  const [isLoading, setIsLoading] = useState({
+    children: false,
+    homework: false,
+    notifications: false
+  });
+  const [errors, setErrors] = useState({
+    children: null,
+    homework: null,
+    notifications: null
+  });
 
   const parent_id = localStorage.getItem('parent_id');
   const token = localStorage.getItem('accessToken');
 
-  // Fetch children for the dropdown
-  const fetchChildren = async () => {
+  // Fetch children for the dropdown with enhanced error handling
+  const fetchChildren = useCallback(async () => {
     if (!parent_id || !token) return;
+    
+    setIsLoading(prev => ({ ...prev, children: true }));
+    setErrors(prev => ({ ...prev, children: null }));
     
     try {
       console.log('Fetching children for parent ID:', parent_id);
@@ -60,13 +77,20 @@ const Dashboard = () => {
       
       // Auto-select first child if no child is selected
       if (childrenData.length > 0 && !selectedChild) {
-        setSelectedChild(childrenData[0].id.toString());
+        const firstChildId = childrenData[0].id.toString();
+        setSelectedChild(firstChildId);
+        localStorage.setItem('selectedChild', firstChildId);
       }
     } catch (err) {
       console.error('Error fetching children:', err);
+      const errorMessage = err.response?.data?.message || 'Failed to load children';
+      setErrors(prev => ({ ...prev, children: errorMessage }));
       setChildren([]);
+      toast.error(errorMessage);
+    } finally {
+      setIsLoading(prev => ({ ...prev, children: false }));
     }
-  };
+  }, [parent_id, token, selectedChild]);
 
 // Fetch homework data for progress tracking
   const fetchHomeworkData = async () => {
@@ -136,11 +160,26 @@ const Dashboard = () => {
   const unreadNotifications = notifications.filter(n => !n.read).length;
 
 
+  // Handle scroll for back-to-top button and reduced animations on mobile
   useEffect(() => {
+    const handleScroll = () => {
+      setShowBackToTop(window.scrollY > 300);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    // Detect if user prefers reduced motion or is on mobile
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const isMobile = window.innerWidth < 768;
+    
     AOS.init({
-      duration: 1000,
+      duration: prefersReducedMotion || isMobile ? 300 : 1000,
       easing: 'ease-in-out',
       once: false,
+      disable: prefersReducedMotion ? true : false,
     });
     AOS.refresh();
   }, []);
@@ -181,6 +220,10 @@ const Dashboard = () => {
 
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
+  };
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
 
@@ -226,27 +269,33 @@ const Dashboard = () => {
               <div className="relative mt-2" ref={dropdownRef}>
                 <button
                   onClick={toggleDropdown}
-                  className="text-sm text-gray-600 hover:underline "
+                  className="text-sm text-gray-600 hover:underline focus:outline-none focus:ring-2 focus:ring-cyan-500 rounded px-2 py-1"
+                  aria-expanded={isDropdownOpen}
+                  aria-haspopup="true"
+                  aria-label="User options menu"
                 >
                   ▼ Options
                 </button>
                 {isDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-40 bg-white border rounded shadow-md z-50">
+                  <div className="absolute right-0 mt-2 w-44 bg-white border rounded-lg shadow-lg z-50 animate-fadeIn">
                     <button
                       onClick={() => navigate('/profile')}
-                      className="w-full text-left px-4 py-2 hover:bg-gray-100"
+                      className="w-full text-left px-4 py-3 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none transition-colors text-sm md:text-base rounded-t-lg"
+                      role="menuitem"
                     >
                       Profile
                     </button>
                     <button
                       onClick={() => navigate('/settings')}
-                      className="w-full text-left px-4 py-2 hover:bg-gray-100"
+                      className="w-full text-left px-4 py-3 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none transition-colors text-sm md:text-base"
+                      role="menuitem"
                     >
                       Settings
                     </button>
                     <button
                       onClick={handleLogout}
-                      className="w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100"
+                      className="w-full text-left px-4 py-3 text-red-600 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none transition-colors text-sm md:text-base rounded-b-lg"
+                      role="menuitem"
                     >
                       Logout
                     </button>
@@ -269,9 +318,13 @@ const Dashboard = () => {
                   </Link>
                 </li>
                 <select
-                  className="w-full p-2 border rounded bg-white text-black"
+                  className="w-full p-3 md:p-2 border rounded-lg bg-white text-black text-sm md:text-base focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
                   value={selectedChild}
-                  onChange={(e) => setSelectedChild(e.target.value)}
+                  onChange={(e) => {
+                    setSelectedChild(e.target.value);
+                    localStorage.setItem('selectedChild', e.target.value);
+                  }}
+                  aria-label="Select child"
                 >
                   <option value="">Select a child</option>
                   {children.map((child) => (
@@ -370,7 +423,7 @@ const Dashboard = () => {
                   </svg>
                 )}
               </button>
-              <h1 className="text-xl md:text-2xl font-bold text-gray-800 truncate">Parent Dashboard</h1>
+              <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 truncate">Parent Dashboard</h1>
             </div>
             <div className="flex items-center space-x-2 md:space-x-3">
               <Link
@@ -381,7 +434,8 @@ const Dashboard = () => {
               </Link>
               <button
                 onClick={handleLogout}
-                className="px-3 py-2 md:px-4 text-sm md:text-base bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                className="px-4 py-2 md:px-4 text-sm md:text-base bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors min-h-[44px] touch-manipulation"
+                aria-label="Log out of your account"
               >
                 Logout
               </button>
@@ -389,24 +443,24 @@ const Dashboard = () => {
           </div>
         </div>
 
-        <div className="p-4 sm:p-6 space-y-6 max-w-full overflow-x-hidden">
+        <div className="p-3 sm:p-6 space-y-4 sm:space-y-6 max-w-full overflow-x-hidden">
           {/* Welcome Banner */}
-          <div className="bg-gradient-to-r from-cyan-500 to-blue-600 rounded-xl p-6 text-white shadow-lg">
-            <h2 className="text-2xl font-bold mb-2">Welcome back, {userName}!</h2>
-            <p className="text-cyan-100">Track your child's learning progress and stay connected with their education journey.</p>
+          <div className="bg-gradient-to-r from-cyan-500 to-blue-600 rounded-xl p-4 sm:p-6 text-white shadow-lg">
+            <h2 className="text-xl sm:text-2xl font-bold mb-2">Welcome back, {userName}!</h2>
+            <p className="text-sm sm:text-base text-cyan-100">Track your child's learning progress and stay connected with their education journey.</p>
           </div>
 
           {/* Quick Stats Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             {/* Total Children */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6 hover:shadow-md transition-shadow">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Total Children</p>
-                  <p className="text-3xl font-bold text-gray-900">{children.length}</p>
+                  <p className="text-xs sm:text-sm font-medium text-gray-600">Total Children</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-gray-900">{children.length}</p>
                 </div>
-                <div className="p-3 bg-blue-100 rounded-full">
-                  <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="p-2 sm:p-3 bg-blue-100 rounded-full">
+                  <svg className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
                   </svg>
                 </div>
@@ -414,90 +468,98 @@ const Dashboard = () => {
             </div>
 
             {/* Homework Completion */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6 hover:shadow-md transition-shadow">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Homework Rate</p>
-                  <p className="text-3xl font-bold text-gray-900">{Math.round(homeworkProgress.percentage)}%</p>
+                  <p className="text-xs sm:text-sm font-medium text-gray-600">Homework Rate</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-gray-900">{Math.round(homeworkProgress.percentage)}%</p>
                 </div>
-                <div className="p-3 bg-green-100 rounded-full">
-                  <FaBook className="w-6 h-6 text-green-600" />
+                <div className="p-2 sm:p-3 bg-green-100 rounded-full">
+                  <FaBook className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
                 </div>
               </div>
-              <div className="mt-4">
+              <div className="mt-3 sm:mt-4">
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div 
                     className="bg-gradient-to-r from-green-400 to-green-600 h-2 rounded-full transition-all duration-500" 
                     style={{width: `${homeworkProgress.percentage}%`}}
+                    role="progressbar"
+                    aria-valuenow={homeworkProgress.percentage}
+                    aria-valuemin="0"
+                    aria-valuemax="100"
+                    aria-label={`Homework completion: ${Math.round(homeworkProgress.percentage)}%`}
                   ></div>
                 </div>
               </div>
             </div>
 
             {/* Notifications */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6 hover:shadow-md transition-shadow">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Notifications</p>
-                  <p className="text-3xl font-bold text-gray-900">{unreadNotifications}</p>
+                  <p className="text-xs sm:text-sm font-medium text-gray-600">Notifications</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-gray-900">{unreadNotifications}</p>
                 </div>
-                <div className="p-3 bg-yellow-100 rounded-full">
-                  <FaBell className="w-6 h-6 text-yellow-600" />
+                <div className="p-2 sm:p-3 bg-yellow-100 rounded-full">
+                  <FaBell className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-600" />
                 </div>
               </div>
               {unreadNotifications > 0 && (
-                <p className="text-sm text-yellow-600 mt-2">You have new updates</p>
+                <p className="text-xs sm:text-sm text-yellow-600 mt-2">You have new updates</p>
               )}
             </div>
 
             {/* Assignments */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6 hover:shadow-md transition-shadow">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Total Assignments</p>
-                  <p className="text-3xl font-bold text-gray-900">{homeworkProgress.total}</p>
+                  <p className="text-xs sm:text-sm font-medium text-gray-600">Total Assignments</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-gray-900">{homeworkProgress.total}</p>
                 </div>
-                <div className="p-3 bg-purple-100 rounded-full">
-                  <FaClipboardList className="w-6 h-6 text-purple-600" />
+                <div className="p-2 sm:p-3 bg-purple-100 rounded-full">
+                  <FaClipboardList className="w-5 h-5 sm:w-6 sm:h-6 text-purple-600" />
                 </div>
               </div>
-              <p className="text-sm text-gray-500 mt-2">{homeworkProgress.submitted} completed</p>
+              <p className="text-xs sm:text-sm text-gray-500 mt-2">{homeworkProgress.submitted} completed</p>
             </div>
           </div>
 
           {/* Quick Actions */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">Quick Actions</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
               <Link
                 to={`/student/homework?className=${encodeURIComponent(className)}&grade=${encodeURIComponent(grade)}`}
-                className="flex items-center p-4 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors group"
+                className="flex items-center p-4 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors group min-h-[80px] touch-manipulation"
+                aria-label="View homework assignments"
               >
                 <div className="p-2 bg-blue-100 rounded-lg mr-3 group-hover:bg-blue-200">
                   <FaBook className="w-5 h-5 text-blue-600" />
                 </div>
                 <div>
-                  <p className="font-medium text-gray-900">View Homework</p>
-                  <p className="text-sm text-gray-600">Check assignments</p>
+                  <p className="text-sm sm:text-base font-medium text-gray-900">View Homework</p>
+                  <p className="text-xs sm:text-sm text-gray-600">Check assignments</p>
                 </div>
               </Link>
 
               <Link
                 to="/submit-work"
-                className="flex items-center p-4 bg-green-50 hover:bg-green-100 rounded-lg transition-colors group"
+                className="flex items-center p-4 bg-green-50 hover:bg-green-100 rounded-lg transition-colors group min-h-[80px] touch-manipulation"
+                aria-label="Submit work assignments"
               >
                 <div className="p-2 bg-green-100 rounded-lg mr-3 group-hover:bg-green-200">
                   <FaClipboardList className="w-5 h-5 text-green-600" />
                 </div>
                 <div>
-                  <p className="font-medium text-gray-900">Submit Work</p>
-                  <p className="text-sm text-gray-600">Upload assignments</p>
+                  <p className="text-sm sm:text-base font-medium text-gray-900">Submit Work</p>
+                  <p className="text-xs sm:text-sm text-gray-600">Upload assignments</p>
                 </div>
               </Link>
 
               <Link
                 to="/register-child"
-                className="flex items-center p-4 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors group"
+                className="flex items-center p-4 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors group min-h-[80px] touch-manipulation"
+                aria-label="Register a new child"
               >
                 <div className="p-2 bg-purple-100 rounded-lg mr-3 group-hover:bg-purple-200">
                   <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -505,22 +567,26 @@ const Dashboard = () => {
                   </svg>
                 </div>
                 <div>
-                  <p className="font-medium text-gray-900">Add Child</p>
-                  <p className="text-sm text-gray-600">Register new child</p>
+                  <p className="text-sm sm:text-base font-medium text-gray-900">Add Child</p>
+                  <p className="text-xs sm:text-sm text-gray-600">Register new child</p>
                 </div>
               </Link>
             </div>
           </div>
 
           {/* Child Progress Overview */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-semibold text-gray-900">Child Progress</h3>
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6 max-h-96 overflow-y-auto">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-6 gap-3">
+              <h3 className="text-base sm:text-lg font-bold text-gray-900">Child Progress</h3>
               {children.length > 0 && (
                 <select
-                  className="px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-700 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
+                  className="px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-700 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 text-sm min-h-[44px]"
                   value={selectedChild}
-                  onChange={(e) => setSelectedChild(e.target.value)}
+                  onChange={(e) => {
+                    setSelectedChild(e.target.value);
+                    localStorage.setItem('selectedChild', e.target.value);
+                  }}
+                  aria-label="Select child for progress view"
                 >
                   <option value="">Select a child</option>
                   {children.map((child) => (
@@ -533,41 +599,41 @@ const Dashboard = () => {
             </div>
             
             {selectedChild ? (
-              <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+              <div className="space-y-3 sm:space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 bg-gray-50 rounded-lg gap-2">
                   <div>
-                    <p className="font-medium text-gray-900">Overall Progress</p>
-                    <p className="text-sm text-gray-600">{homeworkProgress.submitted} of {homeworkProgress.total} assignments completed</p>
+                    <p className="text-sm sm:text-base font-medium text-gray-900">Overall Progress</p>
+                    <p className="text-xs sm:text-sm text-gray-600">{homeworkProgress.submitted} of {homeworkProgress.total} assignments completed</p>
                   </div>
-                  <div className="text-right">
-                    <p className="text-2xl font-bold text-cyan-600">{Math.round(homeworkProgress.percentage)}%</p>
-                    <p className="text-sm text-gray-500">Completion rate</p>
+                  <div className="text-left sm:text-right">
+                    <p className="text-xl sm:text-2xl font-bold text-cyan-600">{Math.round(homeworkProgress.percentage)}%</p>
+                    <p className="text-xs sm:text-sm text-gray-500">Completion rate</p>
                   </div>
                 </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="p-4 bg-green-50 rounded-lg">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                  <div className="p-3 sm:p-4 bg-green-50 rounded-lg">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-medium text-green-800">Completed</p>
-                        <p className="text-xl font-bold text-green-900">{homeworkProgress.submitted}</p>
+                        <p className="text-xs sm:text-sm font-medium text-green-800">Completed</p>
+                        <p className="text-lg sm:text-xl font-bold text-green-900">{homeworkProgress.submitted}</p>
                       </div>
                       <div className="p-2 bg-green-100 rounded-lg">
-                        <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                       </div>
                     </div>
                   </div>
                   
-                  <div className="p-4 bg-orange-50 rounded-lg">
+                  <div className="p-3 sm:p-4 bg-orange-50 rounded-lg">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-medium text-orange-800">Pending</p>
-                        <p className="text-xl font-bold text-orange-900">{homeworkProgress.total - homeworkProgress.submitted}</p>
+                        <p className="text-xs sm:text-sm font-medium text-orange-800">Pending</p>
+                        <p className="text-lg sm:text-xl font-bold text-orange-900">{homeworkProgress.total - homeworkProgress.submitted}</p>
                       </div>
                       <div className="p-2 bg-orange-100 rounded-lg">
-                        <svg className="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-4 h-4 sm:w-5 sm:h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                       </div>
@@ -576,26 +642,81 @@ const Dashboard = () => {
                 </div>
               </div>
             ) : (
-              <div className="text-center py-8">
-                <svg className="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="text-center py-6 sm:py-8">
+                <svg className="w-10 h-10 sm:w-12 sm:h-12 text-gray-400 mx-auto mb-3 sm:mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
                 </svg>
-                <p className="text-gray-600">Select a child to view their progress</p>
+                <p className="text-sm sm:text-base text-gray-600">Select a child to view their progress</p>
               </div>
             )}
           </div>
 
           {/* Events Calendar */}
-          <div>
+          <div className="max-h-96 overflow-y-auto">
             <EventsCalendar />
           </div>
           
           {/* Homework List Integration */}
-          <div>
+          <div className="max-h-96 overflow-y-auto">
             <HomeworkList onProgressUpdate={fetchHomeworkData} />
           </div>
         </div>
+
+        {/* Back to Top Button */}
+        {showBackToTop && (
+          <button
+            onClick={scrollToTop}
+            className="fixed bottom-6 right-6 z-50 p-3 bg-cyan-600 text-white rounded-full shadow-lg hover:bg-cyan-700 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2"
+            aria-label="Scroll to top"
+          >
+            <FaChevronUp className="w-5 h-5" />
+          </button>
+        )}
       </main>
+
+      {/* Custom CSS for animations and mobile optimizations */}
+      <style jsx>{`
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(-10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fadeIn {
+          animation: fadeIn 0.2s ease-out;
+        }
+        
+        /* Touch optimization */
+        .touch-manipulation {
+          touch-action: manipulation;
+        }
+        
+        /* Improved scrollbar styling */
+        .overflow-y-auto::-webkit-scrollbar {
+          width: 6px;
+        }
+        .overflow-y-auto::-webkit-scrollbar-track {
+          background: #f1f1f1;
+          border-radius: 3px;
+        }
+        .overflow-y-auto::-webkit-scrollbar-thumb {
+          background: #c1c1c1;
+          border-radius: 3px;
+        }
+        .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+          background: #a8a8a8;
+        }
+        
+        /* Mobile-specific optimizations */
+        @media (max-width: 640px) {
+          /* Ensure minimum touch target size */
+          button, a, select {
+            min-height: 44px;
+          }
+          
+          /* Optimize font sizes for readability */
+          .text-xs { font-size: 0.75rem; }
+          .text-sm { font-size: 0.875rem; }
+        }
+      `}</style>
     </>
   );
 };
