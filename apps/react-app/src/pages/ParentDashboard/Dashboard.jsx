@@ -102,8 +102,14 @@ const Dashboard = () => {
 
   useEffect(() => {
     fetchChildren();
-    fetchHomeworkData();
   }, [parent_id, token]);
+
+  // Fetch homework data when selectedChild changes
+  useEffect(() => {
+    if (selectedChild) {
+      fetchHomeworkData();
+    }
+  }, [selectedChild, parent_id, token]);
 
   // Refresh homework data every 30 seconds to catch updates
   useEffect(() => {
@@ -191,36 +197,7 @@ const Dashboard = () => {
 
   return (
     <>
-      {/* Hamburger menu (mobile only) */}
-      <button
-        onClick={toggleSidebar}
-        className="fixed top-4 left-4 z-50 sm:hidden sm:p-0 text-white bg-cyan-800 rounded focus:outline-none"
-      >
-        {isSidebarOpen ? (
-          // X icon
-          <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-            <path
-              fillRule="evenodd"
-              clipRule="evenodd"
-              d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 
-           1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 
-           1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 
-           10 4.293 5.707a1 1 0 010-1.414z"
-            />
-          </svg>
-        ) : (
-          // Hamburger icon
-          <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-            <path
-              fillRule="evenodd"
-              clipRule="evenodd"
-              d="M3 5h14a1 1 0 110 2H3a1 1 0 110-2zm0 
-           4h14a1 1 0 110 2H3a1 1 0 110-2zm0 
-           4h14a1 1 0 110 2H3a1 1 0 110-2z"
-            />
-          </svg>
-        )}
-      </button>
+      {/* Hamburger menu (mobile only) - Moved to nav bar */}
 
 
       {/* Sidebar Backdrop */}
@@ -372,21 +349,39 @@ const Dashboard = () => {
         </div>
       </aside>
 
-      <main className="sm:ml-64 min-h-screen bg-gray-50 transition-all duration-300 ease-in-out">
-        {/* Top Navigation */}
-        <div className="bg-white shadow-sm border-b p-4">
-          <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold text-gray-800">Parent Dashboard</h1>
-            <div className="flex items-center space-x-3">
+      <main className="sm:ml-64 min-h-screen bg-gray-50 transition-all duration-300 ease-in-out overflow-x-hidden">
+        {/* Sticky Top Navigation */}
+        <div className="sticky top-0 z-30 bg-white shadow-sm border-b">
+          <div className="flex justify-between items-center p-4">
+            {/* Mobile hamburger button */}
+            <div className="flex items-center gap-4">
+              <button
+                onClick={toggleSidebar}
+                className="sm:hidden p-2 text-cyan-800 bg-gray-100 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                aria-label="Toggle sidebar"
+              >
+                {isSidebarOpen ? (
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                  </svg>
+                ) : (
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
+                  </svg>
+                )}
+              </button>
+              <h1 className="text-xl md:text-2xl font-bold text-gray-800 truncate">Parent Dashboard</h1>
+            </div>
+            <div className="flex items-center space-x-2 md:space-x-3">
               <Link
                 to="/home"
-                className="text-gray-600 hover:text-gray-800 font-medium transition-colors"
+                className="hidden sm:inline-block text-gray-600 hover:text-gray-800 font-medium transition-colors"
               >
                 Home
               </Link>
               <button
                 onClick={handleLogout}
-                className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                className="px-3 py-2 md:px-4 text-sm md:text-base bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
               >
                 Logout
               </button>
@@ -394,62 +389,200 @@ const Dashboard = () => {
           </div>
         </div>
 
-        <div className="p-4 sm:p-6 space-y-6">
-          {/* Dashboard Overview Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <DashboardTile
-              label="Homework"
-              icon={<FaBook />}
-              color="bg-blue-100 hover:bg-blue-200"
-              to={`/student/homework?className=${encodeURIComponent(className)}&grade=${encodeURIComponent(grade)}`}
-              isActive={true}
-            />
-            <DashboardTile
-              label="Submit Work"
-              icon={<FaClipboardList />}
-              color="bg-green-100 hover:bg-green-200"
-              to="/submit-work"
-              isActive={true}
-            />
-            <DashboardTile
-              label="Notifications"
-              icon={
-                <div className="relative">
-                  <FaBell />
-                  {unreadNotifications > 0 && (
-                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center animate-pulse">
-                      {unreadNotifications}
-                    </span>
-                  )}
-                </div>
-              }
-              color="bg-red-100 hover:bg-red-200"
-              to="/notifications"
-              isActive={true}
-            />
+        <div className="p-4 sm:p-6 space-y-6 max-w-full overflow-x-hidden">
+          {/* Welcome Banner */}
+          <div className="bg-gradient-to-r from-cyan-500 to-blue-600 rounded-xl p-6 text-white shadow-lg">
+            <h2 className="text-2xl font-bold mb-2">Welcome back, {userName}!</h2>
+            <p className="text-cyan-100">Track your child's learning progress and stay connected with their education journey.</p>
           </div>
 
-          {/* Progress Overview */}
-          <div className="bg-white shadow-sm rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4 text-gray-800">Homework Progress</h2>
-            <div className="space-y-3">
-              <div className="flex justify-between items-center">
-                <span className="text-gray-600">Completion Rate</span>
-                <span className="font-semibold text-gray-800">
-                  {homeworkProgress.submitted}/{homeworkProgress.total} 
-                  ({Math.round(homeworkProgress.percentage)}%)
-                </span>
+          {/* Quick Stats Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Total Children */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Total Children</p>
+                  <p className="text-3xl font-bold text-gray-900">{children.length}</p>
+                </div>
+                <div className="p-3 bg-blue-100 rounded-full">
+                  <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                  </svg>
+                </div>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-3">
-                <div 
-                  className="bg-gradient-to-r from-green-400 to-green-600 h-3 rounded-full transition-all duration-500" 
-                  style={{width: `${homeworkProgress.percentage}%`}}
-                ></div>
+            </div>
+
+            {/* Homework Completion */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Homework Rate</p>
+                  <p className="text-3xl font-bold text-gray-900">{Math.round(homeworkProgress.percentage)}%</p>
+                </div>
+                <div className="p-3 bg-green-100 rounded-full">
+                  <FaBook className="w-6 h-6 text-green-600" />
+                </div>
               </div>
-              {homeworkProgress.total === 0 && (
-                <p className="text-sm text-yellow-600">No homework assigned yet</p>
+              <div className="mt-4">
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div 
+                    className="bg-gradient-to-r from-green-400 to-green-600 h-2 rounded-full transition-all duration-500" 
+                    style={{width: `${homeworkProgress.percentage}%`}}
+                  ></div>
+                </div>
+              </div>
+            </div>
+
+            {/* Notifications */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Notifications</p>
+                  <p className="text-3xl font-bold text-gray-900">{unreadNotifications}</p>
+                </div>
+                <div className="p-3 bg-yellow-100 rounded-full">
+                  <FaBell className="w-6 h-6 text-yellow-600" />
+                </div>
+              </div>
+              {unreadNotifications > 0 && (
+                <p className="text-sm text-yellow-600 mt-2">You have new updates</p>
               )}
             </div>
+
+            {/* Assignments */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Total Assignments</p>
+                  <p className="text-3xl font-bold text-gray-900">{homeworkProgress.total}</p>
+                </div>
+                <div className="p-3 bg-purple-100 rounded-full">
+                  <FaClipboardList className="w-6 h-6 text-purple-600" />
+                </div>
+              </div>
+              <p className="text-sm text-gray-500 mt-2">{homeworkProgress.submitted} completed</p>
+            </div>
+          </div>
+
+          {/* Quick Actions */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <Link
+                to={`/student/homework?className=${encodeURIComponent(className)}&grade=${encodeURIComponent(grade)}`}
+                className="flex items-center p-4 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors group"
+              >
+                <div className="p-2 bg-blue-100 rounded-lg mr-3 group-hover:bg-blue-200">
+                  <FaBook className="w-5 h-5 text-blue-600" />
+                </div>
+                <div>
+                  <p className="font-medium text-gray-900">View Homework</p>
+                  <p className="text-sm text-gray-600">Check assignments</p>
+                </div>
+              </Link>
+
+              <Link
+                to="/submit-work"
+                className="flex items-center p-4 bg-green-50 hover:bg-green-100 rounded-lg transition-colors group"
+              >
+                <div className="p-2 bg-green-100 rounded-lg mr-3 group-hover:bg-green-200">
+                  <FaClipboardList className="w-5 h-5 text-green-600" />
+                </div>
+                <div>
+                  <p className="font-medium text-gray-900">Submit Work</p>
+                  <p className="text-sm text-gray-600">Upload assignments</p>
+                </div>
+              </Link>
+
+              <Link
+                to="/register-child"
+                className="flex items-center p-4 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors group"
+              >
+                <div className="p-2 bg-purple-100 rounded-lg mr-3 group-hover:bg-purple-200">
+                  <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="font-medium text-gray-900">Add Child</p>
+                  <p className="text-sm text-gray-600">Register new child</p>
+                </div>
+              </Link>
+            </div>
+          </div>
+
+          {/* Child Progress Overview */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-semibold text-gray-900">Child Progress</h3>
+              {children.length > 0 && (
+                <select
+                  className="px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-700 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
+                  value={selectedChild}
+                  onChange={(e) => setSelectedChild(e.target.value)}
+                >
+                  <option value="">Select a child</option>
+                  {children.map((child) => (
+                    <option key={child.id} value={child.id}>
+                      {child.name} - {child.className || 'No Class'}
+                    </option>
+                  ))}
+                </select>
+              )}
+            </div>
+            
+            {selectedChild ? (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                  <div>
+                    <p className="font-medium text-gray-900">Overall Progress</p>
+                    <p className="text-sm text-gray-600">{homeworkProgress.submitted} of {homeworkProgress.total} assignments completed</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-2xl font-bold text-cyan-600">{Math.round(homeworkProgress.percentage)}%</p>
+                    <p className="text-sm text-gray-500">Completion rate</p>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="p-4 bg-green-50 rounded-lg">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-green-800">Completed</p>
+                        <p className="text-xl font-bold text-green-900">{homeworkProgress.submitted}</p>
+                      </div>
+                      <div className="p-2 bg-green-100 rounded-lg">
+                        <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="p-4 bg-orange-50 rounded-lg">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-orange-800">Pending</p>
+                        <p className="text-xl font-bold text-orange-900">{homeworkProgress.total - homeworkProgress.submitted}</p>
+                      </div>
+                      <div className="p-2 bg-orange-100 rounded-lg">
+                        <svg className="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <svg className="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                </svg>
+                <p className="text-gray-600">Select a child to view their progress</p>
+              </div>
+            )}
           </div>
 
           {/* Events Calendar */}

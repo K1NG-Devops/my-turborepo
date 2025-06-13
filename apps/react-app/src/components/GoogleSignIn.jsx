@@ -12,8 +12,11 @@ const GoogleSignIn = ({ className = '' }) => {
 
   const createUserSession = async (firebaseUser) => {
     try {
+      console.log('Creating user session for:', firebaseUser.email);
+      
       // Get Firebase ID token
       const idToken = await firebaseUser.getIdToken();
+      console.log('Got Firebase ID token');
       
       // Send to your backend for session creation
       const response = await fetch('https://youngeagles-api-server.up.railway.app/api/auth/firebase-login', {
@@ -28,19 +31,31 @@ const GoogleSignIn = ({ className = '' }) => {
           displayName: firebaseUser.displayName
         })
       });
+      
+      console.log('Backend response status:', response.status);
 
       if (response.ok) {
         const data = await response.json();
+        console.log('Session created successfully:', data);
         login(data);
         localStorage.setItem('parent_id', data.user.id);
         localStorage.setItem('accessToken', data.token);
         return true;
       } else {
-        const errorData = await response.json();
-        if (errorData.code === 'EMAIL_NOT_VERIFIED') {
-          toast.error('Please verify your email before signing in.');
-        } else {
-          toast.error(errorData.message || 'Authentication failed');
+        const errorData = await response.text(); // Get as text first
+        console.error('Backend error response:', errorData);
+        
+        try {
+          const jsonError = JSON.parse(errorData);
+          if (jsonError.code === 'EMAIL_NOT_VERIFIED') {
+            toast.error('Please verify your email before signing in.');
+          } else {
+            toast.error(jsonError.message || 'Authentication failed');
+          }
+        } catch (e) {
+          // If response is not JSON (like HTML error page)
+          console.error('Non-JSON error response:', errorData);
+          toast.error('Server error. Please try again later.');
         }
         return false;
       }
@@ -59,15 +74,19 @@ const GoogleSignIn = ({ className = '' }) => {
       provider.addScope('email');
       provider.addScope('profile');
       
+      // Configure popup settings for better mobile support
+      provider.setCustomParameters({
+        prompt: 'select_account'
+      });
+      
+      console.log('Starting Google sign-in...');
+      
       // Sign in with Google
       const result = await signInWithPopup(auth, provider);
+      console.log('Google sign-in successful:', result.user.email);
       
-      // Check if email is verified
-      if (!result.user.emailVerified) {
-        toast.error('Please verify your email address before signing in.');
-        await auth.signOut(); // Sign out unverified user
-        return;
-      }
+      // Google accounts are automatically verified, skip email verification check
+      // Google OAuth provides verified emails by default
       
       // Create session with backend
       const sessionCreated = await createUserSession(result.user);

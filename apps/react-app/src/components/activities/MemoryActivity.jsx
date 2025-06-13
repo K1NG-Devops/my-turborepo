@@ -48,10 +48,13 @@ export default function MemoryActivity({ items = [], instructions = '', title = 
   }, [matched, cards, completed, onSubmit]);
 
   return (
-    <div className="max-w-md mx-auto p-4 bg-white rounded shadow flex flex-col items-center">
-      <h2 className="text-xl font-bold mb-2 text-center">{title}</h2>
-      <p className="mb-4 text-center">{instructions}</p>
-      <div className="grid grid-cols-4 gap-3">
+    <div className="min-h-screen w-full bg-gradient-to-br from-purple-50 to-blue-50 flex flex-col">
+      <div className="w-full p-4 bg-gradient-to-r from-purple-500 to-blue-500 text-white">
+        <h2 className="text-2xl font-bold text-center">{title}</h2>
+        <p className="text-center mt-2 text-purple-100">{instructions}</p>
+      </div>
+      <div className="flex-1 p-4 flex flex-col justify-center">
+        <div className="grid grid-cols-4 gap-3 max-w-sm mx-auto">
         {cards.map((card, idx) => {
           const isFlipped = flipped.includes(idx) || matched.includes(idx);
           return (
@@ -68,8 +71,16 @@ export default function MemoryActivity({ items = [], instructions = '', title = 
             </div>
           );
         })}
+        </div>
+        {completed && (
+          <div className="mt-6 text-center">
+            <div className="bg-green-500 text-white p-4 rounded-lg shadow-lg mx-auto max-w-xs">
+              <div className="text-lg font-bold">🎉 Excellent Work! 🎉</div>
+              <div className="text-sm mt-1">All pairs matched successfully!</div>
+            </div>
+          </div>
+        )}
       </div>
-      {completed && <div className="mt-4 text-green-600 font-bold">All pairs matched! <span className="text-2xl">🎉</span></div>}
     </div>
   );
 } 

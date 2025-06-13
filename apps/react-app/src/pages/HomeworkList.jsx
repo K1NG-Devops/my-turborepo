@@ -141,10 +141,14 @@ const HomeworkList = ({ onProgressUpdate }) => {
 
   const fetchHomeworks = async (childId = null) => {
     try {
-      // Build URL with optional child filter
+      // Build URL with child filter - always include child_id as it's required by backend
+      const effectiveChildId = childId || childInfo.id || localStorage.getItem('child_id');
       let url = `https://youngeagles-api-server.up.railway.app/api/homeworks/for-parent/${parent_id}`;
-      if (childId) {
-        url += `?child_id=${childId}`;
+      if (effectiveChildId) {
+        url += `?child_id=${effectiveChildId}`;
+      } else {
+        console.warn('No child_id available for homework request');
+        // Still attempt the request - backend might handle missing child_id differently
       }
       
       const res = await axios.get(url, {
@@ -358,9 +362,12 @@ const HomeworkList = ({ onProgressUpdate }) => {
   const progressPercentage = totalHomework > 0 ? (submittedHomework / totalHomework) * 100 : 0;
 
   return (
-    <div className="w-full min-h-screen bg-gray-50 mx-auto px-2 sm:px-4 py-6 mobile-container">
-      <div className="max-w-7xl mx-auto parent-dashboard-mobile">
-        <h2 className="text-2xl sm:text-3xl font-bold text-center mb-6 text-gray-800 mobile-heading">📚 Homework Dashboard</h2>
+    <div className="w-full min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 px-4 py-6">
+      <div className="w-full max-w-none">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">📚 Homework Hub</h1>
+          <p className="text-gray-600 text-sm md:text-base">Your learning journey starts here</p>
+        </div>
         
         {/* Child Selection */}
         {availableChildren.length > 1 && (

@@ -264,20 +264,24 @@ export default function ColorMatchActivity({ items = [], instructions = '', titl
   const getCircle = (item) => <div style={{ background: item.color }} className="w-16 h-16 rounded-full" />;
 
   return (
-    <div className="max-w-md mx-auto p-4 bg-white rounded shadow flex flex-col justify-center overflow-y-auto">
-      <div className="mb-4 flex flex-col items-center">
-        <h2 className="text-xl font-bold mb-2 text-center">{title}</h2>
-        <p className="mb-2 text-center">{instructions}</p>
+    <div className="fixed inset-0 bg-gradient-to-br from-pink-50 to-yellow-50 flex flex-col overflow-hidden">
+      {/* Header */}
+      <div className="w-full p-4 bg-gradient-to-r from-pink-500 to-orange-500 text-white flex-shrink-0">
+        <h2 className="text-xl md:text-2xl font-bold text-center">{title}</h2>
+        <p className="text-center mt-2 text-pink-100 text-sm md:text-base">{instructions}</p>
       </div>
-      <div className="flex flex-col gap-6">
+      
+      {/* Main Content */}
+      <div className="flex-1 overflow-y-auto px-4 py-6">
+        <div className="w-full max-w-none space-y-8">
         {/* Circles to drop on */}
-        <div className="flex justify-around mb-6 flex-wrap">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 justify-items-center mb-8">
           {items.map((item) => (
             <div
               key={item.color}
               onDrop={() => handleDrop(item.color)}
               onDragOver={handleDragOver}
-              className={`w-16 h-16 rounded-full flex items-center justify-center border-2 ${matches[item.color] ? (isCorrect(item.color) ? 'border-green-500' : 'border-red-500') : 'border-gray-300'} transition-colors m-2`}
+              className={`w-20 h-20 md:w-16 md:h-16 rounded-full flex items-center justify-center border-4 ${matches[item.color] ? (isCorrect(item.color) ? 'border-green-500' : 'border-red-500') : 'border-gray-300'} transition-colors shadow-lg`}
               style={{ opacity: matches[item.color] ? 0.7 : 1, cursor: disabled ? 'not-allowed' : 'pointer' }}
             >
               {matches[item.color] && (
@@ -290,14 +294,14 @@ export default function ColorMatchActivity({ items = [], instructions = '', titl
           ))}
         </div>
         {/* Draggable names */}
-        <div className="flex flex-wrap justify-center gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 justify-items-center">
           {colorNames.map(({ name }) => (
             !Object.values(matches).includes(name) && (
               <div
                 key={name}
                 draggable={!disabled}
                 onDragStart={() => handleDragStart(name)}
-                className={`px-4 py-2 bg-gray-100 rounded shadow cursor-grab text-center font-medium border border-gray-300 hover:bg-gray-200 select-none ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+                className={`w-full px-4 py-3 bg-white rounded-lg shadow-md cursor-grab text-center font-semibold border-2 border-gray-200 hover:border-blue-300 hover:shadow-lg select-none transition-all ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
                 {name}
               </div>
@@ -318,11 +322,11 @@ export default function ColorMatchActivity({ items = [], instructions = '', titl
           </div>
         )}
         {/* Submit/Retry/Check buttons */}
-        <div className="flex flex-col items-center mt-6 gap-2">
+        <div className="flex flex-col items-center mt-8 gap-4 pb-6">
           {!submitted && (
             <>
               <button
-                className="bg-blue-500 text-white px-6 py-2 rounded font-bold disabled:opacity-50"
+                className="w-full md:w-auto bg-blue-500 text-white px-8 py-4 rounded-lg font-bold disabled:opacity-50 text-lg shadow-lg hover:bg-blue-600 transition-colors"
                 disabled={!allMatched || disabled}
                 onClick={handleCheck}
               >
@@ -330,20 +334,20 @@ export default function ColorMatchActivity({ items = [], instructions = '', titl
               </button>
               {showResult && allCorrect && (
                 <button
-                  className="bg-green-600 text-white px-6 py-2 rounded font-bold mt-2"
+                  className="w-full md:w-auto bg-green-600 text-white px-8 py-4 rounded-lg font-bold text-lg shadow-lg hover:bg-green-700 transition-colors"
                   onClick={handleSubmit}
                   disabled={disabled}
                 >
-                  Submit
+                  Submit Homework
                 </button>
               )}
               {showResult && !allCorrect && (
                 <button
-                  className="bg-yellow-500 text-white px-6 py-2 rounded font-bold mt-2"
+                  className="w-full md:w-auto bg-yellow-500 text-white px-8 py-4 rounded-lg font-bold text-lg shadow-lg hover:bg-yellow-600 transition-colors"
                   onClick={handleRetry}
                   disabled={disabled}
                 >
-                  Retry
+                  Try Again
                 </button>
               )}
             </>
@@ -356,6 +360,15 @@ export default function ColorMatchActivity({ items = [], instructions = '', titl
           {showResult && !allCorrect && (
             <span className="text-red-600 font-bold mt-2">Some matches are incorrect. Try again!</span>
           )}
+        </div>
+        {submitted && (
+          <div className="mt-6 text-center">
+            <div className="bg-green-500 text-white p-4 rounded-lg shadow-lg mx-auto max-w-xs">
+              <div className="text-lg font-bold">🎉 Perfect Match! 🎉</div>
+              <div className="text-sm mt-1">All colors matched correctly!</div>
+            </div>
+          </div>
+        )}
         </div>
       </div>
     </div>

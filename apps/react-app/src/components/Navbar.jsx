@@ -30,12 +30,13 @@ function Navbar() {
   };
 
   return (
-    <nav className="fixed w-full top-0 z-100 bg-white shadow-md backdrop-blur-md bg-opacity-80">
+    <nav className="fixed w-full top-0 z-50 bg-white shadow-md backdrop-blur-md bg-opacity-80">
       <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
         {/* Logo */}
-        <Link to="/home" className="flex items-center gap-3 text-xl font-bold text-pink-600">
-          <img src={logo} alt="Young Eagles Logo" className="h-10 w-10 rounded-full shadow-sm" />
-          Young Eagles
+        <Link to="/home" className="flex items-center gap-3 text-lg md:text-xl font-bold text-pink-600">
+          <img src={logo} alt="Young Eagles Logo" className="h-8 w-8 md:h-10 md:w-10 rounded-full shadow-sm" />
+          <span className="hidden sm:inline">Young Eagles</span>
+          <span className="sm:hidden">YE</span>
         </Link>
 
         {/* Desktop Menu */}
@@ -59,12 +60,17 @@ function Navbar() {
         </ul>
 
         {/* Mobile Toggle */}
-        <div
-          className="sticky  right-4 z-[100] md:hidden bg-white p-2 rounded-full shadow-md"
+        <button
+          className="relative z-[60] md:hidden bg-white p-2 rounded-full shadow-md cursor-pointer flex items-center justify-center w-10 h-10"
           onClick={toggleMenu}
+          aria-label="Toggle menu"
         >
-          {IsMenuOpen ? <RiCloseCircleFill className="text-pink-600 text-2xl" /> : <GiHamburgerMenu className="text-pink-600 text-2xl" />}
-        </div>
+          {IsMenuOpen ? (
+            <RiCloseCircleFill className="text-pink-600 text-xl" />
+          ) : (
+            <GiHamburgerMenu className="text-pink-600 text-xl" />
+          )}
+        </button>
       </div>
 
       {/* Mobile Menu */}
@@ -73,7 +79,7 @@ function Navbar() {
           <>
             {/* Background overlay */}
             <motion.div
-              className="fixed inset-0 bg-white bg-opacity-40 z-40"
+              className="fixed inset-0 bg-black bg-opacity-50 z-[55]"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -82,7 +88,7 @@ function Navbar() {
 
             {/* Slide-in Sidebar */}
             <motion.div
-              className="fixed top-0 left-0 w-2/3 max-w-sm h-screen bg-white z-50 shadow-lg"
+              className="fixed top-0 left-0 w-2/3 max-w-sm h-screen bg-white z-[60] shadow-lg"
               initial={{ x: "-100%" }}
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
