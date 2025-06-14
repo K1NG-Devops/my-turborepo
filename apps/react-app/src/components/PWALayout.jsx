@@ -9,10 +9,10 @@ import { toast } from 'react-toastify';
 import PWAParentDashboard from './PWA/PWAParentDashboard';
 import PWATeacherDashboard from './PWA/PWATeacherDashboard';
 import SubmitWork from '../pages/ParentDashboard/SubmitWork';
+import HomeworkList from '../pages/HomeworkList';
 import Notifications from '../pages/ParentDashboard/Notifications';
 import Login from '../components/Login';
 import TeacherLogin from '../components/Teacher/TeacherLogin';
-import NotificationManager from './NotificationManager';
 
 const PWALayout = () => {
   const navigate = useNavigate();
@@ -159,7 +159,8 @@ const PWALayout = () => {
               {auth.user.role === 'parent' && (
                 <>
                   <Route path="/dashboard" element={<PWAParentDashboard />} />
-                  <Route path="/student/homework" element={<SubmitWork />} />
+                  <Route path="/student/homework" element={<HomeworkList />} />
+                  <Route path="/submit-work" element={<SubmitWork />} />
                   <Route path="/notifications" element={<Notifications />} />
                 </>
               )}

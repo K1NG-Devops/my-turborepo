@@ -142,7 +142,7 @@ const NotificationManager = () => {
       window.removeEventListener('young-eagles-notification', handleCustomNotification);
       delete window.youngEaglesNotifications;
     };
-  }, [addNotification, simulateNotifications, notifications.length]);
+  }, [addNotification, simulateNotifications]); // Removed notifications.length dependency to prevent cycling
 
   return (
     <div 
