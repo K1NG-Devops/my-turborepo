@@ -6,10 +6,10 @@ import usePWA from '../hooks/usePWA';
 import { toast } from 'react-toastify';
 
 // Import dashboard components
-import Dashboard from '../pages/ParentDashboard/Dashboard';
+import PWAParentDashboard from './PWA/PWAParentDashboard';
+import PWATeacherDashboard from './PWA/PWATeacherDashboard';
 import SubmitWork from '../pages/ParentDashboard/SubmitWork';
 import Notifications from '../pages/ParentDashboard/Notifications';
-import TeacherDashboard from '../pages/TeacherDashboard/TeacherDashboard';
 import Login from '../components/Login';
 import TeacherLogin from '../components/Teacher/TeacherLogin';
 
@@ -139,7 +139,7 @@ const PWALayout = () => {
               {/* Parent Routes */}
               {auth.user.role === 'parent' && (
                 <>
-                  <Route path="/dashboard" element={<Dashboard />} />
+                  <Route path="/dashboard" element={<PWAParentDashboard />} />
                   <Route path="/student/homework" element={<SubmitWork />} />
                   <Route path="/notifications" element={<Notifications />} />
                 </>
@@ -148,7 +148,7 @@ const PWALayout = () => {
               {/* Teacher Routes */}
               {auth.user.role === 'teacher' && (
                 <>
-                  <Route path="/teacher-dashboard" element={<TeacherDashboard />} />
+                  <Route path="/teacher-dashboard" element={<PWATeacherDashboard />} />
                   <Route path="/notifications" element={<Notifications />} />
                 </>
               )}
