@@ -55,7 +55,7 @@ const Login = () => {
         {/* Header */}
         <div className="text-center mb-8">
           <img
-            src="/logo.jpg"
+            src="/logo.png"
             alt="Young Eagles"
             className="h-16 w-auto mx-auto mb-4"
           />

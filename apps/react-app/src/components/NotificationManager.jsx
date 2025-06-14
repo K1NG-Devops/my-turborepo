@@ -146,7 +146,7 @@ const NotificationManager = () => {
 
   return (
     <div 
-      className="fixed top-0 right-0 p-4 space-y-4 pointer-events-none"
+      className="fixed top-4 right-4 space-y-3 pointer-events-none"
       style={{ zIndex: 10000 }}
     >
       {notifications.map((notification, index) => (
@@ -154,7 +154,6 @@ const NotificationManager = () => {
           key={notification.id} 
           className="pointer-events-auto"
           style={{
-            transform: `translateY(${index * 10}px)`,
             zIndex: 10000 - index
           }}
         >

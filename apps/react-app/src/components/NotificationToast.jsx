@@ -6,15 +6,18 @@ const NotificationToast = ({ notification, onClose, onAction }) => {
   const [isLeaving, setIsLeaving] = useState(false);
 
   useEffect(() => {
-    // Slide in animation
-    setTimeout(() => setIsVisible(true), 100);
+    // Slide in animation - start immediately
+    const slideTimer = setTimeout(() => setIsVisible(true), 50);
     
     // Auto-hide after 6 seconds
-    const timer = setTimeout(() => {
+    const hideTimer = setTimeout(() => {
       handleClose();
     }, 6000);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(slideTimer);
+      clearTimeout(hideTimer);
+    };
   }, []);
 
   const handleClose = () => {
@@ -47,12 +50,16 @@ const NotificationToast = ({ notification, onClose, onAction }) => {
 
   return (
     <div 
-      className={`fixed top-4 right-4 max-w-sm w-full transform transition-all duration-300 ease-out pointer-events-auto ${
+      className={`w-80 transform transition-all duration-300 ease-out pointer-events-auto ${
         isVisible && !isLeaving 
           ? 'translate-x-0 opacity-100' 
           : 'translate-x-full opacity-0'
       }`}
-      style={{ zIndex: 9999 }}
+      style={{ 
+        zIndex: 9999,
+        minWidth: '320px',
+        maxWidth: '400px'
+      }}
     >
       <div className={`${getNotificationColors(notification.type)} border-l-4 rounded-lg shadow-lg bg-white border border-gray-200 overflow-hidden`}>
         {/* Notification Header */}
