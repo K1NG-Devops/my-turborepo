@@ -148,6 +148,7 @@ const PWALayout = () => {
         <Routes>
           {/* Authentication Routes */}
           <Route path="/login" element={<Login />} />
+          <Route path="/teacher/login" element={<TeacherLogin />} />
           <Route path="/teacher-login" element={<TeacherLogin />} />
           <Route path="/admin-login" element={<Login />} />
           
