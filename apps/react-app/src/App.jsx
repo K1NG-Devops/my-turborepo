@@ -49,7 +49,7 @@ function App() {
   }, []);
 
   // Force PWA mode for testing - you can remove this line after testing
-  const isStandalone = false; // Temporarily disabled to test web mode
+  const isStandalone = isPWAStandalone; // Re-enabled PWA mode with bottom navigation
 
   // Check if URL has source=pwa parameter to force web view
   const urlParams = new URLSearchParams(window.location.search);
