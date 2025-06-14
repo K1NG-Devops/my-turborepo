@@ -8,13 +8,12 @@ import AOS from 'aos';
 import 'aos/dist/aos.css';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import HomeworkList from '../../pages/HomeworkList';
 import EventsCalendar from '../../components/Calendar/EventsCalendar';
 import axios from 'axios';
 
-const linkStyles = "block mb-2 px-4 py-2 rounded hover:bg-gray-200 transition-colors duration-200 text-gray-800 hover:text-gray-800";
-const linkStyles2 = "bg-cyan-800 font-bold text-white hover:bg-cyan-700 transition-colors duration-200";
-const linkStylesActive = "bg-pink-500 font-bold text-gray-800";
+const linkStyles = "block mb-2 px-4 py-2 rounded hover:bg-slate-600 hover:bg-opacity-20 transition-colors duration-200 text-white hover:text-white";
+const linkStyles2 = "bg-cyan-600 font-bold text-white hover:bg-cyan-700 transition-colors duration-200";
+const linkStylesActive = "bg-slate-600 bg-opacity-30 font-bold text-white";
 
 const className = localStorage.getItem('className') || 'Class 1';
 const grade = localStorage.getItem('grade') || 'Grade 1';
@@ -92,9 +91,12 @@ const Dashboard = () => {
     }
   }, [parent_id, token, selectedChild]);
 
-// Fetch homework data for progress tracking
-  const fetchHomeworkData = async () => {
+// Fetch homework data for progress tracking with enhanced error handling
+  const fetchHomeworkData = useCallback(async () => {
     if (!parent_id || !token || !selectedChild) return;
+    
+    setIsLoading(prev => ({ ...prev, homework: true }));
+    setErrors(prev => ({ ...prev, homework: null }));
     
     try {
       const res = await axios.get(
@@ -119,10 +121,30 @@ const Dashboard = () => {
         submitted,
         percentage
       });
+      
+      // Clear any previous errors since fetch was successful
+      setErrors(prev => ({ ...prev, homework: null }));
     } catch (err) {
       console.error('Error fetching homework:', err);
+      const errorMessage = err.response?.data?.message || 'Unable to load homework data';
+      setErrors(prev => ({ ...prev, homework: errorMessage }));
+      
+      // Don't show error toast for 404 or empty data - this is normal
+      if (err.response?.status !== 404) {
+        toast.error(errorMessage);
+      }
+      
+      // Reset to empty state on error
+      setHomeworkList([]);
+      setHomeworkProgress({
+        total: 0,
+        submitted: 0,
+        percentage: 0
+      });
+    } finally {
+      setIsLoading(prev => ({ ...prev, homework: false }));
     }
-  };
+  }, [parent_id, token, selectedChild]);
 
   useEffect(() => {
     fetchChildren();
@@ -137,9 +159,11 @@ const Dashboard = () => {
 
   // Refresh homework data every 30 seconds to catch updates
   useEffect(() => {
-    const interval = setInterval(fetchHomeworkData, 30000);
-    return () => clearInterval(interval);
-  }, [parent_id, token]);
+    if (selectedChild) {
+      const interval = setInterval(fetchHomeworkData, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [fetchHomeworkData, selectedChild]);
 
   // Fetch real notifications from API
   useEffect(() => {
@@ -253,19 +277,30 @@ const Dashboard = () => {
 
       {/* Sidebar */}
       <aside
-        className={`fixed top-0 left-0 z-40 w-64 h-full bg-cyan-300 shadow transform transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        className={`fixed top-0 left-0 z-40 w-64 h-full bg-gradient-to-b from-slate-900 via-slate-800 to-slate-700 shadow transform transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
           } sm:translate-x-0`}
       >
         <div className="h-full p-4 flex flex-col justify-between">
           <div>
+            {/* Close button for mobile */}
+            <button
+              onClick={closeSidebar}
+              className="sm:hidden absolute top-4 right-4 w-10 h-10 flex items-center justify-center text-white hover:text-gray-200 bg-red-500 rounded-full hover:bg-red-600 transition-all duration-300 z-50 shadow-lg border-2 border-white"
+              style={{ aspectRatio: '1/1' }}
+              aria-label="Close sidebar"
+            >
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
+            </button>
             {/* Profile Section */}
             <div className="flex flex-col items-center mb-6">
               <img
                 src={userProfilePic}
                 alt="User Avatar"
-                className="w-20 h-20 rounded-full border"
+                className="w-20 h-20 rounded-full border-4 border-white shadow-lg"
               />
-              <p className="mt-2 font-semibold">{userName}</p>
+              <p className="mt-2 font-semibold text-white text-lg">{userName}</p>
               <div className="relative mt-2" ref={dropdownRef}>
                 <button
                   onClick={toggleDropdown}
@@ -317,22 +352,6 @@ const Dashboard = () => {
                     Dashboard
                   </Link>
                 </li>
-                <select
-                  className="w-full p-3 md:p-2 border rounded-lg bg-white text-black text-sm md:text-base focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
-                  value={selectedChild}
-                  onChange={(e) => {
-                    setSelectedChild(e.target.value);
-                    localStorage.setItem('selectedChild', e.target.value);
-                  }}
-                  aria-label="Select child"
-                >
-                  <option value="">Select a child</option>
-                  {children.map((child) => (
-                    <option key={child.id} value={child.id}>
-                      {child.name} - {child.className || 'No Class'}
-                    </option>
-                  ))}
-                </select>
                 <li>
                   <Link
                     to="/submit-work"
@@ -472,7 +491,14 @@ const Dashboard = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs sm:text-sm font-medium text-gray-600">Homework Rate</p>
-                  <p className="text-2xl sm:text-3xl font-bold text-gray-900">{Math.round(homeworkProgress.percentage)}%</p>
+                  {isLoading.homework ? (
+                    <div className="flex items-center space-x-2">
+                      <FaSpinner className="animate-spin text-gray-400" />
+                      <span className="text-sm text-gray-500">Loading...</span>
+                    </div>
+                  ) : (
+                    <p className="text-2xl sm:text-3xl font-bold text-gray-900">{Math.round(homeworkProgress.percentage)}%</p>
+                  )}
                 </div>
                 <div className="p-2 sm:p-3 bg-green-100 rounded-full">
                   <FaBook className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
@@ -490,6 +516,9 @@ const Dashboard = () => {
                     aria-label={`Homework completion: ${Math.round(homeworkProgress.percentage)}%`}
                   ></div>
                 </div>
+                {errors.homework && (
+                  <p className="text-xs text-orange-500 mt-2">Unable to load latest data</p>
+                )}
               </div>
             </div>
 
@@ -514,13 +543,58 @@ const Dashboard = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs sm:text-sm font-medium text-gray-600">Total Assignments</p>
-                  <p className="text-2xl sm:text-3xl font-bold text-gray-900">{homeworkProgress.total}</p>
+                  {isLoading.homework ? (
+                    <div className="flex items-center space-x-2">
+                      <FaSpinner className="animate-spin text-gray-400" />
+                      <span className="text-sm text-gray-500">Loading...</span>
+                    </div>
+                  ) : (
+                    <p className="text-2xl sm:text-3xl font-bold text-gray-900">{homeworkProgress.total}</p>
+                  )}
                 </div>
                 <div className="p-2 sm:p-3 bg-purple-100 rounded-full">
                   <FaClipboardList className="w-5 h-5 sm:w-6 sm:h-6 text-purple-600" />
                 </div>
               </div>
-              <p className="text-xs sm:text-sm text-gray-500 mt-2">{homeworkProgress.submitted} completed</p>
+              <p className="text-xs sm:text-sm text-gray-500 mt-2">
+                {homeworkProgress.submitted} completed
+                {homeworkProgress.total === 0 && !isLoading.homework && !errors.homework && (
+                  <span className="text-blue-500 ml-1">• No assignments yet</span>
+                )}
+              </p>
+            </div>
+          </div>
+
+          {/* Child Selection */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">Child Selection</h3>
+            <div className="mb-4">
+              {isLoading.children ? (
+                <div className="flex items-center space-x-2 p-3 border rounded-lg bg-gray-50">
+                  <FaSpinner className="animate-spin text-gray-400" />
+                  <span className="text-sm text-gray-500">Loading children...</span>
+                </div>
+              ) : (
+                <select
+                  className="w-full p-3 border border-gray-300 rounded-lg bg-white text-black text-sm md:text-base focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 min-h-[44px]"
+                  value={selectedChild}
+                  onChange={(e) => {
+                    setSelectedChild(e.target.value);
+                    localStorage.setItem('selectedChild', e.target.value);
+                  }}
+                  aria-label="Select child"
+                >
+                  <option value="">Select a child</option>
+                  {children.map((child) => (
+                    <option key={child.id} value={child.id}>
+                      {child.name} - {child.className || 'No Class'}
+                    </option>
+                  ))}
+                </select>
+              )}
+              {errors.children && (
+                <p className="text-xs text-red-500 mt-2">{errors.children}</p>
+              )}
             </div>
           </div>
 
@@ -529,16 +603,47 @@ const Dashboard = () => {
             <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">Quick Actions</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
               <Link
-                to={`/student/homework?className=${encodeURIComponent(className)}&grade=${encodeURIComponent(grade)}`}
-                className="flex items-center p-4 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors group min-h-[80px] touch-manipulation"
-                aria-label="View homework assignments"
+                to={selectedChild ? `/student/homework?className=${encodeURIComponent(className)}&grade=${encodeURIComponent(grade)}&child_id=${selectedChild}` : '#'}
+                className={`flex items-center p-4 rounded-lg transition-colors group min-h-[80px] touch-manipulation ${
+                  selectedChild 
+                    ? 'bg-blue-50 hover:bg-blue-100 cursor-pointer' 
+                    : 'bg-gray-100 cursor-not-allowed opacity-60'
+                }`}
+                aria-label={selectedChild ? "View homework assignments" : "Select a child first"}
+                onClick={(e) => {
+                  if (!selectedChild) {
+                    e.preventDefault();
+                    toast.warning('Please select a child first');
+                  }
+                }}
               >
-                <div className="p-2 bg-blue-100 rounded-lg mr-3 group-hover:bg-blue-200">
-                  <FaBook className="w-5 h-5 text-blue-600" />
+                <div className={`p-2 rounded-lg mr-3 ${
+                  selectedChild 
+                    ? 'bg-blue-100 group-hover:bg-blue-200' 
+                    : 'bg-gray-200'
+                }`}>
+                  <FaBook className={`w-5 h-5 ${
+                    selectedChild ? 'text-blue-600' : 'text-gray-400'
+                  }`} />
                 </div>
-                <div>
-                  <p className="text-sm sm:text-base font-medium text-gray-900">View Homework</p>
-                  <p className="text-xs sm:text-sm text-gray-600">Check assignments</p>
+                <div className="flex-1">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className={`text-sm sm:text-base font-medium ${
+                        selectedChild ? 'text-gray-900' : 'text-gray-500'
+                      }`}>View Homework</p>
+                      <p className={`text-xs sm:text-sm ${
+                        selectedChild ? 'text-gray-600' : 'text-gray-400'
+                      }`}>{selectedChild ? 'Check assignments' : 'Select child first'}</p>
+                    </div>
+                    {homeworkProgress.total > 0 && (
+                      <div className="ml-3">
+                        <span className="inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-blue-600 rounded-full">
+                          {homeworkProgress.total}
+                        </span>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </Link>
 
@@ -578,23 +683,12 @@ const Dashboard = () => {
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6 max-h-96 overflow-y-auto">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-6 gap-3">
               <h3 className="text-base sm:text-lg font-bold text-gray-900">Child Progress</h3>
-              {children.length > 0 && (
-                <select
-                  className="px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-700 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 text-sm min-h-[44px]"
-                  value={selectedChild}
-                  onChange={(e) => {
-                    setSelectedChild(e.target.value);
-                    localStorage.setItem('selectedChild', e.target.value);
-                  }}
-                  aria-label="Select child for progress view"
-                >
-                  <option value="">Select a child</option>
-                  {children.map((child) => (
-                    <option key={child.id} value={child.id}>
-                      {child.name} - {child.className || 'No Class'}
-                    </option>
-                  ))}
-                </select>
+              {selectedChild && (
+                <div className="text-sm text-gray-600">
+                  Current child: <span className="font-medium text-gray-900">
+                    {children.find(child => child.id.toString() === selectedChild)?.name || 'Unknown'}
+                  </span>
+                </div>
               )}
             </div>
             
@@ -654,11 +748,6 @@ const Dashboard = () => {
           {/* Events Calendar */}
           <div className="max-h-96 overflow-y-auto">
             <EventsCalendar />
-          </div>
-          
-          {/* Homework List Integration */}
-          <div className="max-h-96 overflow-y-auto">
-            <HomeworkList onProgressUpdate={fetchHomeworkData} />
           </div>
         </div>
 

@@ -27,11 +27,18 @@ const SubmitWork = () => {
 
     const parent_id = localStorage.getItem('parent_id');
     const token = localStorage.getItem('accessToken');
+    
+    // Debug logging
+    console.log('SubmitWork Component - Debug Info:');
+    console.log('parent_id:', parent_id);
+    console.log('token exists:', !!token);
+    console.log('token length:', token ? token.length : 'N/A');
 
     // Fetch available homework on component mount
     useEffect(() => {
         const fetchHomework = async () => {
             try {
+                console.log('Fetching homework for parent_id:', parent_id);
                 const res = await axios.get(
                     `https://youngeagles-api-server.up.railway.app/api/homeworks/for-parent/${parent_id}`,
                     {
@@ -40,8 +47,16 @@ const SubmitWork = () => {
                         },
                     }
                 );
+                console.log('Homework API response:', res.data);
+                console.log('Response status:', res.status);
+                
                 const hwList = Array.isArray(res.data) ? res.data : res.data.homeworks || [];
-                setHomeworkList(hwList.filter(hw => !hw.submitted)); // Only show unsubmitted homework
+                console.log('Processed homework list:', hwList);
+                
+                const unsubmittedHw = hwList.filter(hw => !hw.submitted);
+                console.log('Unsubmitted homework:', unsubmittedHw);
+                
+                setHomeworkList(unsubmittedHw); // Only show unsubmitted homework
             } catch (err) {
                 toast.error('Failed to load homework.');
                 console.error('Error loading homework:', err);
@@ -59,12 +74,19 @@ const SubmitWork = () => {
     };
 
     const handleUpload = async () => {
+        console.log('Starting submission process...');
+        console.log('Selected homework:', selectedHomework);
+        console.log('File selected:', file);
+        console.log('Comment:', comment);
+        
         if (!file || !selectedHomework) {
             toast.error('Please select homework and upload a file.');
+            console.error('Missing file or homework selection');
             return;
         }
 
         setUploading(true);
+        console.log('Starting Firebase upload...');
         const storageRef = ref(storage, `submissions/${file.name}`);
         const uploadTask = uploadBytesResumable(storageRef, file);
 
@@ -82,10 +104,18 @@ const SubmitWork = () => {
             },
             async () => {
                 try {
+                    console.log('Firebase upload completed successfully');
                     const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+                    console.log('Download URL obtained:', downloadURL);
+
+                    console.log('Submitting to backend with data:');
+                    console.log('- homeworkId:', selectedHomework);
+                    console.log('- fileURL:', downloadURL);
+                    console.log('- comment:', comment);
+                    console.log('- token (first 10 chars):', token ? token.substring(0, 10) + '...' : 'No token');
 
                     // Submit to backend
-                    await axios.post(
+                    const response = await axios.post(
                         'https://youngeagles-api-server.up.railway.app/api/homeworks/submit',
                         {
                             homeworkId: selectedHomework,
@@ -98,6 +128,9 @@ const SubmitWork = () => {
                             },
                         }
                     );
+                    
+                    console.log('Backend submission response:', response.data);
+                    console.log('Response status:', response.status);
 
                     toast.success('Homework submitted successfully!');
                     setFile(null);
@@ -108,8 +141,12 @@ const SubmitWork = () => {
                     // Remove submitted homework from list
                     setHomeworkList(prev => prev.filter(hw => hw.id !== parseInt(selectedHomework)));
                 } catch (err) {
-                    toast.error('Submission upload succeeded but saving failed.');
-                    console.error(err);
+                    console.error('Backend submission error:', err);
+                    console.error('Error response:', err.response?.data);
+                    console.error('Error status:', err.response?.status);
+                    console.error('Error headers:', err.response?.headers);
+                    
+                    toast.error(`Submission failed: ${err.response?.data?.message || err.message}`);
                     setUploading(false);
                 }
             }
