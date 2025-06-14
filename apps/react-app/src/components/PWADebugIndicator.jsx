@@ -2,12 +2,8 @@ import React from 'react';
 import usePWA from '../hooks/usePWA';
 
 const PWADebugIndicator = () => {
-  const { isStandalone, isInstallable } = usePWA();
-  
-  // Only show in development mode
-  if (process.env.NODE_ENV !== 'development') {
-    return null;
-  }
+  // Completely disabled for clean UI
+  return null;
   
   return (
     <div className="fixed top-0 left-0 z-50 bg-black bg-opacity-75 text-white text-xs p-2 rounded-br-lg">

@@ -4,6 +4,9 @@ import { app } from '../firebase';
 import { toast } from 'sonner';
 
 const NotificationPermission = () => {
+  // Temporarily disabled for testing to prevent rate limiting
+  return null;
+  
   const [permissionStatus, setPermissionStatus] = useState('default');
   const [fcmToken, setFcmToken] = useState(null);
   const [showPermissionPrompt, setShowPermissionPrompt] = useState(false);
@@ -86,6 +89,18 @@ const NotificationPermission = () => {
 
   const sendTokenToServer = async (token) => {
     try {
+      // Check if we've already sent this token recently (rate limiting)
+      const lastTokenSent = localStorage.getItem('lastFCMTokenSent');
+      const lastTokenValue = localStorage.getItem('lastFCMTokenValue');
+      const now = Date.now();
+      const fiveMinutes = 5 * 60 * 1000; // 5 minutes in milliseconds
+      
+      // Skip if same token was sent within last 5 minutes
+      if (lastTokenSent && lastTokenValue === token && (now - parseInt(lastTokenSent)) < fiveMinutes) {
+        console.log('FCM token already sent recently, skipping...');
+        return;
+      }
+      
       // Always use the production server for FCM token registration
       const apiUrl = 'https://youngeagles-api-server.up.railway.app';
       
@@ -117,9 +132,22 @@ const NotificationPermission = () => {
       
       if (!response.ok) {
         const text = await response.text();
+        
+        // Handle rate limiting specifically
+        if (response.status === 429) {
+          console.warn('Rate limited - will retry FCM token registration later');
+          // Set a longer delay before next attempt
+          localStorage.setItem('lastFCMTokenSent', (now + fiveMinutes).toString());
+          return;
+        }
+        
         console.error("FCM token POST failed:", response.status, text);
         throw new Error(`Failed to send token to server: ${response.status} ${text}`);
       }
+      
+      // Store successful send time and token value
+      localStorage.setItem('lastFCMTokenSent', now.toString());
+      localStorage.setItem('lastFCMTokenValue', token);
       
       console.log("FCM token sent to server successfully");
     } catch (err) {
