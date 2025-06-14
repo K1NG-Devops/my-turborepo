@@ -95,6 +95,23 @@ const PWALayout = () => {
           </div>
           
           <div className="flex items-center space-x-2">
+            {/* Notification Test Button (Development) */}
+            {process.env.NODE_ENV === 'development' && (
+              <button
+                onClick={() => {
+                  if (window.youngEaglesNotifications) {
+                    window.youngEaglesNotifications.test();
+                  } else {
+                    console.log('⚠️ Notification system not ready yet');
+                  }
+                }}
+                className="p-2 hover:bg-blue-500 rounded-lg transition-colors duration-200"
+                title="Test Notifications"
+              >
+                <FaBell className="text-sm" />
+              </button>
+            )}
+            
             {/* Open Website Button */}
             <button
               onClick={handleOpenWebsite}

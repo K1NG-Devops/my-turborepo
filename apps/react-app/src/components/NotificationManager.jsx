@@ -88,24 +88,56 @@ const NotificationManager = () => {
 
   // Expose the notification system globally
   useEffect(() => {
+    console.log('🔔 NotificationManager mounted - setting up global API');
+    
     // Make notification functions available globally
     window.youngEaglesNotifications = {
       add: addNotification,
-      demo: simulateNotifications
+      demo: simulateNotifications,
+      test: () => {
+        console.log('🧪 Testing notification system...');
+        addNotification({
+          type: 'homework',
+          title: 'Test Notification',
+          message: 'This is a test notification to verify the system is working!',
+          actions: [
+            { label: 'Great!', type: 'dismiss', primary: true }
+          ]
+        });
+      },
+      status: () => {
+        console.log('📊 Notification System Status:');
+        console.log('- API Available:', !!window.youngEaglesNotifications);
+        console.log('- Active Notifications:', notifications.length);
+        console.log('- Add Function:', typeof addNotification);
+        console.log('- Demo Function:', typeof simulateNotifications);
+        return {
+          available: true,
+          activeNotifications: notifications.length,
+          functions: ['add', 'demo', 'test', 'status']
+        };
+      }
     };
+
+    console.log('✅ Global notification API ready!');
+    console.log('💡 Try: window.youngEaglesNotifications.test()');
+    console.log('💡 Try: window.youngEaglesNotifications.demo()');
+    console.log('💡 Try: window.youngEaglesNotifications.status()');
 
     // Listen for custom notification events
     const handleCustomNotification = (event) => {
+      console.log('📨 Custom notification event received:', event.detail);
       addNotification(event.detail);
     };
 
     window.addEventListener('young-eagles-notification', handleCustomNotification);
 
     return () => {
+      console.log('🔕 NotificationManager unmounting - cleaning up global API');
       window.removeEventListener('young-eagles-notification', handleCustomNotification);
       delete window.youngEaglesNotifications;
     };
-  }, [addNotification, simulateNotifications]);
+  }, [addNotification, simulateNotifications, notifications.length]);
 
   return (
     <div className="fixed top-0 right-0 z-50 p-4 space-y-4 pointer-events-none">
