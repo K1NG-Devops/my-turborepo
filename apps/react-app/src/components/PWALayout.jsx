@@ -12,6 +12,7 @@ import SubmitWork from '../pages/ParentDashboard/SubmitWork';
 import Notifications from '../pages/ParentDashboard/Notifications';
 import Login from '../components/Login';
 import TeacherLogin from '../components/Teacher/TeacherLogin';
+import NotificationManager from './NotificationManager';
 
 const PWALayout = () => {
   const navigate = useNavigate();
@@ -80,11 +81,11 @@ const PWALayout = () => {
         <div className="flex justify-between items-center">
           <div className="flex items-center space-x-3">
             {/* Circular Logo */}
-            <div className="w-8 h-8 rounded-full bg-white p-1 shadow-sm">
+            <div className="w-8 h-8 rounded-full overflow-hidden shadow-lg border-2 border-white/20">
               <img 
                 src="/pwa-192x192.png" 
                 alt="Young Eagles Logo" 
-                className="w-full h-full rounded-full object-cover"
+                className="w-full h-full object-cover"
               />
             </div>
             <div className="flex items-center space-x-2">
@@ -205,6 +206,9 @@ const PWALayout = () => {
           </div>
         </nav>
       )}
+      
+      {/* WhatsApp/Facebook-style Notifications */}
+      <NotificationManager />
     </div>
   );
 };

@@ -101,7 +101,16 @@ const PWAParentDashboard = () => {
       console.error('Error fetching homework:', err);
       const errorMessage = err.response?.data?.message || 'Unable to load homework data';
       
-      if (err.response?.status !== 404) {
+      // Handle different error scenarios
+      if (err.response?.status === 404) {
+        // No homework found - this is normal, not an error
+        console.log('No homework found for this child - this is normal');
+        setErrors(prev => ({ ...prev, homework: null }));
+      } else if (err.response?.status === 400 && errorMessage.includes('Child ID must be specified')) {
+        // Child not selected
+        setErrors(prev => ({ ...prev, homework: 'Please select a child first' }));
+      } else {
+        // Actual error
         setErrors(prev => ({ ...prev, homework: errorMessage }));
       }
       
@@ -141,7 +150,8 @@ const PWAParentDashboard = () => {
       color: 'blue',
       path: selectedChild ? `/student/homework?child_id=${selectedChild}` : '#',
       disabled: !selectedChild,
-      badge: homeworkProgress.total
+      badge: homeworkProgress.total,
+      showBadgeWhenZero: false
     },
     {
       id: 'submit',
@@ -150,7 +160,8 @@ const PWAParentDashboard = () => {
       icon: FaClipboardList,
       color: 'green',
       path: '/submit-work',
-      disabled: false
+      disabled: false,
+      showBadgeWhenZero: false
     },
     {
       id: 'notifications',
@@ -160,7 +171,8 @@ const PWAParentDashboard = () => {
       color: 'yellow',
       path: '/notifications',
       disabled: false,
-      badge: 0 // TODO: Add notification count
+      badge: 0, // TODO: Add notification count
+      showBadgeWhenZero: false
     }
   ];
 

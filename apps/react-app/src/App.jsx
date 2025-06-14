@@ -34,6 +34,7 @@ import PasswordlessLogin from './components/PasswordlessLogin';
 import PhoneLogin from './components/PhoneLogin';
 import usePWA from './hooks/usePWA';
 import PWADebugIndicator from './components/PWADebugIndicator';
+import NotificationManager from './components/NotificationManager';
 import './App.css';
 
 function App() {
@@ -136,6 +137,9 @@ function App() {
         
         {/* PWA Debug Indicator - shows in both modes during development */}
         <PWADebugIndicator />
+        
+        {/* WhatsApp/Facebook-style Notifications - available in both PWA and web */}
+        <NotificationManager />
       </AutoLogout>
     </Router>
   );
