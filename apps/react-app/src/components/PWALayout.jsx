@@ -21,7 +21,7 @@ const PWALayout = () => {
 
   // Check authentication on mount
   useEffect(() => {
-    if (!auth.user) {
+    if (!auth?.user) {
       // If not authenticated, show login based on stored role preference
       const preferredRole = localStorage.getItem('preferredRole') || 'parent';
       if (preferredRole === 'teacher') {
@@ -32,7 +32,7 @@ const PWALayout = () => {
         navigate('/login');
       }
     }
-  }, [auth.user, navigate]);
+  }, [auth?.user, navigate]);
 
   const handleLogout = () => {
     logout();
@@ -48,7 +48,7 @@ const PWALayout = () => {
 
   // Navigation items based on user role
   const getNavigationItems = () => {
-    const role = auth.user?.role;
+    const role = auth?.user?.role;
     
     if (role === 'teacher') {
       return [
@@ -62,7 +62,7 @@ const PWALayout = () => {
         { id: 'notifications', label: 'Notifications', icon: FaBell, path: '/notifications' },
       ];
     } else {
-      // Parent role
+      // Parent role or no role
       return [
         { id: 'dashboard', label: 'Dashboard', icon: FaHome, path: '/dashboard' },
         { id: 'homework', label: 'Homework', icon: FaBook, path: '/student/homework' },
@@ -78,9 +78,19 @@ const PWALayout = () => {
       {/* PWA Header */}
       <header className="bg-blue-600 text-white p-4 shadow-lg">
         <div className="flex justify-between items-center">
-          <div className="flex items-center space-x-2">
-            <h1 className="text-lg font-bold">Young Eagles</h1>
-            <span className="text-xs bg-blue-500 px-2 py-1 rounded-full">App</span>
+          <div className="flex items-center space-x-3">
+            {/* Circular Logo */}
+            <div className="w-8 h-8 rounded-full bg-white p-1 shadow-sm">
+              <img 
+                src="/pwa-192x192.png" 
+                alt="Young Eagles Logo" 
+                className="w-full h-full rounded-full object-cover"
+              />
+            </div>
+            <div className="flex items-center space-x-2">
+              <h1 className="text-lg font-bold">Young Eagles</h1>
+              <span className="text-xs bg-blue-500 px-2 py-1 rounded-full">App</span>
+            </div>
           </div>
           
           <div className="flex items-center space-x-2">
@@ -105,7 +115,7 @@ const PWALayout = () => {
         </div>
         
         {/* User info */}
-        {auth.user && (
+        {auth?.user && (
           <div className="mt-2 text-sm opacity-90">
             Welcome, {auth.user.name || auth.user.email}
             <span className="ml-2 text-xs bg-blue-500 px-2 py-1 rounded">
@@ -124,7 +134,7 @@ const PWALayout = () => {
           <Route path="/admin-login" element={<Login />} />
           
           {/* Protected Routes */}
-          {auth.user ? (
+          {auth?.user ? (
             <>
               {/* Parent Routes */}
               {auth.user.role === 'parent' && (
@@ -167,7 +177,7 @@ const PWALayout = () => {
       </main>
 
       {/* Bottom Navigation */}
-      {auth.user && (
+      {auth?.user && (
         <nav className="bg-white border-t border-gray-200 p-2">
           <div className="flex justify-around">
             {navigationItems.map((item) => {
