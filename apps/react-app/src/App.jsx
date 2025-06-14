@@ -35,6 +35,7 @@ import PhoneLogin from './components/PhoneLogin';
 import usePWA from './hooks/usePWA';
 import PWADebugIndicator from './components/PWADebugIndicator';
 import NotificationManager from './components/NotificationManager';
+import { Capacitor } from '@capacitor/core';
 import './App.css';
 
 function App() {
@@ -48,12 +49,15 @@ function App() {
     });
   }, []);
 
+  // Check if running as native Capacitor app
+  const isNativeApp = Capacitor.isNativePlatform();
+  
   // Force PWA mode for testing - you can remove this line after testing
-  const isStandalone = isPWAStandalone; // Re-enabled PWA mode with bottom navigation
+  const isStandalone = isPWAStandalone || isNativeApp; // Re-enabled PWA mode with bottom navigation
 
   // Check if URL has source=pwa parameter to force web view
   const urlParams = new URLSearchParams(window.location.search);
-  const forceWebView = urlParams.get('source') === 'pwa';
+  const forceWebView = urlParams.get('source') === 'pwa' && !isNativeApp; // Don't force web view for native app
 
   return (
     <Router>

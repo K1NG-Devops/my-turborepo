@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
-import { FaHome, FaBook, FaBell, FaUser, FaChalkboardTeacher, FaExternalLinkAlt, FaCog } from 'react-icons/fa';
+import { FaHome, FaBook, FaBell, FaUser, FaChalkboardTeacher, FaExternalLinkAlt, FaCog, FaGlobe } from 'react-icons/fa';
 import useAuth from '../hooks/useAuth';
 import usePWA from '../hooks/usePWA';
+import { Capacitor } from '@capacitor/core';
+import { Browser } from '@capacitor/browser';
 import { toast } from 'react-toastify';
 
 // Import dashboard components
@@ -42,9 +44,28 @@ const PWALayout = () => {
     toast.success('Logged out successfully');
   };
 
-  const handleOpenWebsite = () => {
-    openFullWebsite();
-    toast.info('Opening full website in browser...');
+  const handleOpenWebsite = async () => {
+    const isNativeApp = Capacitor.isNativePlatform();
+    
+    if (isNativeApp) {
+      // For native app, open the full website in external browser
+      try {
+        await Browser.open({ 
+          url: 'https://youngeagles-homework-app.vercel.app/',
+          windowName: '_system'
+        });
+        toast.info('Opening full website in browser...');
+      } catch (error) {
+        console.error('Error opening browser:', error);
+        // Fallback to window.open
+        window.open('https://youngeagles-homework-app.vercel.app/', '_system');
+        toast.info('Opening full website in browser...');
+      }
+    } else {
+      // For PWA, use the existing function
+      openFullWebsite();
+      toast.info('Opening full website in browser...');
+    }
   };
 
   // Navigation items based on user role
@@ -83,8 +104,8 @@ const PWALayout = () => {
             {/* Circular Logo */}
             <div className="w-8 h-8 rounded-full overflow-hidden shadow-lg border-2 border-white/20">
               <img 
-                src="/pwa-192x192.png" 
-                alt="Young Eagles Logo" 
+                src="/app-icons/yehc_logo.png" 
+                alt="Young Eagles Home Care Centre Logo" 
                 className="w-full h-full object-cover"
               />
             </div>

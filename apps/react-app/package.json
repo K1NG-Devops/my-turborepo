@@ -12,6 +12,12 @@
     "check:env": "node -e \"console.log('Environment check:', { mode: process.env.NODE_ENV, apiUrl: process.env.VITE_API_URL })\""
   },
   "dependencies": {
+    "@capacitor/android": "^7.3.0",
+    "@capacitor/browser": "^7.0.1",
+    "@capacitor/cli": "^7.3.0",
+    "@capacitor/core": "^7.3.0",
+    "@capacitor/splash-screen": "^7.0.1",
+    "@capacitor/status-bar": "^7.0.1",
     "@hello-pangea/dnd": "^18.0.1",
     "@radix-ui/react-dialog": "^1.1.14",
     "@radix-ui/react-label": "^2.1.7",

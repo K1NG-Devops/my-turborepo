@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { GiHamburgerMenu } from "react-icons/gi";
 import { RiCloseCircleFill } from "react-icons/ri";
-import logo from "../assets/logo.jpg";
+// Using yehc_logo.png for the Young Eagles Home Care Centre branding
 import useRedirect from "../hooks/useRedirect";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -34,7 +34,7 @@ function Navbar() {
       <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
         {/* Logo */}
         <Link to="/home" className="flex items-center gap-3 text-lg md:text-xl font-bold text-pink-600">
-          <img src={logo} alt="Young Eagles Logo" className="h-8 w-8 md:h-10 md:w-10 rounded-full shadow-sm" />
+          <img src="/app-icons/yehc_logo.png" alt="Young Eagles Home Care Centre Logo" className="h-8 w-8 md:h-10 md:w-10 rounded-full object-cover shadow-sm" />
           <span className="hidden sm:inline">Young Eagles</span>
           <span className="sm:hidden">YE</span>
         </Link>

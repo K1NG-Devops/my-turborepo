@@ -55,9 +55,9 @@ const Login = () => {
         {/* Header */}
         <div className="text-center mb-8">
           <img
-            src="/logo.png"
+            src="/app-icons/yehc_logo.png"
             alt="Young Eagles"
-            className="h-16 w-auto mx-auto mb-4"
+            className="h-16 w-16 mx-auto mb-4 rounded-full object-cover shadow-lg"
           />
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h1>
           <p className="text-gray-600">Sign in to your parent account</p>
