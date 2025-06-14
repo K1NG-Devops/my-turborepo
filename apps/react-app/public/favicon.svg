@@ -11,11 +11,8 @@
     </linearGradient>
   </defs>
   
-  <!-- White Circular Background -->
-  <circle cx="256" cy="256" r="240" fill="white" stroke="#E5E7EB" stroke-width="4"/>
-  
-  <!-- Colored Inner Circle -->
-  <circle cx="256" cy="256" r="220" fill="url(#bgGradient)" stroke="#1E40AF" stroke-width="4"/>
+  <!-- White Circular Background with Blue Border -->
+  <circle cx="256" cy="256" r="240" fill="white" stroke="#3B82F6" stroke-width="20"/>
   
   <!-- Eagle Silhouette -->
   <g transform="translate(256,256)">
