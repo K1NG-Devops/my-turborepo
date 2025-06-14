@@ -11,7 +11,6 @@ import SubmitWork from '../pages/ParentDashboard/SubmitWork';
 import Notifications from '../pages/ParentDashboard/Notifications';
 import TeacherDashboard from '../pages/TeacherDashboard/TeacherDashboard';
 import Login from '../components/Login';
-import AdminLogin from '../components/AdminLogin';
 import TeacherLogin from '../components/Teacher/TeacherLogin';
 
 const PWALayout = () => {
@@ -122,7 +121,7 @@ const PWALayout = () => {
           {/* Authentication Routes */}
           <Route path="/login" element={<Login />} />
           <Route path="/teacher-login" element={<TeacherLogin />} />
-          <Route path="/admin-login" element={<AdminLogin />} />
+          <Route path="/admin-login" element={<Login />} />
           
           {/* Protected Routes */}
           {auth.user ? (
