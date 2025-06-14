@@ -20,7 +20,7 @@ export default defineConfig({
         background_color: '#ffffff',
         display: 'standalone',
         scope: '/',
-        start_url: '/',
+        start_url: '/dashboard?source=app',
         orientation: 'portrait-primary',
         categories: ['education', 'productivity'],
         icons: [
