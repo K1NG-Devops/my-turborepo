@@ -225,8 +225,6 @@ const PWALayout = () => {
         </nav>
       )}
       
-      {/* WhatsApp/Facebook-style Notifications */}
-      <NotificationManager />
     </div>
   );
 };

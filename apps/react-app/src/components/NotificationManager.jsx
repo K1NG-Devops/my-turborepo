@@ -8,6 +8,7 @@ const NotificationManager = () => {
 
   // Function to add a new notification
   const addNotification = useCallback((notification) => {
+    console.log('🔔 addNotification called with:', notification);
     const id = Date.now() + Math.random();
     const newNotification = {
       id,
@@ -15,9 +16,13 @@ const NotificationManager = () => {
       ...notification
     };
     
+    console.log('📝 Created notification object:', newNotification);
+    
     setNotifications(prev => {
       // Limit to 3 notifications at once
       const updated = [newNotification, ...prev.slice(0, 2)];
+      console.log('📋 Updated notifications array:', updated);
+      console.log('📊 Total notifications now:', updated.length);
       return updated;
     });
   }, []);

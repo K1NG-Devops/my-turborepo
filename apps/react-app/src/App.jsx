@@ -38,7 +38,7 @@ import NotificationManager from './components/NotificationManager';
 import './App.css';
 
 function App() {
-  const { isStandalone } = usePWA();
+  const { isStandalone: isPWAStandalone } = usePWA();
   
   // Initialize AOS animation library
   useEffect(() => {
@@ -49,7 +49,7 @@ function App() {
   }, []);
 
   // Force PWA mode for testing - you can remove this line after testing
-  // const isStandalone = true;
+  const isStandalone = true; // Change this to isPWAStandalone for normal operation
 
   // Check if URL has source=pwa parameter to force web view
   const urlParams = new URLSearchParams(window.location.search);
