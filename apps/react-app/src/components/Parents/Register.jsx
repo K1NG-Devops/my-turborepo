@@ -88,13 +88,15 @@ const Register = () => {
           { name: 'confirmPassword', label: 'Confirm Password', type: 'password' },
         ].map(({ name, label, type = 'text' }) => (
           <div key={name}>
-            <label className="block text-sm mb-1">{label}</label>
+            <label htmlFor={name} className="block text-sm mb-1">{label}</label>
             <input
+              id={name}
               type={type}
               name={name}
               value={formData[name]}
               onChange={handleChange}
               required
+              autoComplete={name === 'password' || name === 'confirmPassword' ? 'new-password' : name}
               className="w-full border px-3 py-2 rounded bg-white text-black dark:bg-gray-100 dark:text-black focus:ring-2 focus:ring-blue-500"
               placeholder={name === "workAddress" ? "If applicable" : undefined}
             />

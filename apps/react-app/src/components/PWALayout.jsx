@@ -14,6 +14,8 @@ import SubmitWork from '../pages/ParentDashboard/SubmitWork';
 import HomeworkList from '../pages/HomeworkList';
 import Notifications from '../pages/ParentDashboard/Notifications';
 import Login from '../components/Login';
+import Register from '../components/Parents/Register';
+import PasswordReset from '../components/PasswordReset';
 import TeacherLogin from '../components/Teacher/TeacherLogin';
 
 const PWALayout = () => {
@@ -174,6 +176,8 @@ const PWALayout = () => {
         <Routes>
           {/* Authentication Routes */}
           <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/password-reset" element={<PasswordReset />} />
           <Route path="/teacher/login" element={<TeacherLogin />} />
           <Route path="/teacher-login" element={<TeacherLogin />} />
           <Route path="/admin-login" element={<Login />} />
