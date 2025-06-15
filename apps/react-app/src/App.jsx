@@ -9,6 +9,7 @@ import PopUploadForm from './components/Parents/PopUploadForm';
 import PrivateRoute from './components/PrivateRoute';
 import Login from './components/Login';
 import TeacherLogin from './components/Teacher/TeacherLogin';
+import AdminLogin from './components/Admin/AdminLogin';
 import Register from './components/Parents/Register';
 import RegisterChild from './components/Parents/RegisterChild';
 import Lessons from './pages/ParentDashboard/Lessons';
@@ -120,7 +121,7 @@ function App() {
             <Route path="/register" element={<Register />} />
             <Route path="/teacher/login" element={<TeacherLogin />} />
             <Route path="/teacher-login" element={<TeacherLogin />} />
-            <Route path="/admin-login" element={<Login />} />
+            <Route path="/admin-login" element={<AdminLogin />} />
             <Route path="/password-reset" element={<PasswordReset />} />
             <Route path="/passwordless-login" element={<PasswordlessLogin />} />
             <Route path="/phone-login" element={<PhoneLogin />} />

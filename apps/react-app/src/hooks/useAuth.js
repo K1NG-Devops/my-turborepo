@@ -62,6 +62,7 @@ const useAuth = () => {
     logout,
     isAuthenticated: !!auth,
     isTeacher: auth?.role === 'teacher' || localStorage.getItem('role') === 'teacher',
+    isAdmin: auth?.role === 'admin' || localStorage.getItem('role') === 'admin',
     isParent: auth?.role === 'parent' || auth?.role === 'user' || (!auth?.role && localStorage.getItem('parent_id'))
   };
 };
