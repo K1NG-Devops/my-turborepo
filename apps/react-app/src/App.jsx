@@ -35,6 +35,7 @@ import PhoneLogin from './components/PhoneLogin';
 import usePWA from './hooks/usePWA';
 import PWADebugIndicator from './components/PWADebugIndicator';
 import NotificationManager from './components/NotificationManager';
+import AuthTest from './components/AuthTest';
 import './App.css';
 
 // Lazy import new components with fallbacks
@@ -123,6 +124,7 @@ function App() {
             <Route path="/passwordless-login" element={<PasswordlessLogin />} />
             <Route path="/phone-login" element={<PhoneLogin />} />
             <Route path="/auth/action" element={<FirebaseActionHandler />} />
+            <Route path="/auth-test" element={<AuthTest />} />
             <Route path="/download" element={
               <React.Suspense fallback={<div className="p-4 text-center">Loading...</div>}>
                 <DownloadApp />

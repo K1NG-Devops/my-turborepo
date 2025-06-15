@@ -56,7 +56,13 @@ const TeacherLogin = () => {
         login(authData);
         
         setSuccess("Login successful!");
-        toast.success("Login successful!");
+        
+        // Show success message based on environment
+        if (typeof window !== 'undefined' && window.toast) {
+          window.toast.success("Login successful!");
+        } else {
+          toast.success("Login successful!");
+        }
         
         // Navigate with replace to prevent back button issues
         setTimeout(() => {
@@ -64,13 +70,25 @@ const TeacherLogin = () => {
           navigate("/teacher-dashboard", { replace: true });
         }, 500); // Increased timeout to ensure auth state is updated
       } else {
-        setError(result.message);
-        toast.error(result.message);
+        const errorMessage = result.message || 'Login failed. Please check your credentials.';
+        setError(errorMessage);
+        
+        if (typeof window !== 'undefined' && window.toast) {
+          window.toast.error(errorMessage);
+        } else {
+          toast.error(errorMessage);
+        }
       }
     } catch (error) {
       console.error('Login error:', error);
-      setError('Login failed. Please try again.');
-      toast.error('Login failed. Please try again.');
+      const errorMessage = 'Login failed. Please check your internet connection and try again.';
+      setError(errorMessage);
+      
+      if (typeof window !== 'undefined' && window.toast) {
+        window.toast.error(errorMessage);
+      } else {
+        toast.error(errorMessage);
+      }
     } finally {
       setIsLoading(false);
     }

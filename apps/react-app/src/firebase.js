@@ -22,6 +22,30 @@ const auth = getAuth(app);
 const analytics = getAnalytics(app);
 const storage = getStorage(app);
 
+// Debug: Log Firebase initialization status
+if (typeof window !== 'undefined') {
+  console.log('🔥 Firebase initialized:', {
+    projectId: firebaseConfig.projectId,
+    authDomain: firebaseConfig.authDomain,
+    authInitialized: !!auth,
+    storageInitialized: !!storage
+  });
+  
+  // Listen for auth state changes
+  auth.onAuthStateChanged((user) => {
+    if (user) {
+      console.log('🔐 Firebase user logged in:', {
+        uid: user.uid,
+        email: user.email,
+        emailVerified: user.emailVerified,
+        displayName: user.displayName
+      });
+    } else {
+      console.log('🔓 Firebase user logged out');
+    }
+  });
+}
+
 // Initialize messaging if supported
 let messaging = null;
 if (typeof window !== 'undefined') {

@@ -17,6 +17,7 @@ import Login from '../components/Login';
 import Register from '../components/Parents/Register';
 import PasswordReset from '../components/PasswordReset';
 import TeacherLogin from '../components/Teacher/TeacherLogin';
+import AuthTest from '../components/AuthTest';
 
 const PWALayout = () => {
   const navigate = useNavigate();
@@ -204,6 +205,7 @@ const PWALayout = () => {
           <Route path="/teacher/login" element={<TeacherLogin />} />
           <Route path="/teacher-login" element={<TeacherLogin />} />
           <Route path="/admin-login" element={<Login />} />
+          <Route path="/auth-test" element={<AuthTest />} />
           
           {/* Protected Routes */}
           {(auth?.user || localStorage.getItem('accessToken')) ? (
