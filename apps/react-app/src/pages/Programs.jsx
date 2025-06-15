@@ -1,7 +1,18 @@
 import React from "react";
 import MyRegisterButton from "../components/MyRegisterButton";
 import MyButton from "../components/MyButton";
-import APKDownload from "../components/APKDownload";
+
+// Safely import APKDownload with fallback
+const APKDownload = React.lazy(() => 
+  import('../components/APKDownload').catch(() => ({ 
+    default: () => (
+      <div className="text-center p-6 bg-gray-100 rounded-lg">
+        <p className="text-gray-600">APK download coming soon!</p>
+        <p className="text-sm text-gray-500">For now, please contact us for app access.</p>
+      </div>
+    )
+  }))
+);
 import codeAPillar from "../assets/codeAPillar.png";
 import legoBlocks from "../assets/legoBlocks.png";
 // import kidsSmiling from "../assets/kidsSmiling.png";
@@ -168,7 +179,14 @@ const Programs = () => {
           Get the Young Eagles mobile app for the best experience! Access homework, 
           track your child's progress, and stay connected with teachers.
         </p>
-        <APKDownload />
+        <React.Suspense fallback={
+          <div className="text-center p-6 bg-gray-100 rounded-lg animate-pulse">
+            <div className="h-4 bg-gray-300 rounded w-3/4 mx-auto mb-2"></div>
+            <div className="h-3 bg-gray-300 rounded w-1/2 mx-auto"></div>
+          </div>
+        }>
+          <APKDownload />
+        </React.Suspense>
       </section>
     </div>
   );

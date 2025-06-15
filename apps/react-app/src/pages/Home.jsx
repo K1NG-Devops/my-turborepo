@@ -27,7 +27,7 @@ const Home = () => {
 
   return (
     <>
-      <div className="mt-16 p-6 bg-pink-50 min-h-screen space-y-16 overflow-x-hidden">
+      <div className="mt-16 p-4 md:p-6 bg-pink-50 min-h-screen space-y-8 md:space-y-16 w-full overflow-x-hidden">
         {/* Hero */}
         <header className="text-center mb-8" data-aos="fade-down">
           <div className="flex flex-col md:flex-row items-center justify-center text-center overflow-x-hidden text-pink-700 font-bold">

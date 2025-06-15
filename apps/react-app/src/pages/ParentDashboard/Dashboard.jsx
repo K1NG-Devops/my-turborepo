@@ -9,7 +9,25 @@ import 'aos/dist/aos.css';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import EventsCalendar from '../../components/Calendar/EventsCalendar';
-import MessagingSystem from '../../components/Messaging/MessagingSystem';
+// Lazy import MessagingSystem with fallback
+const MessagingSystem = React.lazy(() => 
+  import('../../components/Messaging/MessagingSystem').catch(() => ({ 
+    default: ({ isOpen, onClose }) => isOpen ? (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+        <div className="bg-white rounded-lg p-6 max-w-md mx-4">
+          <h3 className="text-lg font-semibold mb-2">Messaging Coming Soon!</h3>
+          <p className="text-gray-600 mb-4">The messaging system is currently being updated. Please check back later.</p>
+          <button 
+            onClick={onClose}
+            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    ) : null
+  }))
+);
 import axios from 'axios';
 
 const linkStyles = "block mb-2 px-4 py-2 rounded hover:bg-slate-600 hover:bg-opacity-20 transition-colors duration-200 text-white hover:text-white";
@@ -800,11 +818,13 @@ const Dashboard = () => {
       </main>
 
       {/* Messaging System Modal */}
-      <MessagingSystem 
-        isOpen={isMessagingOpen}
-        onClose={() => setIsMessagingOpen(false)}
-        selectedChild={children.find(child => child.id.toString() === selectedChild) || null}
-      />
+      <React.Suspense fallback={null}>
+        <MessagingSystem 
+          isOpen={isMessagingOpen}
+          onClose={() => setIsMessagingOpen(false)}
+          selectedChild={children.find(child => child.id.toString() === selectedChild) || null}
+        />
+      </React.Suspense>
 
       {/* Custom CSS for animations and mobile optimizations */}
       <style jsx>{`

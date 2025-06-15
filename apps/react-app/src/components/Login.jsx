@@ -200,7 +200,7 @@ const Login = () => {
               Teacher
             </Link>
             <span className="text-gray-300">•</span>
-            <Link to="/admin/login" className="text-blue-600 hover:text-blue-500 font-medium">
+            <Link to="/admin-login" className="text-blue-600 hover:text-blue-500 font-medium">
               Admin
             </Link>
             <span className="text-gray-300">•</span>

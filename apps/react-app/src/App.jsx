@@ -32,12 +32,27 @@ import FirebaseActionHandler from './components/FirebaseActionHandler';
 import PasswordReset from './components/PasswordReset';
 import PasswordlessLogin from './components/PasswordlessLogin';
 import PhoneLogin from './components/PhoneLogin';
-import DownloadApp from './pages/DownloadApp';
 import usePWA from './hooks/usePWA';
 import PWADebugIndicator from './components/PWADebugIndicator';
 import NotificationManager from './components/NotificationManager';
-import { Capacitor } from '@capacitor/core';
 import './App.css';
+
+// Lazy import new components with fallbacks
+const DownloadApp = React.lazy(() => 
+  import('./pages/DownloadApp').catch(() => ({ 
+    default: () => <div className="p-4 text-center">Download page temporarily unavailable</div> 
+  }))
+);
+
+// Check for Capacitor availability
+const isCapacitorAvailable = (() => {
+  try {
+    const { Capacitor } = require('@capacitor/core');
+    return Capacitor;
+  } catch {
+    return null;
+  }
+})();
 
 function App() {
   const { isStandalone: isPWAStandalone } = usePWA();
@@ -51,7 +66,7 @@ function App() {
   }, []);
 
   // Check if running as native Capacitor app
-  const isNativeApp = Capacitor.isNativePlatform();
+  const isNativeApp = isCapacitorAvailable ? isCapacitorAvailable.isNativePlatform() : false;
   
   // Force PWA mode for testing - you can remove this line after testing
   const isStandalone = isPWAStandalone || isNativeApp; // Re-enabled PWA mode with bottom navigation
@@ -108,7 +123,11 @@ function App() {
             <Route path="/passwordless-login" element={<PasswordlessLogin />} />
             <Route path="/phone-login" element={<PhoneLogin />} />
             <Route path="/auth/action" element={<FirebaseActionHandler />} />
-            <Route path="/download" element={<DownloadApp />} />
+            <Route path="/download" element={
+              <React.Suspense fallback={<div className="p-4 text-center">Loading...</div>}>
+                <DownloadApp />
+              </React.Suspense>
+            } />
 
             {/* Private Routes */}
             <Route element={<PrivateRoute />}>
