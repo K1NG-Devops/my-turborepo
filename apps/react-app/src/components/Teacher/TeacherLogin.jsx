@@ -40,28 +40,40 @@ const TeacherLogin = () => {
     setError("");
     setSuccess("");
   
-    const result = await teacherLogin(email, password);
-  
-    if (result.success) {
-      // Update auth context with teacher data
-      login({
-        token: result.token,
-        user: result.user,
-        role: 'teacher'
-      });
-      
-      setSuccess("Login successful!");
-      toast.success("Login successful!");
-      
-      // Navigate with replace to prevent back button issues
-      setTimeout(() => {
-        navigate("/teacher-dashboard", { replace: true });
-      }, 100);
-    } else {
-      setError(result.message);
-      toast.error(result.message);
+    try {
+      const result = await teacherLogin(email, password);
+      console.log('Teacher login result:', result);
+    
+      if (result.success) {
+        // Update auth context with teacher data
+        const authData = {
+          token: result.token,
+          user: result.user,
+          role: 'teacher'
+        };
+        
+        console.log('Setting auth data:', authData);
+        login(authData);
+        
+        setSuccess("Login successful!");
+        toast.success("Login successful!");
+        
+        // Navigate with replace to prevent back button issues
+        setTimeout(() => {
+          console.log('Navigating to teacher dashboard');
+          navigate("/teacher-dashboard", { replace: true });
+        }, 500); // Increased timeout to ensure auth state is updated
+      } else {
+        setError(result.message);
+        toast.error(result.message);
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      setError('Login failed. Please try again.');
+      toast.error('Login failed. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
   
 

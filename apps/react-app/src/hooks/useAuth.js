@@ -39,6 +39,7 @@ const useAuth = () => {
   }, [auth]);
 
   const login = (userData) => {
+    console.log('useAuth - Setting auth data:', userData);
     setAuth(userData);
   };
 
