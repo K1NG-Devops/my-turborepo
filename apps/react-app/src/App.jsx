@@ -32,6 +32,7 @@ import FirebaseActionHandler from './components/FirebaseActionHandler';
 import PasswordReset from './components/PasswordReset';
 import PasswordlessLogin from './components/PasswordlessLogin';
 import PhoneLogin from './components/PhoneLogin';
+import DownloadApp from './pages/DownloadApp';
 import usePWA from './hooks/usePWA';
 import PWADebugIndicator from './components/PWADebugIndicator';
 import NotificationManager from './components/NotificationManager';
@@ -106,6 +107,7 @@ function App() {
             <Route path="/passwordless-login" element={<PasswordlessLogin />} />
             <Route path="/phone-login" element={<PhoneLogin />} />
             <Route path="/auth/action" element={<FirebaseActionHandler />} />
+            <Route path="/download" element={<DownloadApp />} />
 
             {/* Private Routes */}
             <Route element={<PrivateRoute />}>

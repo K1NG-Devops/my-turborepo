@@ -1,35 +1,14 @@
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { FaDownload } from 'react-icons/fa';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import TracksuitPromo from '../components/Parents/TracksuitPromo';
 import CountUp from 'react-countup';
-//           fillRule="evenodd"
-//             d="M2 4a2 2 0 012-2h12a2 2 0 012 2v12a2 2 0 01-2 2H4a2 2 0 01-2-2V4zm3.293 3.293a1 1 0 011.414-1.414L10 8.586l3.293-3.293a1 1 0 111.414 1.414L11.414 10l3.293 3.293a1 1 0 01-1.414 1.414L10 11.414l-3.293 3.293a1 1 0 01-1.414-1.414L8.586 10l-3.293-3.293z"
-//             clipRule="evenodd"
-//           />
-//         </svg>
-//       </button>
-//       {/* Sidebar */}
-
-//       {/* Swiper and SwiperSlide */}
-<Swiper
-  modules={[Autoplay]}
-  autoplay={{ delay: 3000, disableOnInteraction: false }}
-  className="mySwiper"
->
-  <SwiperSlide>
-    <img src={winterTracksuit} alt="Winter Tracksuit" />
-  </SwiperSlide>
-  <SwiperSlide>
-    <img src={winterTracksuit2} alt="Winter Tracksuit 2" />
-  </SwiperSlide>
-</Swiper>
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
 import 'swiper/css/autoplay';
 import { Autoplay } from 'swiper/modules';
-
 
 // Import local images (adjust if using Vite or Webpack)
 import winterTracksuit from '../assets/track_suit1.png';
@@ -207,6 +186,13 @@ const Home = () => {
             className="ml-2 inline-block px-8 py-3 bg-purple-600 text-white text-lg font-semibold rounded-full shadow-md hover:bg-purple-500 transition transform hover:scale-115 transition duration-300 ease-in-out"
           >
             Upload POP
+          </Link>
+          <Link
+            to="/download"
+            className="ml-2 inline-flex items-center justify-center px-8 py-3 bg-green-600 text-white text-lg font-semibold rounded-full shadow-md hover:bg-green-500 transition transform hover:scale-105 duration-300 ease-in-out mt-4 md:mt-0"
+          >
+            <FaDownload className="mr-2" />
+            Download App
           </Link>
         </div>
       </div>

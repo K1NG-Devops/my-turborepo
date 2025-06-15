@@ -66,6 +66,11 @@ jobs:
       - name: Sync Capacitor
         run: npx cap sync android
 
+      - name: Set up signing keystore
+        if: github.ref == 'refs/heads/main' || github.event.inputs.build_type == 'release'
+        run: |
+          echo "${{ secrets.KEYSTORE_FILE }}" | base64 -d > android/app/release-key.keystore
+        
       - name: Build APK
         run: |
           cd android
@@ -75,6 +80,10 @@ jobs:
           else
             ./gradlew assembleDebug
           fi
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
