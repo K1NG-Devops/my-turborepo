@@ -89,9 +89,19 @@ const PWALayout = () => {
 
   // Navigation items based on user role
   const getNavigationItems = () => {
-    const role = auth?.user?.role;
+    // Get user role with fallback to localStorage for PWA compatibility
+    const role = auth?.user?.role || localStorage.getItem('role');
+    const isTeacher = role === 'teacher' || localStorage.getItem('isTeacher') === 'true';
     
-    if (role === 'teacher') {
+    console.log('PWA Navigation - Auth state:', {
+      role,
+      isTeacher,
+      authUserRole: auth?.user?.role,
+      localStorageRole: localStorage.getItem('role'),
+      localStorageIsTeacher: localStorage.getItem('isTeacher')
+    });
+    
+    if (isTeacher) {
       return [
         { id: 'dashboard', label: 'Dashboard', icon: FaHome, path: '/teacher-dashboard' },
         { id: 'homework', label: 'Homework', icon: FaBook, path: '/teacher-dashboard' },
@@ -196,10 +206,18 @@ const PWALayout = () => {
           <Route path="/admin-login" element={<Login />} />
           
           {/* Protected Routes */}
-          {auth?.user ? (
+          {(auth?.user || localStorage.getItem('accessToken')) ? (
             <>
-              {/* Parent Routes */}
-              {auth.user.role === 'parent' && (
+              {/* Teacher Routes - Check both auth context and localStorage */}
+              {((auth?.user?.role === 'teacher') || (localStorage.getItem('role') === 'teacher') || (localStorage.getItem('isTeacher') === 'true')) && (
+                <>
+                  <Route path="/teacher-dashboard" element={<PWATeacherDashboard />} />
+                  <Route path="/notifications" element={<Notifications />} />
+                </>
+              )}
+              
+              {/* Parent Routes - Check both auth context and localStorage */}
+              {((auth?.user?.role === 'parent') || (auth?.user?.role === 'user') || localStorage.getItem('parent_id') || (!auth?.user?.role && !localStorage.getItem('role'))) && (
                 <>
                   <Route path="/dashboard" element={<PWAParentDashboard />} />
                   <Route path="/student/homework" element={<HomeworkList />} />
@@ -208,16 +226,8 @@ const PWALayout = () => {
                 </>
               )}
               
-              {/* Teacher Routes */}
-              {auth.user.role === 'teacher' && (
-                <>
-                  <Route path="/teacher-dashboard" element={<PWATeacherDashboard />} />
-                  <Route path="/notifications" element={<Notifications />} />
-                </>
-              )}
-              
               {/* Admin Routes */}
-              {auth.user.role === 'admin' && (
+              {((auth?.user?.role === 'admin') || (localStorage.getItem('role') === 'admin')) && (
                 <>
                   <Route path="/admin-dashboard" element={<div className="p-4">Admin Dashboard Coming Soon</div>} />
                   <Route path="/notifications" element={<Notifications />} />
@@ -227,8 +237,8 @@ const PWALayout = () => {
               {/* Default redirect based on role */}
               <Route path="/" element={
                 <Navigate to={
-                  auth.user.role === 'teacher' ? '/teacher-dashboard' :
-                  auth.user.role === 'admin' ? '/admin-dashboard' :
+                  ((auth?.user?.role === 'teacher') || (localStorage.getItem('role') === 'teacher') || (localStorage.getItem('isTeacher') === 'true')) ? '/teacher-dashboard' :
+                  ((auth?.user?.role === 'admin') || (localStorage.getItem('role') === 'admin')) ? '/admin-dashboard' :
                   '/dashboard'
                 } replace />
               } />
