@@ -36,20 +36,29 @@ const Register = () => {
     try {
       const res = await axios.post('https://youngeagles-api-server.up.railway.app/api/auth/register', formData);
 
-      localStorage.removeItem('token');
+      localStorage.removeItem('accessToken');
+      
       // login using the same credentials
       const loginRes = await axios.post('https://youngeagles-api-server.up.railway.app/api/auth/login', {
         email: formData.email,
         password: formData.password
       });
 
-      localStorage.setItem('token', loginRes.data.token);
+      // Store credentials consistently
+      localStorage.setItem('accessToken', loginRes.data.token);
+      localStorage.setItem('parent_id', loginRes.data.user.id);
+      localStorage.setItem('user', JSON.stringify(loginRes.data.user));
+      
       setMessage('Registration successful!');
       setFormData({
         name: '', email: '', phone: '', address: '', workAddress: '', password: '', confirmPassword: ''
       });
       setErrors('');
-      navigate('/dashboard');
+      
+      // Navigate with replace to prevent back button issues
+      setTimeout(() => {
+        navigate('/dashboard', { replace: true });
+      }, 100);
     } catch (err) {
       console.error(err); // Helpful for debugging
       if (err.response?.data?.errors) {

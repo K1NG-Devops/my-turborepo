@@ -24,7 +24,11 @@ const PWALayout = () => {
 
   // Check authentication on mount
   useEffect(() => {
-    if (!auth?.user) {
+    const token = localStorage.getItem('accessToken');
+    const storedUser = localStorage.getItem('user');
+    
+    // Check both auth context and localStorage
+    if (!auth?.user && !token) {
       // If not authenticated, show login based on stored role preference
       const preferredRole = localStorage.getItem('preferredRole') || 'parent';
       if (preferredRole === 'teacher') {

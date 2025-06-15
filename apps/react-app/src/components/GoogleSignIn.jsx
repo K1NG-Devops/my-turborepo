@@ -93,7 +93,10 @@ const GoogleSignIn = ({ className = '' }) => {
       
       if (sessionCreated) {
         toast.success('Successfully signed in with Google!');
-        navigate('/dashboard');
+        // Add a small delay to ensure state is updated
+        setTimeout(() => {
+          navigate('/dashboard', { replace: true });
+        }, 100);
       }
       
     } catch (error) {

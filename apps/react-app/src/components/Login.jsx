@@ -26,12 +26,24 @@ const Login = () => {
       );
 
       const data = response.data;
-      login(data); // save to auth context
+      
+      // Clear any previous errors
+      setErrorMessage('');
+      
+      // Save to auth context
+      login(data);
+      
+      // Save to localStorage for consistency
       localStorage.setItem('parent_id', data.user.id);
       localStorage.setItem('accessToken', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      
       setSuccessMessage('Login successful!');
-      setErrorMessage('');
-      navigate('/dashboard');
+      
+      // Navigate with replace to prevent back button issues
+      setTimeout(() => {
+        navigate('/dashboard', { replace: true });
+      }, 100);
     } catch (error) {
       setErrorMessage(error.response?.data?.message || 'Invalid email or password.');
       setSuccessMessage('');
