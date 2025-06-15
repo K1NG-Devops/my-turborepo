@@ -1,7 +1,7 @@
 {
-  "name": "Young Eagles - Homework Helper",
+  "name": "Young Eagles Home Care Centre",
   "short_name": "Young Eagles",
-  "description": "Interactive homework app for students with activities, file uploads, and progress tracking",
+  "description": "Educational app connecting teachers, parents and students with homework, messaging and progress tracking",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#3B82F6",

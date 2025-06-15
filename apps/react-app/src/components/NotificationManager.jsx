@@ -1,169 +1,183 @@
-import React, { useState, useCallback, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import NotificationToast from './NotificationToast';
+import React, { useEffect, useState } from 'react';
+import { FaBell, FaTimes, FaCheck } from 'react-icons/fa';
+import { toast } from 'react-toastify';
+import useMessaging from '../hooks/useMessaging';
+import useAuth from '../hooks/useAuth';
 
 const NotificationManager = () => {
   const [notifications, setNotifications] = useState([]);
-  const navigate = useNavigate();
+  const [isVisible, setIsVisible] = useState(false);
+  
+  const { 
+    fetchNotifications, 
+    markNotificationAsRead, 
+    notifications: realNotifications 
+  } = useMessaging();
+  const { auth } = useAuth();
 
-  // Function to add a new notification
-  const addNotification = useCallback((notification) => {
-    console.log('🔔 addNotification called with:', notification);
-    const id = Date.now() + Math.random();
-    const newNotification = {
-      id,
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      ...notification
-    };
-    
-    console.log('📝 Created notification object:', newNotification);
-    
-    setNotifications(prev => {
-      // Limit to 3 notifications at once
-      const updated = [newNotification, ...prev.slice(0, 2)];
-      console.log('📋 Updated notifications array:', updated);
-      console.log('📊 Total notifications now:', updated.length);
-      return updated;
-    });
-  }, []);
-
-  // Function to remove a notification
-  const removeNotification = useCallback((id) => {
-    setNotifications(prev => prev.filter(notif => notif.id !== id));
-  }, []);
-
-  // Handle notification actions
-  const handleNotificationAction = useCallback((action) => {
-    if (action.type === 'navigate') {
-      navigate(action.path);
-    } else if (action.type === 'url') {
-      window.open(action.url, '_blank');
-    } else if (action.type === 'callback' && action.callback) {
-      action.callback();
-    }
-  }, [navigate]);
-
-  // Demo function to simulate notifications (for testing)
-  const simulateNotifications = useCallback(() => {
-    const demoNotifications = [
-      {
-        type: 'homework',
-        title: 'New Homework Posted',
-        message: 'Math homework has been posted for Grade 3. Due date: Tomorrow at 2 PM.',
-        actions: [
-          { label: 'View', type: 'navigate', path: '/student/homework', primary: true },
-          { label: 'Dismiss', type: 'dismiss' }
-        ]
-      },
-      {
-        type: 'submission',
-        title: 'Homework Submitted',
-        message: 'Your child\'s English homework has been successfully submitted.',
-        actions: [
-          { label: 'View Progress', type: 'navigate', path: '/dashboard', primary: true }
-        ]
-      },
-      {
-        type: 'user',
-        title: 'Teacher Message',
-        message: 'Ms. Sarah left a comment on your child\'s art project.',
-        avatar: '/api/placeholder/32/32',
-        actions: [
-          { label: 'Read Message', type: 'navigate', path: '/notifications', primary: true },
-          { label: 'Later', type: 'dismiss' }
-        ]
-      },
-      {
-        type: 'urgent',
-        title: 'Urgent: School Closure',
-        message: 'Due to weather conditions, school will be closed tomorrow.',
-        actions: [
-          { label: 'Read Full Notice', type: 'navigate', path: '/notifications', primary: true }
-        ]
-      }
-    ];
-
-    // Add notifications with delays
-    demoNotifications.forEach((notif, index) => {
-      setTimeout(() => {
-        addNotification(notif);
-      }, index * 1500);
-    });
-  }, [addNotification]);
-
-  // Expose the notification system globally
   useEffect(() => {
-    console.log('🔔 NotificationManager mounted - setting up global API');
-    
-    // Make notification functions available globally
-    window.youngEaglesNotifications = {
-      add: addNotification,
-      demo: simulateNotifications,
-      test: () => {
-        console.log('🧪 Testing notification system...');
-        addNotification({
-          type: 'homework',
-          title: 'Test Notification',
-          message: 'This is a test notification to verify the system is working!',
-          actions: [
-            { label: 'Great!', type: 'dismiss', primary: true }
-          ]
-        });
-      },
-      status: () => {
-        console.log('📊 Notification System Status:');
-        console.log('- API Available:', !!window.youngEaglesNotifications);
-        console.log('- Active Notifications:', notifications.length);
-        console.log('- Add Function:', typeof addNotification);
-        console.log('- Demo Function:', typeof simulateNotifications);
-        return {
-          available: true,
-          activeNotifications: notifications.length,
-          functions: ['add', 'demo', 'test', 'status']
-        };
+    if (auth?.user) {
+      // Fetch real notifications when user is authenticated
+      fetchNotifications();
+      
+      // Set up periodic refresh every 30 seconds
+      const notificationRefresh = setInterval(() => {
+        fetchNotifications();
+      }, 30000);
+      
+      return () => clearInterval(notificationRefresh);
+    }
+  }, [auth?.user, fetchNotifications]);
+
+  useEffect(() => {
+    // Update local state when real notifications change
+    if (realNotifications && realNotifications.length > 0) {
+      setNotifications(realNotifications);
+      
+      // Show notification popup if there are unread notifications
+      const unreadCount = realNotifications.filter(n => !n.is_read).length;
+      if (unreadCount > 0) {
+        setIsVisible(true);
       }
+    }
+  }, [realNotifications]);
+
+  useEffect(() => {
+    // Setup notification system
+    const setupNotifications = () => {
+      console.log('🔔 Setting up real notification system...');
+      
+      // Global notification function for testing
+      window.youngEaglesNotifications = {
+        test: () => {
+          // Test by fetching latest notifications
+          fetchNotifications();
+          setIsVisible(true);
+          toast.info('Refreshed notifications!');
+          console.log('🧪 Notification system tested');
+        },
+        
+        refresh: () => {
+          fetchNotifications();
+          console.log('🔄 Notifications refreshed');
+        },
+        
+        markAsRead: async (id) => {
+          await markNotificationAsRead(id);
+          console.log('✅ Notification marked as read:', id);
+        },
+        
+        clear: () => {
+          setNotifications([]);
+          setIsVisible(false);
+          console.log('🗑️ Notification panel cleared (server notifications remain)');
+        }
+      };
+      
+      console.log('✅ Real notification system ready!');
     };
 
-    console.log('✅ Global notification API ready!');
-    console.log('💡 Try: window.youngEaglesNotifications.test()');
-    console.log('💡 Try: window.youngEaglesNotifications.demo()');
-    console.log('💡 Try: window.youngEaglesNotifications.status()');
+    setupNotifications();
 
-    // Listen for custom notification events
-    const handleCustomNotification = (event) => {
-      console.log('📨 Custom notification event received:', event.detail);
-      addNotification(event.detail);
-    };
-
-    window.addEventListener('young-eagles-notification', handleCustomNotification);
+    // Request notification permission if not already granted
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission().then(permission => {
+        console.log('🔔 Notification permission:', permission);
+      });
+    }
 
     return () => {
-      console.log('🔕 NotificationManager unmounting - cleaning up global API');
-      window.removeEventListener('young-eagles-notification', handleCustomNotification);
       delete window.youngEaglesNotifications;
     };
-  }, [addNotification, simulateNotifications]); // Removed notifications.length dependency to prevent cycling
+  }, [fetchNotifications, markNotificationAsRead]);
+
+  const handleMarkAsRead = async (notificationId) => {
+    try {
+      await markNotificationAsRead(notificationId);
+      // Remove from local state
+      setNotifications(prev => prev.filter(n => n.id !== notificationId));
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+      toast.error('Failed to mark notification as read');
+    }
+  };
+
+  const formatNotificationTime = (timestamp) => {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffInMinutes = Math.floor((now - date) / 60000);
+    
+    if (diffInMinutes < 1) return 'Just now';
+    if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
+    if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}h ago`;
+    return date.toLocaleDateString();
+  };
+
+  if (!isVisible || notifications.length === 0) {
+    return null;
+  }
 
   return (
-    <div 
-      className="fixed top-4 right-4 space-y-3 pointer-events-none"
-      style={{ zIndex: 10000 }}
-    >
-      {notifications.map((notification, index) => (
-        <div 
-          key={notification.id} 
-          className="pointer-events-auto"
-          style={{
-            zIndex: 10000 - index
-          }}
-        >
-          <NotificationToast
-            notification={notification}
-            onClose={() => removeNotification(notification.id)}
-            onAction={handleNotificationAction}
-          />
+    <div className="fixed top-4 right-4 max-w-sm w-full" style={{ zIndex: 10000 }}>
+      <div className="bg-white rounded-lg shadow-lg border border-gray-200">
+        <div className="flex items-center justify-between p-4 border-b border-gray-200">
+          <div className="flex items-center gap-2">
+            <FaBell className="text-blue-600" />
+            <h3 className="font-semibold text-gray-900">
+              Notifications ({notifications.filter(n => !n.is_read).length})
+            </h3>
+          </div>
+          <button
+            onClick={() => setIsVisible(false)}
+            className="text-gray-400 hover:text-gray-600 p-1"
+          >
+            <FaTimes />
+          </button>
         </div>
-      ))}
+        
+        <div className="max-h-96 overflow-y-auto">
+          {notifications.slice(0, 5).map((notification) => (
+            <div
+              key={notification.id}
+              className={`p-4 border-b border-gray-100 last:border-b-0 ${
+                notification.is_read ? 'bg-gray-50' : 'bg-white'
+              }`}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-900 mb-1">
+                    {notification.title}
+                  </p>
+                  <p className="text-sm text-gray-600 mb-2">
+                    {notification.content}
+                  </p>
+                  <p className="text-xs text-gray-400">
+                    {formatNotificationTime(notification.created_at)}
+                  </p>
+                </div>
+                
+                {!notification.is_read && (
+                  <button
+                    onClick={() => handleMarkAsRead(notification.id)}
+                    className="flex-shrink-0 p-1 text-green-600 hover:text-green-700"
+                    title="Mark as read"
+                  >
+                    <FaCheck size={14} />
+                  </button>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+        
+        {notifications.length > 5 && (
+          <div className="p-3 border-t border-gray-200 text-center">
+            <button className="text-sm text-blue-600 hover:text-blue-700">
+              View all notifications
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

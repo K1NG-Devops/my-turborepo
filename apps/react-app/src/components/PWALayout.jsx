@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
-import { FaHome, FaBook, FaBell, FaUser, FaChalkboardTeacher, FaExternalLinkAlt, FaCog, FaGlobe } from 'react-icons/fa';
+import { FaHome, FaBook, FaBell, FaUser, FaChalkboardTeacher, FaExternalLinkAlt, FaCog, FaGlobe, FaComments } from 'react-icons/fa';
 import useAuth from '../hooks/useAuth';
 import usePWA from '../hooks/usePWA';
 import { Capacitor } from '@capacitor/core';
@@ -18,6 +18,7 @@ import Register from '../components/Parents/Register';
 import PasswordReset from '../components/PasswordReset';
 import TeacherLogin from '../components/Teacher/TeacherLogin';
 import AuthTest from '../components/AuthTest';
+import MessagingCenter from './Messaging/MessagingCenter';
 
 const PWALayout = () => {
   const navigate = useNavigate();
@@ -50,6 +51,8 @@ const PWALayout = () => {
     const currentPath = location.pathname;
     if (currentPath.includes('/student/homework') || currentPath.includes('/homework')) {
       setActiveTab('homework');
+    } else if (currentPath.includes('/messages')) {
+      setActiveTab('messages');
     } else if (currentPath.includes('/notifications')) {
       setActiveTab('notifications');
     } else if (currentPath.includes('/dashboard')) {
@@ -106,11 +109,13 @@ const PWALayout = () => {
       return [
         { id: 'dashboard', label: 'Dashboard', icon: FaHome, path: '/teacher-dashboard' },
         { id: 'homework', label: 'Homework', icon: FaBook, path: '/teacher-dashboard' },
+        { id: 'messages', label: 'Messages', icon: FaComments, path: '/messages' },
         { id: 'notifications', label: 'Notifications', icon: FaBell, path: '/notifications' },
       ];
     } else if (role === 'admin') {
       return [
         { id: 'dashboard', label: 'Dashboard', icon: FaHome, path: '/admin-dashboard' },
+        { id: 'messages', label: 'Messages', icon: FaComments, path: '/messages' },
         { id: 'notifications', label: 'Notifications', icon: FaBell, path: '/notifications' },
       ];
     } else {
@@ -118,6 +123,7 @@ const PWALayout = () => {
       return [
         { id: 'dashboard', label: 'Dashboard', icon: FaHome, path: '/dashboard' },
         { id: 'homework', label: 'Homework', icon: FaBook, path: '/student/homework' },
+        { id: 'messages', label: 'Messages', icon: FaComments, path: '/messages' },
         { id: 'notifications', label: 'Notifications', icon: FaBell, path: '/notifications' },
       ];
     }
@@ -214,6 +220,7 @@ const PWALayout = () => {
               {((auth?.user?.role === 'teacher') || (localStorage.getItem('role') === 'teacher') || (localStorage.getItem('isTeacher') === 'true')) && (
                 <>
                   <Route path="/teacher-dashboard" element={<PWATeacherDashboard />} />
+                  <Route path="/messages" element={<MessagingCenter />} />
                   <Route path="/notifications" element={<Notifications />} />
                 </>
               )}
@@ -224,6 +231,7 @@ const PWALayout = () => {
                   <Route path="/dashboard" element={<PWAParentDashboard />} />
                   <Route path="/student/homework" element={<HomeworkList />} />
                   <Route path="/submit-work" element={<SubmitWork />} />
+                  <Route path="/messages" element={<MessagingCenter />} />
                   <Route path="/notifications" element={<Notifications />} />
                 </>
               )}
@@ -232,6 +240,7 @@ const PWALayout = () => {
               {((auth?.user?.role === 'admin') || (localStorage.getItem('role') === 'admin')) && (
                 <>
                   <Route path="/admin-dashboard" element={<div className="p-4">Admin Dashboard Coming Soon</div>} />
+                  <Route path="/messages" element={<MessagingCenter />} />
                   <Route path="/notifications" element={<Notifications />} />
                 </>
               )}

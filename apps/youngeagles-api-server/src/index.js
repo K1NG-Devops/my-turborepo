@@ -85,6 +85,10 @@ app.use('/api/attendance/:teacherId', authMiddleware, isTeacher, getChildrenByTe
 app.use('/api/homeworks', homeworks);
 app.use('/api/homeworks', homeworkRoutes);
 
+// Import messaging routes
+import messagingRoutes from './routes/messaging.routes.js';
+app.use('/api/messages', messagingRoutes);
+
 // Homework completion endpoint
 app.post('/api/homeworks/:homeworkId/complete', authMiddleware, async (req, res) => {
   const { homeworkId } = req.params;

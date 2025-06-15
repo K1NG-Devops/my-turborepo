@@ -36,6 +36,7 @@ import usePWA from './hooks/usePWA';
 import PWADebugIndicator from './components/PWADebugIndicator';
 import NotificationManager from './components/NotificationManager';
 import AuthTest from './components/AuthTest';
+import MessagingCenter from './components/Messaging/MessagingCenter';
 import './App.css';
 
 // Lazy import new components with fallbacks
@@ -141,6 +142,7 @@ function App() {
               <Route path="/lessons" element={<Lessons />} />
               <Route path="/resources" element={<Resources />} />
               <Route path="/videos" element={<Videos />} />
+              <Route path="/messages" element={<MessagingCenter />} />
               <Route path="/admin-dashboard" element={<AdminDashboard />} />
               <Route path="/teacher-dashboard" element={<TeacherDashboard />} />
               <Route path="/view-attendance" element={<AttendancePage />} />
