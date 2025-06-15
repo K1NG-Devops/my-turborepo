@@ -9,7 +9,6 @@
     "check-types": "turbo run check-types"
   },
   "devDependencies": {
-    "@angular/cli": "^19.2.10",
     "eslint": "^9.27.0",
     "prettier": "^3.5.3",
     "turbo": "^2.5.2",
