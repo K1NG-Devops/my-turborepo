@@ -47,13 +47,7 @@ const TeacherLogin = () => {
   
 
   return (
-    <div
-      className="min-h-screen bg-white dark:bg-gray-900 text-gray-800 dark:text-white bg-cover bg-center flex items-center justify-center px-4"
-      style={{
-        backgroundImage:
-          "url(https://i.pinimg.com/736x/9d/9f/18/9d9f18a89989da838bbc6f63bec8967b.jpg)",
-      }}
-    >
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 text-gray-800 dark:text-white flex items-center justify-center px-4 safe-area-inset">
       <div className="w-full max-w-md bg-white/90 dark:bg-gray-800/90 backdrop-blur-md p-6 rounded-lg shadow-lg">
         <h2 className="text-2xl font-bold mb-4 text-center text-gray-900 dark:text-gray-100">
           Teacher Login

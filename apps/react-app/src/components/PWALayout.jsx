@@ -220,7 +220,7 @@ const PWALayout = () => {
 
       {/* Bottom Navigation */}
       {auth?.user && (
-        <nav className="bg-white border-t border-gray-200 p-2">
+        <nav className="bg-white border-t border-gray-200 p-2 mobile-nav-safe">
           <div className="flex justify-around">
             {navigationItems.map((item) => {
               const IconComponent = item.icon;

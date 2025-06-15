@@ -41,16 +41,7 @@ const Login = () => {
   };
 
   return (
-    <div 
-      className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4 relative"
-      style={{
-        backgroundImage: `linear-gradient(rgba(59, 130, 246, 0.1), rgba(99, 102, 241, 0.1)), url('/background.jpg')`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-        backgroundAttachment: 'fixed'
-      }}
-    >
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4 relative safe-area-inset">
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-8">
@@ -193,7 +184,7 @@ const Login = () => {
         <div className="mt-6 bg-white rounded-xl shadow-lg p-4">
           <p className="text-center text-sm text-gray-600 mb-3">Sign in as:</p>
           <div className="flex justify-center space-x-4 text-sm">
-            <Link to="/teacher/login" className="text-blue-600 hover:text-blue-500 font-medium">
+            <Link to="/teacher-login" className="text-blue-600 hover:text-blue-500 font-medium">
               Teacher
             </Link>
             <span className="text-gray-300">•</span>
