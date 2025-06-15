@@ -112,6 +112,7 @@ const PWALayout = () => {
             <div className="flex items-center space-x-2">
               <h1 className="text-lg font-bold">Young Eagles</h1>
               <span className="text-xs bg-blue-500 px-2 py-1 rounded-full">App</span>
+              <span className="text-xs bg-green-500 px-2 py-1 rounded-full">v1.0</span>
             </div>
           </div>
           
