@@ -2,11 +2,34 @@ import { useState, useEffect } from 'react';
 
 const useAuth = () => {
   const [auth, setAuth] = useState(() => {
+    // Check for auth data in localStorage
     const stored = localStorage.getItem('auth');
-    return stored ? JSON.parse(stored) : null;
+    if (stored) {
+      return JSON.parse(stored);
+    }
+    
+    // Fallback: construct auth from individual localStorage items
+    const token = localStorage.getItem('accessToken');
+    const user = localStorage.getItem('user');
+    const role = localStorage.getItem('role');
+    
+    if (token && user) {
+      try {
+        const userData = JSON.parse(user);
+        return {
+          token,
+          user: userData,
+          role: role || userData.role
+        };
+      } catch (e) {
+        console.error('Error parsing user data:', e);
+      }
+    }
+    
+    return null;
   });
 
-  // Optional: keep localStorage in sync
+  // Keep localStorage in sync
   useEffect(() => {
     if (auth) {
       localStorage.setItem('auth', JSON.stringify(auth));
@@ -21,7 +44,15 @@ const useAuth = () => {
 
   const logout = () => {
     setAuth(null);
+    // Clear all auth-related localStorage items
     localStorage.removeItem('auth');
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('user');
+    localStorage.removeItem('role');
+    localStorage.removeItem('parent_id');
+    localStorage.removeItem('teacherId');
+    localStorage.removeItem('isLoggedIn');
+    localStorage.removeItem('isTeacher');
   };
 
   return {
@@ -29,6 +60,8 @@ const useAuth = () => {
     login,
     logout,
     isAuthenticated: !!auth,
+    isTeacher: auth?.role === 'teacher' || localStorage.getItem('role') === 'teacher',
+    isParent: auth?.role === 'parent' || auth?.role === 'user' || (!auth?.role && localStorage.getItem('parent_id'))
   };
 };
 

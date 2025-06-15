@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { teacherLogin } from "../auth.js";
+import useAuth from "../../hooks/useAuth";
 
 const TeacherLogin = () => {
   const [email, setEmail] = useState("");
@@ -12,6 +13,14 @@ const TeacherLogin = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const navigate = useNavigate();
+  const { login, isTeacher, isAuthenticated } = useAuth();
+
+  // Redirect if already logged in as teacher
+  useEffect(() => {
+    if (isAuthenticated && isTeacher) {
+      navigate('/teacher-dashboard', { replace: true });
+    }
+  }, [isAuthenticated, isTeacher, navigate]);
 
   // Handles input changes for email and password
   const handleChange = (e) => {
@@ -34,10 +43,20 @@ const TeacherLogin = () => {
     const result = await teacherLogin(email, password);
   
     if (result.success) {
-      // No need to set localStorage here again, it's already set inside teacherLogin
+      // Update auth context with teacher data
+      login({
+        token: result.token,
+        user: result.user,
+        role: 'teacher'
+      });
+      
       setSuccess("Login successful!");
       toast.success("Login successful!");
-      navigate("/teacher-dashboard");
+      
+      // Navigate with replace to prevent back button issues
+      setTimeout(() => {
+        navigate("/teacher-dashboard", { replace: true });
+      }, 100);
     } else {
       setError(result.message);
       toast.error(result.message);
