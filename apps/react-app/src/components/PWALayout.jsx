@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { FaHome, FaBook, FaBell, FaUser, FaChalkboardTeacher, FaExternalLinkAlt, FaCog, FaGlobe } from 'react-icons/fa';
 import useAuth from '../hooks/useAuth';
 import usePWA from '../hooks/usePWA';
@@ -20,6 +20,7 @@ import TeacherLogin from '../components/Teacher/TeacherLogin';
 
 const PWALayout = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { auth, logout } = useAuth();
   const { openFullWebsite } = usePWA();
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -42,6 +43,18 @@ const PWALayout = () => {
       }
     }
   }, [auth?.user, navigate]);
+
+  // Sync navigation tab with current route
+  useEffect(() => {
+    const currentPath = location.pathname;
+    if (currentPath.includes('/student/homework') || currentPath.includes('/homework')) {
+      setActiveTab('homework');
+    } else if (currentPath.includes('/notifications')) {
+      setActiveTab('notifications');
+    } else if (currentPath.includes('/dashboard')) {
+      setActiveTab('dashboard');
+    }
+  }, [location.pathname]);
 
   const handleLogout = () => {
     logout();
