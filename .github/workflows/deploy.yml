@@ -1,0 +1,70 @@
+name: 🚀 Deploy to Vercel & Railway
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  # Frontend deployment to Vercel (handled automatically by Vercel GitHub integration)
+  frontend:
+    name: 📱 Frontend (Vercel)
+    runs-on: ubuntu-latest
+    steps:
+      - name: ✅ Vercel Auto-Deploy
+        run: |
+          echo "Frontend deployment triggered automatically by Vercel"
+          echo "Check your Vercel dashboard for deployment status"
+          echo "URL: https://vercel.com/dashboard"
+
+  # Backend deployment to Railway
+  backend:
+    name: 🛠️ Backend (Railway)
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🛒 Checkout Repository
+        uses: actions/checkout@v4
+        
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: 'apps/youngeagles-api-server/package-lock.json'
+          
+      - name: 📦 Install Dependencies
+        run: |
+          cd apps/youngeagles-api-server
+          npm ci
+          
+      - name: 🧪 Run Tests (if any)
+        run: |
+          cd apps/youngeagles-api-server
+          npm test --if-present
+          
+      - name: 🚀 Deploy to Railway
+        uses: railway-community/action@v0.3
+        with:
+          api_token: ${{ secrets.RAILWAY_TOKEN }}
+          service: youngeagles-api-server
+        env:
+          NODE_ENV: production
+          
+  # Notification job
+  notify:
+    name: 📢 Deployment Status
+    runs-on: ubuntu-latest
+    needs: [frontend, backend]
+    if: always()
+    steps:
+      - name: 📊 Deployment Summary
+        run: |
+          echo "🎉 Deployment Summary:"
+          echo "Frontend (Vercel): Check dashboard"
+          echo "Backend (Railway): ${{ needs.backend.result }}"
+          echo ""
+          echo "🔗 Live URLs:"
+          echo "Frontend: https://your-vercel-app.vercel.app"
+          echo "Backend: https://youngeagles-api-server.up.railway.app"
+
