@@ -2,11 +2,11 @@ name: Deploy to Vercel
 
 on:
   push:
-    branches: [main, master]
+    branches: [main, master, feature/main-app]
     paths:
       - 'apps/react-app/**'
   pull_request:
-    branches: [main, master]
+    branches: [main, master, feature/main-app]
     paths:
       - 'apps/react-app/**'
 

@@ -6,13 +6,13 @@ import { getAuth } from "firebase/auth";
 import { getMessaging, isSupported } from "firebase/messaging";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyABl23C2T_smbFQgTypZ0cfii3faawwoe8",
-  authDomain: "skydekstorage.firebaseapp.com",
-  projectId: "skydekstorage",
-  storageBucket: "skydekstorage.firebasestorage.app",
-  messagingSenderId: "482749285321",
-  appId: "1:482749285321:web:3864dec67deca22f885e18",
-  measurementId: "G-ZLBW552T6P"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyABl23C2T_smbFQgTypZ0cfii3faawwoe8",
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "skydekstorage.firebaseapp.com",
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "skydekstorage",
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "skydekstorage.firebasestorage.app",
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "482749285321",
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:482749285321:web:3864dec67deca22f885e18",
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || "G-ZLBW552T6P"
 };
 
 const app = initializeApp(firebaseConfig);
