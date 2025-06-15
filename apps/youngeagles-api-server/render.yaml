@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: youngeagles-api-server-dev
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    branch: development
+    envVars:
+      - key: NODE_ENV
+        value: development
+      - key: PORT
+        value: 10000
+    autoDeploy: true
+
