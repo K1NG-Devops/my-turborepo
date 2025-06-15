@@ -20,6 +20,7 @@ import eventRoutes from './routes/event.routes.js';
 import { getTeacherByClass } from './controllers/teacherByClassController.js';
 import { Sequelize, DataTypes } from 'sequelize';
 import { initializeFirebaseAdmin } from './config/firebase-admin.js';
+import adminRoutes from './routes/admin.routes.js';
 
 // Setup paths and CORS
 const __filename = fileURLToPath(import.meta.url);
@@ -313,6 +314,7 @@ app.delete('/api/submissions/:submissionId', authMiddleware, async (req, res) =>
   }
 });
 app.use('/api/events', eventRoutes);
+app.use('/api/admin', adminRoutes);
 app.get('/api/teachers/by-class', authMiddleware, isTeacherOrAdmin, getTeacherByClass);
 
 // Get teacher's class information

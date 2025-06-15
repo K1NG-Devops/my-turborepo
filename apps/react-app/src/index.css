@@ -6,3 +6,8 @@
 @tailwind components;
 @tailwind utilities;
 
+.circular-logo {
+  border-radius: 50%;
+  object-fit: cover; /* Ensures the image covers the area without distortion */
+}
+

@@ -146,7 +146,7 @@ const PWAInstallPrompt = () => {
         <div className="bg-white border border-gray-200 rounded-lg shadow-lg p-4">
           <div className="flex items-start space-x-3">
             <div className="flex-shrink-0">
-              <img src="/pwa-96x96.png" alt="Young Eagles" className="w-12 h-12 rounded-lg" />
+              <img src="/app-icons/yehc_logo.png" alt="Young Eagles" className="w-12 h-12 rounded-full" />
             </div>
             <div className="flex-1">
               <h3 className="text-sm font-semibold text-gray-900 mb-1">

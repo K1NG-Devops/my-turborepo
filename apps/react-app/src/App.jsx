@@ -154,6 +154,7 @@ function App() {
 
             {/* Catch-all 404 */}
             <Route path="*" element={<div className="p-4 text-center">404 Not Found</div>} />
+            <Route path="/unauthorized" element={<div className="p-4 text-center">You are not authorized to view this page.</div>} />
           </Routes>
         )}
         
