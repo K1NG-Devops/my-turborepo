@@ -1,6 +1,7 @@
 import React from "react";
 import MyRegisterButton from "../components/MyRegisterButton";
 import MyButton from "../components/MyButton";
+import APKDownload from "../components/APKDownload";
 import codeAPillar from "../assets/codeAPillar.png";
 import legoBlocks from "../assets/legoBlocks.png";
 // import kidsSmiling from "../assets/kidsSmiling.png";
@@ -152,6 +153,22 @@ const Programs = () => {
           We proudly reflect our African heritage in toys, books, and role models—making sure
           children see brown-skinned faces and diverse stories that they relate to.
         </p>
+      </section>
+
+      {/* Mobile App Download Section */}
+      <section
+        className="mt-12"
+        data-aos="fade-up"
+        data-aos-delay="600"
+      >
+        <h2 className="text-3xl font-semibold text-center mb-8 text-purple-800">
+          📱 Download Our Mobile App
+        </h2>
+        <p className="text-center text-gray-700 mb-8 max-w-2xl mx-auto">
+          Get the Young Eagles mobile app for the best experience! Access homework, 
+          track your child's progress, and stay connected with teachers.
+        </p>
+        <APKDownload />
       </section>
     </div>
   );

@@ -18,6 +18,8 @@ export class NavbarComponent {
 
   goToExternal(path: string): void {
     this.toggleMenu();
-    window.location.href = path; // Navigate to React route
+    // Navigate to the correct React app domain
+    const baseUrl = 'https://youngeagles.org.za';
+    window.location.href = `${baseUrl}${path}`;
   }
 }

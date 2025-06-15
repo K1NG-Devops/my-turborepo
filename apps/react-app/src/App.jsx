@@ -91,9 +91,10 @@ function App() {
           <PWALayout />
         ) : (
           <Routes>
-            {/* Public Layout */}
+{/* Public Layout */}
             <Route element={<Layout />}>
               <Route path="/" element={<Home />} />
+              <Route path="/home" element={<Home />} />
               <Route path="/programs" element={<Programs />} />
             </Route>
 

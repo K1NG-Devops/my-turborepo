@@ -3,12 +3,13 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import DashboardTile from '../../components/DashboardTile';
 import useAuth from '../../hooks/useAuth';
-import { FaBook, FaCalendarCheck, FaClipboardList, FaVideo, FaChalkboardTeacher, FaBell, FaSpinner, FaChevronUp } from 'react-icons/fa';
+import { FaBook, FaCalendarCheck, FaClipboardList, FaVideo, FaChalkboardTeacher, FaBell, FaSpinner, FaChevronUp, FaComments } from 'react-icons/fa';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import EventsCalendar from '../../components/Calendar/EventsCalendar';
+import MessagingSystem from '../../components/Messaging/MessagingSystem';
 import axios from 'axios';
 
 const linkStyles = "block mb-2 px-4 py-2 rounded hover:bg-slate-600 hover:bg-opacity-20 transition-colors duration-200 text-white hover:text-white";
@@ -48,6 +49,7 @@ const Dashboard = () => {
     homework: null,
     notifications: null
   });
+  const [isMessagingOpen, setIsMessagingOpen] = useState(false);
 
   const parent_id = localStorage.getItem('parent_id');
   const token = localStorage.getItem('accessToken');
@@ -676,6 +678,40 @@ const Dashboard = () => {
                   <p className="text-xs sm:text-sm text-gray-600">Register new child</p>
                 </div>
               </Link>
+              
+              <button
+                onClick={() => {
+                  if (!selectedChild) {
+                    toast.warning('Please select a child first');
+                    return;
+                  }
+                  setIsMessagingOpen(true);
+                }}
+                className={`flex items-center p-4 rounded-lg transition-colors group min-h-[80px] touch-manipulation ${
+                  selectedChild 
+                    ? 'bg-indigo-50 hover:bg-indigo-100 cursor-pointer' 
+                    : 'bg-gray-100 cursor-not-allowed opacity-60'
+                }`}
+                aria-label={selectedChild ? "Message teachers" : "Select a child first"}
+              >
+                <div className={`p-2 rounded-lg mr-3 ${
+                  selectedChild 
+                    ? 'bg-indigo-100 group-hover:bg-indigo-200' 
+                    : 'bg-gray-200'
+                }`}>
+                  <FaComments className={`w-5 h-5 ${
+                    selectedChild ? 'text-indigo-600' : 'text-gray-400'
+                  }`} />
+                </div>
+                <div>
+                  <p className={`text-sm sm:text-base font-medium ${
+                    selectedChild ? 'text-gray-900' : 'text-gray-500'
+                  }`}>Message Teachers</p>
+                  <p className={`text-xs sm:text-sm ${
+                    selectedChild ? 'text-gray-600' : 'text-gray-400'
+                  }`}>{selectedChild ? 'Chat with teachers' : 'Select child first'}</p>
+                </div>
+              </button>
             </div>
           </div>
 
@@ -762,6 +798,13 @@ const Dashboard = () => {
           </button>
         )}
       </main>
+
+      {/* Messaging System Modal */}
+      <MessagingSystem 
+        isOpen={isMessagingOpen}
+        onClose={() => setIsMessagingOpen(false)}
+        selectedChild={children.find(child => child.id.toString() === selectedChild) || null}
+      />
 
       {/* Custom CSS for animations and mobile optimizations */}
       <style jsx>{`
