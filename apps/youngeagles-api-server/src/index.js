@@ -58,7 +58,7 @@ app.use(cors({
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'cache-control'],
-  optionsSuccessStatus: 204,
+  optionsSuccessStatus: 200,
 }));
 
 const limiter = rateLimit({
