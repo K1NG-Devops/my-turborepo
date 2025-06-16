@@ -20,6 +20,7 @@ import TeacherLogin from '../components/Teacher/TeacherLogin';
 import AuthTest from '../components/AuthTest';
 import MessagingCenter from './Messaging/MessagingCenter';
 import PrivateRoutePWA from './PWA/PrivateRoutePWA';
+import AdminLogin from '../components/Admin/AdminLogin';
 
 const PWALayout = () => {
   const navigate = useNavigate();
@@ -214,7 +215,7 @@ const PWALayout = () => {
           <Route path="/password-reset" element={<PasswordReset />} />
           <Route path="/teacher/login" element={<TeacherLogin />} />
           <Route path="/teacher-login" element={<TeacherLogin />} />
-          <Route path="/admin-login" element={<Login />} />
+          <Route path="/admin-login" element={<AdminLogin />} />
           <Route path="/auth-test" element={<AuthTest />} />
           
           {/* PWA Protected Routes - Use PrivateRoutePWA */}
