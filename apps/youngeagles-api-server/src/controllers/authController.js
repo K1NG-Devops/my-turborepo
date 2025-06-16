@@ -234,7 +234,7 @@ export const firebaseLogin = async (req, res) => {
     const { email, phone, uid, displayName } = req.body;
     const authHeader = req.headers.authorization;
     
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    if (!authHeader || typeof authHeader !== 'string' || !authHeader.startsWith('Bearer ')) {
       return res.status(401).json({ message: 'Firebase ID token required' });
     }
     
