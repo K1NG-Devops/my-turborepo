@@ -17,7 +17,7 @@ export const authMiddleware = (req, res, next) => {
     return next();
   }
 
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+  if (!authHeader || typeof authHeader !== 'string' || !authHeader.startsWith('Bearer ')) {
     console.log('❌ No valid auth header found');
     return res.status(401).json({ message: 'No token provided.' });
   }

@@ -59,11 +59,24 @@ export async function adminLogin(email, password) {
       { headers: { "Content-Type": "application/json" } }
     );
 
-    const token = response.data.token;
+    // Check if token exists in response
+    const token = response.data.accessToken;
+    if (!token) {
+      console.error('No token in response:', response.data);
+      return { success: false, message: "Login failed: No token returned from server" };
+    }
 
     // JWT decode function
     function parseJwt(token) {
-      const base64Url = token.split('.')[1];
+      if (!token || typeof token !== 'string') {
+        throw new Error('Invalid token format');
+      }
+      const parts = token.split('.');
+      if (parts.length !== 3) {
+        throw new Error('Invalid JWT format');
+      }
+      
+      const base64Url = parts[1];
       const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
       const jsonPayload = decodeURIComponent(
         atob(base64)
