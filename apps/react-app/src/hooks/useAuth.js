@@ -5,7 +5,19 @@ const useAuth = () => {
     // Check for auth data in localStorage
     const stored = localStorage.getItem('auth');
     if (stored) {
-      return JSON.parse(stored);
+      try {
+        const parsedAuth = JSON.parse(stored);
+        // Ensure role is set in localStorage
+        if (parsedAuth.role) {
+          localStorage.setItem('role', parsedAuth.role);
+          // Set role-specific flags
+          localStorage.setItem('isTeacher', parsedAuth.role === 'teacher');
+          localStorage.setItem('isAdmin', parsedAuth.role === 'admin');
+        }
+        return parsedAuth;
+      } catch (e) {
+        console.error('Error parsing stored auth:', e);
+      }
     }
     
     // Fallback: construct auth from individual localStorage items
@@ -16,11 +28,19 @@ const useAuth = () => {
     if (token && user) {
       try {
         const userData = JSON.parse(user);
-        return {
+        const authData = {
           token,
           user: userData,
           role: role || userData.role
         };
+        // Ensure role is set in localStorage
+        if (authData.role) {
+          localStorage.setItem('role', authData.role);
+          // Set role-specific flags
+          localStorage.setItem('isTeacher', authData.role === 'teacher');
+          localStorage.setItem('isAdmin', authData.role === 'admin');
+        }
+        return authData;
       } catch (e) {
         console.error('Error parsing user data:', e);
       }
@@ -33,13 +53,30 @@ const useAuth = () => {
   useEffect(() => {
     if (auth) {
       localStorage.setItem('auth', JSON.stringify(auth));
+      // Ensure role is set in localStorage
+      if (auth.role) {
+        localStorage.setItem('role', auth.role);
+        // Set role-specific flags
+        localStorage.setItem('isTeacher', auth.role === 'teacher');
+        localStorage.setItem('isAdmin', auth.role === 'admin');
+      }
     } else {
       localStorage.removeItem('auth');
+      localStorage.removeItem('role');
+      localStorage.removeItem('isTeacher');
+      localStorage.removeItem('isAdmin');
     }
   }, [auth]);
 
   const login = (userData) => {
     console.log('useAuth - Setting auth data:', userData);
+    // Ensure role is set in localStorage
+    if (userData.role) {
+      localStorage.setItem('role', userData.role);
+      // Set role-specific flags
+      localStorage.setItem('isTeacher', userData.role === 'teacher');
+      localStorage.setItem('isAdmin', userData.role === 'admin');
+    }
     setAuth(userData);
   };
 
@@ -54,6 +91,7 @@ const useAuth = () => {
     localStorage.removeItem('teacherId');
     localStorage.removeItem('isLoggedIn');
     localStorage.removeItem('isTeacher');
+    localStorage.removeItem('isAdmin');
   };
 
   return {
@@ -61,8 +99,8 @@ const useAuth = () => {
     login,
     logout,
     isAuthenticated: !!auth,
-    isTeacher: auth?.role === 'teacher' || localStorage.getItem('role') === 'teacher',
-    isAdmin: auth?.role === 'admin' || localStorage.getItem('role') === 'admin',
+    isTeacher: auth?.role === 'teacher' || localStorage.getItem('isTeacher') === 'true',
+    isAdmin: auth?.role === 'admin' || localStorage.getItem('isAdmin') === 'true',
     isParent: auth?.role === 'parent' || auth?.role === 'user' || (!auth?.role && localStorage.getItem('parent_id'))
   };
 };

@@ -37,6 +37,7 @@ const Login = () => {
       localStorage.setItem('parent_id', data.user.id);
       localStorage.setItem('accessToken', data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
+      localStorage.setItem('role', data.user.role);
       
       setSuccessMessage('Login successful!');
       

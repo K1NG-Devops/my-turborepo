@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { query, execute } from '../db.js';
 import { authMiddleware, isAdmin } from '../middleware/authMiddleware.js';
 import bcrypt from 'bcryptjs';
+import { adminResetTeacherPassword } from '../controllers/passwordResetController.js';
 
 const router = Router();
 
@@ -146,5 +147,8 @@ router.delete('/parents/:id', authMiddleware, isAdmin, async (req, res) => {
     res.status(500).json({ message: 'Server error.' });
   }
 });
+
+// Reset teacher password (admin only)
+router.post('/teachers/:teacherId/reset-password', authMiddleware, isAdmin, adminResetTeacherPassword);
 
 export default router; 
